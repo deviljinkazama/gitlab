@@ -521,6 +521,7 @@ ActiveRecord::Schema.define(version: 20170217151947) do
     t.integer "geo_node_key_id"
     t.integer "oauth_application_id"
     t.integer "system_hook_id"
+    t.boolean "enabled", default: true, null: false
   end
 
   add_index "geo_nodes", ["host"], name: "index_geo_nodes_on_host", using: :btree
