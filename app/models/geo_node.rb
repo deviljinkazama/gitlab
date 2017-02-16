@@ -21,6 +21,14 @@ class GeoNode < ActiveRecord::Base
   after_destroy :refresh_bulk_notify_worker_status
   before_validation :update_dependents_attributes
 
+  def secondary?
+    !primary
+  end
+
+  def toggle!
+    update_attribute(:enabled, !enabled)
+  end
+
   def uri
     if relative_url_root
       relative_url = relative_url_root.starts_with?('/') ? relative_url_root : "/#{relative_url_root}"
