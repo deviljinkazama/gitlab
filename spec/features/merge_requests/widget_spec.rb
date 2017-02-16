@@ -53,6 +53,7 @@ describe 'Merge request', :feature, :js do
     end
   end
 
+<<<<<<< HEAD
   context 'view merge request' do
     let!(:environment) { create(:environment, project: project) }
     let!(:deployment) { create(:deployment, environment: environment, ref: 'feature', sha: merge_request.diff_head_sha) }
@@ -67,6 +68,19 @@ describe 'Merge request', :feature, :js do
       page.within('.mr-widget-heading') do
         expect(page).to have_content("Deployed to #{environment.name}")
         expect(find('.js-environment-link')[:href]).to include(environment.formatted_external_url)
+=======
+  context 'merge error' do
+    before do
+      allow_any_instance_of(Repository).to receive(:merge).and_return(false)
+      visit namespace_project_merge_request_path(project.namespace, project, merge_request)
+      click_button 'Accept Merge Request'
+      wait_for_ajax
+    end
+
+    it 'updates the MR widget' do
+      page.within('.mr-widget-body') do
+        expect(page).to have_content('Conflicts detected during merge')
+>>>>>>> ce/master
       end
     end
   end
