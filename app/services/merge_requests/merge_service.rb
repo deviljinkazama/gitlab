@@ -22,14 +22,14 @@ module MergeRequests
 
       if @merge_request.target_project.above_size_limit?
         message = Gitlab::RepositorySizeError.new(@merge_request.target_project).merge_error
-        @merge_request.update(merge_error: message)
-        return error(message)
+
+        return log_merge_error(message, save_message_on_model: true)
       end
 
       @source = find_merge_source
 
       unless @source
-        log_merge_error('No source for merge', save_message_on_model: true)
+        return log_merge_error('No source for merge', save_message_on_model: true)
       end
 
       merge_request.in_locked_state do
@@ -41,18 +41,20 @@ module MergeRequests
     end
 
     def hooks_validation_pass?(merge_request)
+      @merge_request = merge_request
+
       return true if project.merge_requests_ff_only_enabled
 
       push_rule = merge_request.project.push_rule
       return true unless push_rule
 
       unless push_rule.commit_message_allowed?(params[:commit_message])
-        merge_request.update(merge_error: "Commit message does not follow the pattern '#{push_rule.commit_message_regex}'")
+        log_merge_error("Commit message does not follow the pattern '#{push_rule.commit_message_regex}'", save_message_on_model: true)
         return false
       end
 
       unless push_rule.author_email_allowed?(current_user.email)
-        merge_request.update(merge_error: "Commit author's email '#{current_user.email}' does not follow the pattern '#{push_rule.author_email_regex}'")
+        log_merge_error("Commit author's email '#{current_user.email}' does not follow the pattern '#{push_rule.author_email_regex}'", save_message_on_model: true)
         return false
       end
 
