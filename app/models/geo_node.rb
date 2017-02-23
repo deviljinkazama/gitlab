@@ -63,6 +63,10 @@ class GeoNode < ActiveRecord::Base
     URI.join(uri, "#{uri.path}/", "api/#{API::API.version}/geo/receive_events").to_s
   end
 
+  def status_url
+    URI.join(uri, "#{uri.path}/", "api/#{API::API.version}/geo/status").to_s
+  end
+
   def oauth_callback_url
     Gitlab::Routing.url_helpers.oauth_geo_callback_url(url_helper_args)
   end
