@@ -19,7 +19,7 @@ module Gitlab
     end
 
     def self.enabled?
-      self.cache_value(:geo_node_enabled) { GeoNode.exists? }
+      self.cache_value(:geo_node_enabled) { self.connected_to_primary_db? && GeoNode.exists? }
     end
 
     def self.license_allows?
@@ -31,7 +31,7 @@ module Gitlab
     end
 
     def self.secondary?
-      self.cache_value(:geo_node_secondary) { self.enabled? && self.current_node && !self.current_node.primary? }
+      self.cache_value(:geo_node_secondary) { self.enabled? && self.current_node && self.current_node.secondary? }
     end
 
     def self.primary_ssh_path_prefix
@@ -66,6 +66,11 @@ module Gitlab
       return yield unless RequestStore.active?
 
       RequestStore.fetch(key) { yield }
+    end
+
+    def self.connected_to_primary_db?
+      ActiveRecord::Base.connection.active? &&
+        ActiveRecord::Base.connection.table_exists?(GeoNode.table_name)
     end
   end
 end
