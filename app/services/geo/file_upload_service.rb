@@ -1,5 +1,5 @@
 module Geo
-  class FileTransferService
+  class FileUploadService
     IAT_LEEWAY = 60.seconds.to_i
 
     attr_reader :params, :auth_header

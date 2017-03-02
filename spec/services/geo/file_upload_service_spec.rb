@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Geo::FileTransferService, services: true do
+describe Geo::FileUploadService, services: true do
   let(:lfs_object) { create(:lfs_object, :with_file) }
   let(:params) { { id: lfs_object.id, type: 'lfs' } }
   let(:lfs_transfer) { Gitlab::Geo::LfsTransfer.new(lfs_object) }

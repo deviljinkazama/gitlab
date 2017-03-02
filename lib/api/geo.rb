@@ -14,7 +14,7 @@ module API
         requires :id, type: Integer, desc: 'The DB ID of the file'
       end
       get 'transfers/:type/:id' do
-        service = ::Geo::FileTransferService.new(params, headers['Authorization'])
+        service = ::Geo::FileUploadService.new(params, headers['Authorization'])
         response = service.execute
 
         unauthorized! unless response.present?
