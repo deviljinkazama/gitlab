@@ -68,7 +68,7 @@ module Gitlab
           end
 
           Rails.logger.info("GitLab Geo: Successfully downloaded #{filename}") if success
-        rescue SystemCallError, HTTParty::Error => e
+        rescue SystemCallError, StandardError, HTTParty::Error => e
           log_transfer_error("Error downloading file: #{e}")
         end
 
