@@ -18,6 +18,8 @@ class AddAccessKeysToGeoNodes < ActiveRecord::Migration
     add_column :geo_nodes, :encrypted_secret_access_key, :string
     add_column :geo_nodes, :encrypted_secret_access_key_iv, :string
 
+    add_index :geo_nodes, :access_key
+
     populate_secret_keys
   end
 
@@ -25,6 +27,8 @@ class AddAccessKeysToGeoNodes < ActiveRecord::Migration
     remove_column :geo_nodes, :access_key
     remove_column :geo_nodes, :encrypted_secret_access_key
     remove_column :geo_nodes, :encrypted_secret_access_key_iv
+
+    remove_index :geo_nodes, :access_key
   end
 
   private

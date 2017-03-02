@@ -526,6 +526,7 @@ ActiveRecord::Schema.define(version: 20170224075132) do
     t.string "encrypted_secret_access_key_iv"
   end
 
+  add_index "geo_nodes", ["access_key"], name: "index_geo_nodes_on_access_key", using: :btree
   add_index "geo_nodes", ["host"], name: "index_geo_nodes_on_host", using: :btree
   add_index "geo_nodes", ["primary"], name: "index_geo_nodes_on_primary", using: :btree
 
