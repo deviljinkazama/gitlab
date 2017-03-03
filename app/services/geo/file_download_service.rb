@@ -42,7 +42,10 @@ module Geo
       transfer = ::Gitlab::Geo::LfsTransfer.new(lfs_object)
       bytes_downloaded = transfer.download_from_primary
 
-      update_tracking_db if bytes_downloaded >= 0
+      success = bytes_downloaded && bytes_downloaded >= 0
+      update_tracking_db if success
+
+      success
     end
 
     def log(message)
