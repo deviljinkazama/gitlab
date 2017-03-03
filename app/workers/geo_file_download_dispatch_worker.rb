@@ -2,6 +2,7 @@ class GeoFileDownloadDispatchWorker
   include Sidekiq::Worker
   include CronjobQueue
 
+  LEASE_KEY = 'geo_file_download_dispatch_worker'.freeze
   LEASE_TIMEOUT = 8.hours.freeze
   BATCH_SIZE = 10
 
@@ -29,20 +30,16 @@ class GeoFileDownloadDispatchWorker
   end
 
   def try_obtain_lease
-    uuid = Gitlab::ExclusiveLease.new(lease_key, timeout: LEASE_TIMEOUT).try_obtain
+    uuid = Gitlab::ExclusiveLease.new(LEASE_KEY, timeout: LEASE_TIMEOUT).try_obtain
 
     return unless uuid
 
     yield
 
-    release_lease(key, uuid)
+    release_lease(uuid)
   end
 
-  def lease_key
-    "geo_file_download_dispatch_worker"
-  end
-
-  def release_lease(key, uuid)
-    Gitlab::ExclusiveLease.cancel(key, uuid)
+  def release_lease(uuid)
+    Gitlab::ExclusiveLease.cancel(LEASE_KEY, uuid)
   end
 end
