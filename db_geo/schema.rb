@@ -35,5 +35,4 @@ ActiveRecord::Schema.define(version: 20170302005747) do
   end
 
   add_index "project_registries", ["project_id"], name: "index_project_registries_on_project_id", using: :btree
-
 end

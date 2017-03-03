@@ -39,6 +39,17 @@ module API
         end
       end
 
+      #  Get node information (e.g. health, repos synced, repos failed, etc.)
+      #
+      # Example request:
+      #   GET /geo/status
+      get 'status' do
+        authenticated_as_admin!
+        require_node_to_be_secondary!
+
+        present GeoNodeStatus.new, with: Entities::GeoNodeStatus
+      end
+
       # Enqueue a batch of IDs of wiki's projects to have their
       # wiki repositories updated
       #
