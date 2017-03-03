@@ -56,7 +56,7 @@ module Geo
       transfer.save
     end
 
-    def lease_key(object_type, object_id)
+    def lease_key
       "file_download_service:#{object_type}:#{object_id}"
     end
   end
