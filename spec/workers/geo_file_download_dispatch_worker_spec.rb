@@ -12,9 +12,13 @@ describe GeoFileDownloadDispatchWorker do
     it 'executes GeoFileDownloadWorker if it can get a lease' do
       allow_any_instance_of(Gitlab::ExclusiveLease)
         .to receive(:try_obtain).and_return(true)
-      expect(GeoFileDownloadWorker).to receive(:perform_async)
+      allow_any_instance_of(described_class).to receive(:over_time?).and_return(false, true)
+      expect(GeoFileDownloadWorker).to receive(:perform_async).and_call_original
+      expect(Gitlab::SidekiqStatus).to receive(:job_status).and_return([])
 
-      described_class.new.perform
+      Sidekiq::Testing.inline! do
+        described_class.new.perform
+      end
     end
   end
 end
