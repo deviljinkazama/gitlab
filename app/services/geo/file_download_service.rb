@@ -51,7 +51,7 @@ module Geo
     end
 
     def update_tracking_db
-      transfer = Geo::FileTransfer.find_or_create_by(
+      transfer = Geo::FileRegistry.find_or_create_by(
         file_type: object_type,
         file_id: object_id)
       transfer.save

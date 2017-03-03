@@ -24,7 +24,7 @@ class GeoFileDownloadDispatchWorker
   end
 
   def find_lfs_object_ids
-    LfsObject.where.not(id: Geo::FileTransfer.where(file_type: 'lfs').pluck(:file_id))
+    LfsObject.where.not(id: Geo::FileRegistry.where(file_type: 'lfs').pluck(:file_id))
       .limit(BATCH_SIZE)
       .pluck(:id)
   end

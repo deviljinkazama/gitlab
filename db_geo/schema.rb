@@ -12,18 +12,20 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema.define(version: 20170302005747) do
+
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "file_transfers", force: :cascade do |t|
-    t.string   "file_type",  null: false
-    t.integer  "file_id",    null: false
-    t.integer  "bytes"
-    t.string   "sha256"
+  create_table "file_registries", force: :cascade do |t|
+    t.string "file_type", null: false
+    t.integer "file_id", null: false
+    t.integer "bytes"
+    t.string "sha256"
     t.datetime "created_at", null: false
   end
 
-  add_index "file_transfers", ["file_type"], name: "index_geo_file_transfers_on_file_type"
+  add_index "file_registries", ["file_type", "file_id"], name: "index_file_registries_on_file_type_and_file_id", unique: true, using: :btree
+  add_index "file_registries", ["file_type"], name: "index_file_registries_on_file_type", using: :btree
 
   create_table "project_registries", force: :cascade do |t|
     t.integer "project_id", null: false
@@ -33,4 +35,5 @@ ActiveRecord::Schema.define(version: 20170302005747) do
   end
 
   add_index "project_registries", ["project_id"], name: "index_project_registries_on_project_id", using: :btree
+
 end
