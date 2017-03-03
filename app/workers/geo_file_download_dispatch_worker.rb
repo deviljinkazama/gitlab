@@ -9,7 +9,7 @@ class GeoFileDownloadDispatchWorker
     return unless Gitlab::Geo.secondary?
 
     # Prevent multiple Sidekiq workers from attempting to schedule downloads
-    try_obtain_lease(scheduler_lease_key) do
+    try_obtain_lease do
       schedule_lfs_downloads
     end
   end
@@ -19,10 +19,7 @@ class GeoFileDownloadDispatchWorker
   def schedule_lfs_downloads
     find_lfs_object_ids.each do |lfs_id|
       lease_key = download_lease_key(:lfs, lfs_id)
-      # Avoid downloading the same file simultaneously
-      try_obtain_lease(lease_key) do |lease_uuid|
-        GeoFileDownloadWorker.perform_async(:lfs, lfs_id, lease_key, lease_uuid)
-      end
+      GeoFileDownloadWorker.perform_async(:lfs, lfs_id)
     end
   end
 
@@ -32,8 +29,8 @@ class GeoFileDownloadDispatchWorker
       .pluck(:id)
   end
 
-  def try_obtain_lease(key)
-    uuid = Gitlab::ExclusiveLease.new(key, timeout: LEASE_TIMEOUT).try_obtain
+  def try_obtain_lease
+    uuid = Gitlab::ExclusiveLease.new(lease_key, timeout: LEASE_TIMEOUT).try_obtain
 
     return unless uuid
 
@@ -42,20 +39,11 @@ class GeoFileDownloadDispatchWorker
     release_lease(key, uuid)
   end
 
-  def try_obtain_download_lease(object_type, object_id)
-    key = download_lease_key(object_type, object_id)
-    try_obtain(key)
-  end
-
-  def scheduler_lease_key
+  def lease_key
     "geo_file_download_dispatch_worker"
   end
 
   def release_lease(key, uuid)
     Gitlab::ExclusiveLease.cancel(key, uuid)
-  end
-
-  def download_lease_key(object_type, object_id)
-    "geo_file_transfer_dispatch_worker:#{object_type}:#{object_id}"
   end
 end

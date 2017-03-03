@@ -1,14 +1,12 @@
 module Geo
   class FileDownloadService
-    attr_reader :object_type, :object_id, :lease_key, :lease_uuid
+    attr_reader :object_type, :object_id
 
     LEASE_TIMEOUT = 8.hours.freeze
 
-    def initialize(object_type, object_id, lease_key, lease_uuid)
+    def initialize(object_type, object_id)
       @object_type = object_type
       @object_id = object_id
-      @lease_key = lease_key
-      @lease_uuid = lease_uuid
     end
 
     def execute
@@ -27,13 +25,13 @@ module Geo
     private
 
     def try_obtain_lease
-      download_lease = Gitlab::ExclusiveLease.new(lease_key, timeout: LEASE_TIMEOUT).try_obtain
+      uuid = Gitlab::ExclusiveLease.new(lease_key, timeout: LEASE_TIMEOUT).try_obtain
 
-      return unless download_lease.present?
+      return unless uuid.present?
 
       yield
 
-      Gitlab::ExclusiveLease.cancel(lease_key, lease_uuid)
+      Gitlab::ExclusiveLease.cancel(lease_key, uuid)
     end
 
     def download_lfs_object
@@ -56,6 +54,10 @@ module Geo
         file_type: object_type,
         file_id: object_id)
       transfer.save
+    end
+
+    def lease_key(object_type, object_id)
+      "file_download_service:#{object_type}:#{object_id}"
     end
   end
 end
