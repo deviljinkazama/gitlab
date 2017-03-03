@@ -8,7 +8,7 @@ class GeoFileDownloadDispatchWorker
   def perform
     return unless Gitlab::Geo.secondary?
 
-    # Multiple Sidekiq workers could be attempted to schedule downloads
+    # Prevent multiple Sidekiq workers from attempting to schedule downloads
     try_obtain_lease(scheduler_lease_key) do
       schedule_lfs_downloads
     end
@@ -48,7 +48,7 @@ class GeoFileDownloadDispatchWorker
   end
 
   def scheduler_lease_key
-    "geo_file_transfer_dispatch_worker"
+    "geo_file_download_dispatch_worker"
   end
 
   def release_lease(key, uuid)
