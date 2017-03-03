@@ -3,6 +3,8 @@ class AddAccessKeysToGeoNodes < ActiveRecord::Migration
 
   DOWNTIME = false
 
+  disable_ddl_transaction!
+
   class EncryptedData
     extend AttrEncrypted
     attr_accessor :data
@@ -18,7 +20,7 @@ class AddAccessKeysToGeoNodes < ActiveRecord::Migration
     add_column :geo_nodes, :encrypted_secret_access_key, :string
     add_column :geo_nodes, :encrypted_secret_access_key_iv, :string
 
-    add_index :geo_nodes, :access_key
+    add_concurrent_index :geo_nodes, :access_key
 
     populate_secret_keys
   end
