@@ -56,6 +56,6 @@ class GeoFileDownloadDispatchWorker
   end
 
   def download_lease_key(object_type, object_id)
-    "geo_file_traonsfer_dispatch_worker:#{object_type}:#{object_id}"
+    "geo_file_transfer_dispatch_worker:#{object_type}:#{object_id}"
   end
 end
