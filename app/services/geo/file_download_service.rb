@@ -18,8 +18,6 @@ module Geo
           log("unknown file type: #{object_type}")
         end
       end
-    ensure
-      Gitlab::ExclusiveLease.cancel(lease_key, lease)
     end
 
     private
