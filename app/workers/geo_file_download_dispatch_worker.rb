@@ -18,9 +18,9 @@ class GeoFileDownloadDispatchWorker
 
   def schedule_lfs_downloads
     find_lfs_object_ids.each do |lfs_id|
-      key = download_lease_key(:lfs, lfs_id)
+      lease_key = download_lease_key(:lfs, lfs_id)
       # Avoid downloading the same file simultaneously
-      try_obtain_lease(key) do |lease|
+      try_obtain_lease(lease_key) do |lease|
         GeoFileDownloadWorker.perform_async(:lfs, lfs_id, lease_key, lease_uuid)
       end
     end
