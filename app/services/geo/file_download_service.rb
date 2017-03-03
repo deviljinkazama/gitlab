@@ -36,10 +36,6 @@ module Geo
       Gitlab::ExclusiveLease.cancel(lease_key, lease_uuid)
     end
 
-    def lease_key
-      @key ||= "#{LEASE_KEY_PREFIX}:#{object_type}:#{object_id}"
-    end
-
     def download_lfs_object
       lfs_object = LfsObject.find(object_id)
 
