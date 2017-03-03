@@ -18,7 +18,6 @@ class GeoFileDownloadDispatchWorker
 
   def schedule_lfs_downloads
     find_lfs_object_ids.each do |lfs_id|
-      lease_key = download_lease_key(:lfs, lfs_id)
       GeoFileDownloadWorker.perform_async(:lfs, lfs_id)
     end
   end
