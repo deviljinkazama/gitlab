@@ -54,6 +54,10 @@ module Gitlab
       Sidekiq::Cron::Job.find('geo_backfill_worker')
     end
 
+    def self.file_download_job
+      Sidekiq::Cron::Job.find('geo_download_dispatcher_worker')
+    end
+
     def self.oauth_authentication
       return false unless Gitlab::Geo.secondary?
 
