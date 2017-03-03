@@ -48,15 +48,38 @@ module Gitlab
     #
     # Returns true or false.
     def self.all_completed?(jids)
+      self.num_running(jids).zero?
+    end
+
+    # Returns the number of jobs that are running.
+    #
+    # jids - The Sidekiq job IDs to check.
+    def self.num_running(jids)
+      responses = self.job_status(jids)
+
+      responses.select { |value| value }.count
+    end
+
+    # Returns the number of jobs that have completed.
+    #
+    # jids - The Sidekiq job IDs to check.
+    def self.num_completed(jids)
+      jids.size - self.num_running(jids)
+    end
+
+    # Returns the job status for each of the given job IDs.
+    #
+    # jids - The Sidekiq job IDs to check.
+    #
+    # Returns an array of true or false indicating job completion.
+    def self.job_status(jids)
       keys = jids.map { |jid| key_for(jid) }
 
-      responses = Sidekiq.redis do |redis|
+      Sidekiq.redis do |redis|
         redis.pipelined do
           keys.each { |key| redis.exists(key) }
         end
       end
-
-      responses.all? { |value| !value }
     end
 
     def self.key_for(jid)
