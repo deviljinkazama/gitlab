@@ -3,12 +3,13 @@ require 'spec_helper'
 describe Gitlab::Geo::Transfer do
   let!(:primary_node) { FactoryGirl.create(:geo_node, :primary) }
   let!(:secondary_node) { FactoryGirl.create(:geo_node) }
-  let(:lfs_object) { create(:lfs_object) }
+  let(:lfs_object) { create(:lfs_object, :with_file) }
   let(:url) { primary_node.geo_transfers_url(:lfs, lfs_object.id.to_s) }
   let(:content) { StringIO.new("1\n2\n3") }
+  let(:size) { File.stat(lfs_object.file.path).size }
 
   before do
-    allow(File).to receive(:open).and_yield(content)
+    allow(File).to receive(:open).with(lfs_object.file.path, "w").and_yield(content)
   end
 
   subject do
@@ -23,6 +24,6 @@ describe Gitlab::Geo::Transfer do
     response = double(success?: true)
     expect(HTTParty).to receive(:get).and_return(response)
 
-    expect(subject.download_from_primary).to be_truthy
+    expect(subject.download_from_primary).to eq(size)
   end
 end

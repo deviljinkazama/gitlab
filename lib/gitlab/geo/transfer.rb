@@ -10,6 +10,7 @@ module Gitlab
         @request_data = request_data
       end
 
+      # Returns number of bytes downloaded or -1 if unsuccessful.
       def download_from_primary
         return unless Gitlab::Geo.secondary?
         return if File.directory?(filename)
@@ -56,7 +57,7 @@ module Gitlab
       # Use HTTParty for now but switch to curb if performance becomes
       # an issue
       def download_file(url, req_header)
-        success = false
+        file_size = -1
 
         begin
           File.open(filename, "w") do |file|
@@ -64,15 +65,18 @@ module Gitlab
               file.write(fragment)
             end
 
-            success = response.success?
+            if response.success?
+              file_size = File.stat(filename).size
+              Rails.logger.info("GitLab Geo: Successfully downloaded #{filename} (#{file_size} bytes)")
+            else
+              log_transfer_error("Unsuccessful download: #{response.code} #{response.msg}")
+            end
           end
-
-          Rails.logger.info("GitLab Geo: Successfully downloaded #{filename}") if success
-        rescue SystemCallError, StandardError, HTTParty::Error => e
+        rescue StandardError, HTTParty::Error => e
           log_transfer_error("Error downloading file: #{e}")
         end
 
-        success
+        file_size
       end
     end
   end
