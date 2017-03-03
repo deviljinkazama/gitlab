@@ -19,7 +19,7 @@ module Geo
         end
       end
     ensure
-      Gitlab::ExclusiveLease.cancel(lease_key, lease_uuid)
+      Gitlab::ExclusiveLease.cancel(lease_key, lease)
     end
 
     private
