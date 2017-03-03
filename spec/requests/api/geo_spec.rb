@@ -19,6 +19,16 @@ describe API::Geo, api: true do
     end
   end
 
+  describe 'POST /geo/refresh_wikis disabled node' do
+    it 'responds with forbidden' do
+      geo_node.enabled = false
+
+      post api('/geo/refresh_wikis', admin), nil
+
+      expect(response).to have_http_status(403)
+    end
+  end
+
   describe 'POST /geo/receive_events authentication' do
     it 'denies access if token is not present' do
       post api('/geo/receive_events')

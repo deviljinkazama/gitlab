@@ -4,7 +4,8 @@ describe GeoFileDownloadDispatchWorker do
   let!(:lfs_object) { create(:lfs_object) }
 
   before do
-    create(:geo_node, :primary)
+    create(:geo_node)
+    allow(Gitlab::Geo).to receive(:secondary?).and_return(true)
   end
 
   describe '#perform' do

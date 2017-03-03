@@ -25,10 +25,6 @@ class GeoNode < ActiveRecord::Base
   after_destroy :refresh_bulk_notify_worker_status
   before_validation :update_dependents_attributes
 
-  def secondary?
-    !primary
-  end
-
   before_validation :ensure_access_keys!
 
   attr_encrypted :secret_access_key,
@@ -36,6 +32,10 @@ class GeoNode < ActiveRecord::Base
                  algorithm: 'aes-256-gcm',
                  mode: :per_attribute_iv,
                  encode: true
+
+  def secondary?
+    !primary
+  end
 
   def uri
     if relative_url_root
@@ -71,6 +71,10 @@ class GeoNode < ActiveRecord::Base
 
   def geo_transfers_url(file_type, file_id)
     geo_api_url("transfers/#{file_type}/#{file_id}")
+  end
+
+  def status_url
+    URI.join(uri, "#{uri.path}/", "api/#{API::API.version}/geo/status").to_s
   end
 
   def status_url

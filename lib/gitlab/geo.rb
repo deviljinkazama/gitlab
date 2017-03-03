@@ -19,7 +19,7 @@ module Gitlab
     end
 
     def self.enabled?
-      self.cache_value(:geo_node_enabled) { GeoNode.exists? }
+      self.cache_value(:geo_node_enabled) { self.connected_to_primary_db? && GeoNode.exists? }
     end
 
     def self.license_allows?
@@ -62,6 +62,13 @@ module Gitlab
       end
     end
 
+    def self.available?
+      return false unless ActiveRecord::Base.connection.active?
+      return false unless ActiveRecord::Base.connection.table_exists?(GeoNode.table_name)
+
+      self.secondary?
+    end
+
     def self.cache_value(key, &block)
       return yield unless RequestStore.active?
 
@@ -79,6 +86,11 @@ module Gitlab
     def self.generate_random_string(size)
       # urlsafe_base64 may return a string of size * 4/3
       SecureRandom.urlsafe_base64(size)[0, size]
+    end
+
+    def self.connected_to_primary_db?
+      ActiveRecord::Base.connection.active? &&
+        ActiveRecord::Base.connection.table_exists?(GeoNode.table_name)
     end
   end
 end

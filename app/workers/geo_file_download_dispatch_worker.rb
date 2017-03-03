@@ -6,8 +6,7 @@ class GeoFileDownloadDispatchWorker
   BATCH_SIZE = 10
 
   def perform
-    byebug
-    return unless Gitlab::Geo.primary_node.present?
+    return unless Gitlab::Geo.secondary?
 
     # Multiple Sidekiq workers could be attempted to schedule downloads
     try_obtain_lease(scheduler_lease_key) do
@@ -58,9 +57,5 @@ class GeoFileDownloadDispatchWorker
 
   def download_lease_key(object_type, object_id)
     "geo_file_traonsfer_dispatch_worker:#{object_type}:#{object_id}"
-  end
-
-  def node_enabled?
-    Gitlab::Geo.current_node_enabled?
   end
 end
