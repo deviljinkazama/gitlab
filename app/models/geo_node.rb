@@ -74,11 +74,7 @@ class GeoNode < ActiveRecord::Base
   end
 
   def status_url
-    URI.join(uri, "#{uri.path}/", "api/#{API::API.version}/geo/status").to_s
-  end
-
-  def status_url
-    URI.join(uri, "#{uri.path}/", "api/#{API::API.version}/geo/status").to_s
+    geo_api_url("status")
   end
 
   def oauth_callback_url
@@ -94,6 +90,19 @@ class GeoNode < ActiveRecord::Base
   end
 
   private
+
+  def geo_api_url(suffix)
+    URI.join(uri, "#{uri.path}/", "api/#{API::API.version}/geo/#{suffix}").to_s
+  end
+
+  def ensure_access_keys!
+    return if self.access_key.present? && self.encrypted_secret_access_key.present?
+
+    keys = Gitlab::Geo.generate_access_keys
+
+    self.access_key = keys[:access_key]
+    self.secret_access_key = keys[:secret_access_key]
+  end
 
   def geo_api_url(suffix)
     URI.join(uri, "#{uri.path}/", "api/#{API::API.version}/geo/#{suffix}").to_s

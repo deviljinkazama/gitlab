@@ -7,7 +7,17 @@ describe Gitlab::Geo::JwtRequestDecoder do
 
   subject { described_class.new(request.header['Authorization']) }
 
-  it '#decode' do
-    expect(subject.decode).to eq(data)
+  describe '#decode' do
+    it 'decodes correct data' do
+      expect(subject.decode).to eq(data)
+    end
+
+    it 'fails to decode with wrong key' do
+      data = request.header['Authorization']
+
+      primary_node.secret_access_key = ''
+      primary_node.save
+      expect(described_class.new(data).decode).to be_nil
+    end
   end
 end
