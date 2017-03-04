@@ -31,15 +31,15 @@ class GeoFileDownloadDispatchWorker
       load_pending_downloads
 
       loop do
-        update_jobs_in_progress
-        load_pending_downloads if @pending_lfs_download.size < MAX_CONCURRENT_DOWNLOADS
-
         break if over_time?
         break unless downloads_remain?
 
         schedule_lfs_downloads
 
         sleep(1)
+
+        update_jobs_in_progress
+        load_pending_downloads if @pending_lfs_download.size < MAX_CONCURRENT_DOWNLOADS
       end
     end
   end
