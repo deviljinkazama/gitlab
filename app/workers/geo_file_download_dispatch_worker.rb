@@ -28,6 +28,8 @@ class GeoFileDownloadDispatchWorker
 
     # Prevent multiple Sidekiq workers from attempting to schedule downloads
     try_obtain_lease do
+      load_pending_downloads
+
       loop do
         update_jobs_in_progress
         load_pending_downloads if @pending_lfs_download.size < MAX_CONCURRENT_DOWNLOADS
