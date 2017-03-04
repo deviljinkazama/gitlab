@@ -40,4 +40,26 @@ class GeoNodeStatus
   def repositories_failed=(value)
     @repositories_failed = value.to_i
   end
+
+  def lfs_objects
+    @lfs_objects ||= LfsObject.count
+  end
+
+  def lfs_objects=(value)
+    @lfs_objects = value.to_i
+  end
+
+  def lfs_objects_synced
+    @lfs_objects_synced ||= Geo::FileRegistry.where(file_type: :lfs).count
+  end
+
+  def lfs_objects_synced=(value)
+    @lfs_objects_synced = value.to_i
+  end
+
+  def lfs_objects_synced_in_percentage
+    return 0 if lfs_objects.zero?
+
+    (lfs_objects_synced.to_f / lfs_objects.to_f) * 100.0
+  end
 end

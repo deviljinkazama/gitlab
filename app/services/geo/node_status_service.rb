@@ -6,7 +6,7 @@ module Geo
     default_timeout Gitlab.config.gitlab.geo_status_timeout
 
     def call(status_url)
-      keys = %w(health repositories repositories_synced repositories_failed)
+      keys = %w(health repositories repositories_synced repositories_failed lfs_objects lfs_objects_synced)
       values =
         begin
           response = self.class.get(status_url,
