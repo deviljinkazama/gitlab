@@ -69,7 +69,7 @@ class GeoFileDownloadDispatchWorker
   end
 
   def job_ids
-    @scheduled_lfs_jobs.map{ |data| data[:job_id } }
+    @scheduled_lfs_jobs.map{ |data| data[:job_id] }
   end
 
   def scheduled_lfs_ids
