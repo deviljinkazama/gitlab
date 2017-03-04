@@ -66,7 +66,7 @@ class GeoFileDownloadDispatchWorker
   end
 
   def schedule_lfs_downloads
-    num_to_schedule = MAX_CONCURRENT_DOWNLOADS - job_ids.size
+    num_to_schedule = [MAX_CONCURRENT_DOWNLOADS - job_ids.size, @pending_lfs_downloads.size].min
 
     return unless downloads_remain?
 
@@ -83,7 +83,7 @@ class GeoFileDownloadDispatchWorker
   def find_lfs_object_ids(limit)
     downloaded_ids = Geo::FileRegistry.where(file_type: 'lfs').pluck(:file_id)
     downloaded_ids = (downloaded_ids + scheduled_lfs_ids).uniq
-    ids = LfsObject.where.not(id: downloaded_ids).order(created_at: :desc).limit(limit).pluck(:id)
+    LfsObject.where.not(id: downloaded_ids).order(created_at: :desc).limit(limit).pluck(:id)
   end
 
   def update_jobs_in_progress
