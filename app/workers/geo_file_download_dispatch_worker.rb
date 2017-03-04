@@ -28,23 +28,30 @@ class GeoFileDownloadDispatchWorker
 
     # Prevent multiple Sidekiq workers from attempting to schedule downloads
     try_obtain_lease do
-      load_pending_downloads
-
       loop do
+        update_jobs_in_progress
+        load_pending_downloads if reload_queue?
+        # If  we are still under the limit after refreshing our DB, we can end after
+        # scheduling the remaining tranfers.
+        last_batch = reload_queue?
+
         break if over_time?
         break unless downloads_remain?
 
         schedule_lfs_downloads
 
-        sleep(1)
+        break if last_batch
 
-        update_jobs_in_progress
-        load_pending_downloads if @pending_lfs_download.size < MAX_CONCURRENT_DOWNLOADS
+        sleep(1)
       end
     end
   end
 
   private
+
+  def reload_queue?
+    @pending_lfs_downloads.size < MAX_CONCURRENT_DOWNLOADS
+  end
 
   def over_time?
     Time.now - @start_time >= RUN_TIME
