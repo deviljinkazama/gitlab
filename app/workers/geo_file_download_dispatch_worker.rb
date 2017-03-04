@@ -51,7 +51,7 @@ class GeoFileDownloadDispatchWorker
       job_id = GeoFileDownloadWorker.perform_async(:lfs, lfs_id)
 
       if job_id
-        scheduled_lfs_jobs << { job_id: job_id, id: lfs_id }
+        @scheduled_lfs_jobs << { job_id: job_id, id: lfs_id }
       end
     end
   end
