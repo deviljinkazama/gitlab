@@ -74,7 +74,7 @@ class GeoNode < ActiveRecord::Base
   end
 
   def status_url
-    geo_api_url("status")
+    geo_api_url('status')
   end
 
   def oauth_callback_url
