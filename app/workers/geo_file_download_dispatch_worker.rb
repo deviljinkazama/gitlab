@@ -7,16 +7,14 @@ class GeoFileDownloadDispatchWorker
   RUN_TIME = 60.minutes.to_i.freeze
   BATCH_SIZE = 10
 
-  attr_accessor :job_ids, :start_time
-
   def initialize
-    @job_ids = []
+    @scheduled_lfs_jobs = []
   end
 
   def perform
     return unless Gitlab::Geo.secondary?
 
-    start_time = Time.now
+    @start_time = Time.now
 
     # Prevent multiple Sidekiq workers from attempting to schedule downloads
     try_obtain_lease do
@@ -35,7 +33,7 @@ class GeoFileDownloadDispatchWorker
   private
 
   def over_time?
-    Time.now - start_time >= RUN_TIME
+    Time.now - @start_time >= RUN_TIME
   end
 
   def downloads_remain?
@@ -47,22 +45,35 @@ class GeoFileDownloadDispatchWorker
 
     return if num_to_schedule.zero?
 
-    find_lfs_object_ids(num_to_schedule).each do |lfs_id|
-      jid = GeoFileDownloadWorker.perform_async(:lfs, lfs_id)
-      job_ids << jid if jid
+    object_ids = find_lfs_object_ids(num_to_schedule)
+
+    object_ids.each do |lfs_id|
+      job_id = GeoFileDownloadWorker.perform_async(:lfs, lfs_id)
+
+      if job_id
+        scheduled_lfs_jobs << { job_id: job_id, id: lfs_id }
+      end
     end
   end
 
   def find_lfs_object_ids(limit)
-    LfsObject.where.not(id: Geo::FileRegistry.where(file_type: 'lfs').pluck(:file_id))
-      .limit(limit)
-      .pluck(:id)
+    downloaded_ids = Geo::FileRegistry.where(file_type: 'lfs').pluck(:file_id)
+    downloaded_ids = (downloaded_ids + scheduled_lfs_ids).uniq
+    LfsObject.where.not(id: downloaded_ids).limit(limit).pluck(:id)
   end
 
   def update_jobs_in_progress
     status = Gitlab::SidekiqStatus.job_status(job_ids)
 
-    @job_ids = @job_ids.zip(status).map{ |x| x[0] if x[1] }.compact
+    @scheduled_lfs_jobs = @scheduled_lfs_jobs.zip(status).map{ |x| x[0] if x[1] }.compact
+  end
+
+  def job_ids
+    @scheduled_lfs_jobs.map(&:job_id)
+  end
+
+  def scheduled_lfs_ids
+    @scheduled_lfs_jobs.map(&:id)
   end
 
   def try_obtain_lease
