@@ -5,12 +5,22 @@ class GeoFileDownloadDispatchWorker
   LEASE_KEY = 'geo_file_download_dispatch_worker'.freeze
   LEASE_TIMEOUT = 8.hours.freeze
   RUN_TIME = 60.minutes.to_i.freeze
-  BATCH_SIZE = 10
+  DB_RETRIEVE_BATCH = 1000.freeze
+  MAX_CONCURRENT_DOWNLOADS = 10.freeze
 
   def initialize
+    @pending_lfs_downloads = []
     @scheduled_lfs_jobs = []
   end
 
+  # The scheduling works as the following:
+  #
+  # 1. Load a batch of IDs that we need to download from the primary (DB_RETRIVE_PATH) into a pending list.
+  # 2. Schedule them so that at most MAX_CONCURRENT_DOWNLOADS are running at once.
+  # 3. When a slot frees, schedule another download.
+  # 4. When we have drained the pending list, load another batch into memory, and schedule the remaining
+  #    files, excluding ones in progress.
+  # 5. Quit when we have scheduled all downloads or exceeded an hour.
   def perform
     return unless Gitlab::Geo.secondary?
 
@@ -19,10 +29,12 @@ class GeoFileDownloadDispatchWorker
     # Prevent multiple Sidekiq workers from attempting to schedule downloads
     try_obtain_lease do
       loop do
+        update_jobs_in_progress
+        load_pending_downloads if @pending_lfs_download.size < MAX_CONCURRENT_DOWNLOADS
+
         break if over_time?
         break unless downloads_remain?
 
-        update_jobs_in_progress
         schedule_lfs_downloads
 
         sleep(1)
@@ -36,18 +48,21 @@ class GeoFileDownloadDispatchWorker
     Time.now - @start_time >= RUN_TIME
   end
 
+  def load_pending_downloads
+    @pending_lfs_downloads = find_lfs_object_ids(DB_RETRIEVE_BATCH)
+  end
+
   def downloads_remain?
-    find_lfs_object_ids(1).count
+    @pending_lfs_downloads.size
   end
 
   def schedule_lfs_downloads
-    num_to_schedule = BATCH_SIZE - job_ids.size
+    num_to_schedule = MAX_CONCURRENT_DOWNLOADS - job_ids.size
 
-    return if num_to_schedule.zero?
+    return unless downloads_remain?
 
-    object_ids = find_lfs_object_ids(num_to_schedule)
-
-    object_ids.each do |lfs_id|
+    num_to_schedule.times do
+      lfs_id = @pending_lfs_downloads.shift
       job_id = GeoFileDownloadWorker.perform_async(:lfs, lfs_id)
 
       if job_id
@@ -59,7 +74,7 @@ class GeoFileDownloadDispatchWorker
   def find_lfs_object_ids(limit)
     downloaded_ids = Geo::FileRegistry.where(file_type: 'lfs').pluck(:file_id)
     downloaded_ids = (downloaded_ids + scheduled_lfs_ids).uniq
-    LfsObject.where.not(id: downloaded_ids).limit(limit).pluck(:id)
+    ids = LfsObject.where.not(id: downloaded_ids).order(created_at: :desc).limit(limit).pluck(:id)
   end
 
   def update_jobs_in_progress
