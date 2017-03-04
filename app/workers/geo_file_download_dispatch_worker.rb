@@ -32,7 +32,7 @@ class GeoFileDownloadDispatchWorker
         update_jobs_in_progress
         load_pending_downloads if reload_queue?
         # If  we are still under the limit after refreshing our DB, we can end after
-        # scheduling the remaining tranfers.
+        # scheduling the remaining transfers.
         last_batch = reload_queue?
 
         break if over_time?
