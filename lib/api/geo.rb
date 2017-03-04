@@ -101,14 +101,6 @@ module API
     end
 
     helpers do
-<<<<<<< HEAD
-      def require_node_to_be_enabled!
-        forbidden! 'Geo node is disabled.' unless Gitlab::Geo.current_node.enabled?
-      end
-
-      def require_node_to_be_secondary!
-        forbidden! 'Geo node is disabled.' unless Gitlab::Geo.current_node.secondary?
-=======
       def authenticate_by_gitlab_geo_node_token!
         auth_header = headers['Authorization']
 
@@ -123,7 +115,6 @@ module API
 
       def require_node_to_be_secondary!
         forbidden! 'Geo node is not secondary node.' unless Gitlab::Geo.current_node&.secondary?
->>>>>>> geo/backfilling
       end
     end
   end
