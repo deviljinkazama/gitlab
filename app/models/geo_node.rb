@@ -104,19 +104,6 @@ class GeoNode < ActiveRecord::Base
     self.secret_access_key = keys[:secret_access_key]
   end
 
-  def geo_api_url(suffix)
-    URI.join(uri, "#{uri.path}/", "api/#{API::API.version}/geo/#{suffix}").to_s
-  end
-
-  def ensure_access_keys!
-    return if self.access_key.present? && self.encrypted_secret_access_key.present?
-
-    keys = Gitlab::Geo.generate_access_keys
-
-    self.access_key = keys[:access_key]
-    self.secret_access_key = keys[:secret_access_key]
-  end
-
   def url_helper_args
     if relative_url_root
       relative_url = relative_url_root.starts_with?('/') ? relative_url_root : "/#{relative_url_root}"
