@@ -524,10 +524,10 @@ ActiveRecord::Schema.define(version: 20170224075132) do
     t.integer "geo_node_key_id"
     t.integer "oauth_application_id"
     t.integer "system_hook_id"
-    t.boolean "enabled", default: true, null: false
     t.string "access_key"
     t.string "encrypted_secret_access_key"
     t.string "encrypted_secret_access_key_iv"
+    t.boolean "enabled", default: true, null: false
   end
 
   add_index "geo_nodes", ["access_key"], name: "index_geo_nodes_on_access_key", using: :btree
