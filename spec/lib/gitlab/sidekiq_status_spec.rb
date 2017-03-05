@@ -48,7 +48,7 @@ describe Gitlab::SidekiqStatus do
       described_class.set('123')
       described_class.set('456')
 
-      expect(described_class.num_running(%w(123 456 678))).to eq(2)
+      expect(described_class.num_running(%w(123 456 789))).to eq(2)
     end
   end
 
@@ -61,7 +61,7 @@ describe Gitlab::SidekiqStatus do
       described_class.set('123')
       described_class.set('456')
 
-      expect(described_class.num_completed(%w(123 456 678))).to eq(1)
+      expect(described_class.num_completed(%w(123 456 789))).to eq(1)
     end
   end
 
