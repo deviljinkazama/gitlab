@@ -26,7 +26,7 @@ describe GeoFileDownloadDispatchWorker do
 
     # Test the case where we have:
     #
-    # 1. A total of 5 files in the queue, and we can send 2 at a time.
+    # 1. A total of 6 files in the queue, and we can load a maxmimum of 5 and send 2 at a time.
     # 2. We send 2, wait for 1 to finish, and then send again.
     it 'attempts to load a new batch without pending downloads' do
       stub_const('GeoFileDownloadDispatchWorker::DB_RETRIEVE_BATCH', 5)
