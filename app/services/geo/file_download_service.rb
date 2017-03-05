@@ -33,7 +33,7 @@ module Geo
     end
 
     def download_lfs_object
-      lfs_object = LfsObject.find(object_id)
+      lfs_object = LfsObject.find_by_id(object_id)
 
       return unless lfs_object.present?
 
