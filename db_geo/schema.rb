@@ -26,12 +26,13 @@ ActiveRecord::Schema.define(version: 20170302005747) do
   add_index "file_registries", ["file_type", "file_id"], name: "index_file_registries_on_file_type_and_file_id", unique: true, using: :btree
   add_index "file_registries", ["file_type"], name: "index_file_registries_on_file_type", using: :btree
 
-  create_table "project_registries", force: :cascade do |t|
+  create_table "project_registry", force: :cascade do |t|
     t.integer "project_id", null: false
     t.datetime "last_repository_synced_at"
     t.datetime "last_repository_successful_sync_at"
     t.datetime "created_at", null: false
   end
 
-  add_index "project_registries", ["project_id"], name: "index_project_registries_on_project_id", using: :btree
+
+  add_index "project_registry", ["project_id"], name: "index_project_registry_on_project_id", using: :btree
 end

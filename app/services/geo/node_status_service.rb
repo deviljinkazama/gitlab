@@ -12,11 +12,11 @@ module Geo
           response = self.class.get(status_url, headers: headers)
 
           if response.success? || response.redirection?
-            response.parsed_response.values_at(*keys)
+            response.parsed_response.values_at(*KEYS)
           else
             ["Could not connect to Geo node - HTTP Status Code: #{response.code}"]
           end
-        rescue HTTParty::Error, Errno::ECONNREFUSED => e
+        rescue HTTParty::Error, Timeout::Error, SocketError, Errno::ECONNRESET, Errno::ECONNREFUSED => e
           [e.message]
         end
 
