@@ -44,7 +44,7 @@ describe GeoFileDownloadDispatchWorker do
       # 2. 4 get sent out, 1 remains. This triggers another reload, which loads in the remaining 2.
       # 3. Since the second reload filled the pipe with 2, we need to do a final reload to ensure
       #    zero are left.
-      expect(subject).to receive(:load_pending_downloads).exactly(3).times..and_call_original
+      expect(subject).to receive(:load_pending_downloads).exactly(3).times.and_call_original
 
       Sidekiq::Testing.inline! do
         subject.perform
