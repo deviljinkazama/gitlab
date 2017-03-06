@@ -17,7 +17,7 @@ describe GeoFileDownloadDispatchWorker do
       create_list(:lfs_object, 2, :with_file)
 
       allow_any_instance_of(described_class).to receive(:over_time?).and_return(false)
-      expect(GeoFileDownloadWorker).to receive(:perform_async).exactly(2).times.and_call_original
+      expect(GeoFileDownloadWorker).to receive(:perform_async).twice.and_call_original
 
       subject.perform
     end
