@@ -19,7 +19,7 @@ module Gitlab
     end
 
     def self.enabled?
-      self.cache_value(:geo_node_enabled) { self.connected_to_primary_db? && GeoNode.exists? }
+      self.cache_value(:geo_node_enabled) { GeoNode.exists? }
     end
 
     def self.license_allows?
