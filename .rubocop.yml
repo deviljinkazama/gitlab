@@ -349,6 +349,7 @@ Style/MutableConstant:
   Exclude:
     - 'db/migrate/**/*'
     - 'db/post_migrate/**/*'
+    - 'db_geo/migrate/**/*'
 
 # Favor unless over if for negative conditions (or control flow or).
 Style/NegatedIf:
