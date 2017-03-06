@@ -1,17 +1,6 @@
 module API
   class Geo < Grape::API
     resource :geo do
-      #  Get node information (e.g. health, repos synced, repos failed, etc.)
-      #
-      # Example request:
-      #   GET /geo/status
-      get 'status' do
-        authenticated_as_admin!
-        require_node_to_be_secondary!
-
-        present GeoNodeStatus.new, with: Entities::GeoNodeStatus
-      end
-
       # Verify the GitLab Geo transfer request is valid
       # All transfers use the Authorization header to pass a JWT
       # payload.
