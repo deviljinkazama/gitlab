@@ -15,7 +15,7 @@ class GeoFileDownloadDispatchWorker
 
   # The scheduling works as the following:
   #
-  # 1. Load a batch of IDs that we need to download from the primary (DB_RETRIVE_PATH) into a pending list.
+  # 1. Load a batch of IDs that we need to download from the primary (DB_RETRIEVE_BATCH) into a pending list.
   # 2. Schedule them so that at most MAX_CONCURRENT_DOWNLOADS are running at once.
   # 3. When a slot frees, schedule another download.
   # 4. When we have drained the pending list, load another batch into memory, and schedule the remaining

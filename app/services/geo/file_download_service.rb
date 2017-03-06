@@ -41,7 +41,7 @@ module Geo
       bytes_downloaded = transfer.download_from_primary
 
       success = bytes_downloaded && bytes_downloaded >= 0
-      update_tracking_db(bytes_downloaded) if success
+      update_registry(bytes_downloaded) if success
 
       success
     end
@@ -50,7 +50,7 @@ module Geo
       Rails.logger.info "#{self.class.name}: #{message}"
     end
 
-    def update_tracking_db(bytes_downloaded)
+    def update_registry(bytes_downloaded)
       transfer = Geo::FileRegistry.find_or_create_by(
         file_type: object_type,
         file_id: object_id,

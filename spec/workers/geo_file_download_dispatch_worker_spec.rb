@@ -14,9 +14,7 @@ describe GeoFileDownloadDispatchWorker do
 
   describe '#perform' do
     it 'executes GeoFileDownloadWorker for each LFS object' do
-      2.times do
-        create(:lfs_object, :with_file)
-      end
+      create_list(:lfs_object, 2, :with_file)
 
       allow_any_instance_of(described_class).to receive(:over_time?).and_return(false)
       expect(GeoFileDownloadWorker).to receive(:perform_async).exactly(2).times.and_call_original
@@ -32,9 +30,7 @@ describe GeoFileDownloadDispatchWorker do
       stub_const('GeoFileDownloadDispatchWorker::DB_RETRIEVE_BATCH', 5)
       stub_const('GeoFileDownloadDispatchWorker::MAX_CONCURRENT_DOWNLOADS', 2)
 
-      6.times do
-        create(:lfs_object, :with_file)
-      end
+      create_list(:lfs_object, 6, :with_file)
 
       allow_any_instance_of(described_class).to receive(:over_time?).and_return(false)
 

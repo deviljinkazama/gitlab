@@ -41,7 +41,7 @@ class GeoNodeStatus
     @repositories_failed = value.to_i
   end
 
-  def lfs_objects
+  def lfs_objects_total
     @lfs_objects ||= LfsObject.count
   end
 
