@@ -59,6 +59,8 @@ class GeoNodeStatus
     sync_percentage(lfs_objects_total, lfs_objects_synced)
   end
 
+  private
+
   def sync_percentage(total, synced)
     return 0 if total.zero?
 
