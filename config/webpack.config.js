@@ -31,6 +31,7 @@ var config = {
     environments_folder:  './environments/folder/environments_folder_bundle.js',
     filtered_search:      './filtered_search/filtered_search_bundle.js',
     graphs:               './graphs/graphs_bundle.js',
+    groups_list:          './groups_list.js',
     issuable:             './issuable/issuable_bundle.js',
     merge_conflicts:      './merge_conflicts/merge_conflicts_bundle.js',
     merge_request_widget: './merge_request_widget/ci_bundle.js',
@@ -133,6 +134,7 @@ var config = {
     extensions: ['.js', '.es6', '.js.es6'],
     alias: {
       '~':              path.join(ROOT_PATH, 'app/assets/javascripts'),
+      'emoji-map$':      path.join(ROOT_PATH, 'fixtures/emojis/digests.json'),
       'emoji-aliases$': path.join(ROOT_PATH, 'fixtures/emojis/aliases.json'),
       'empty_states':   path.join(ROOT_PATH, 'app/views/shared/empty_states'),
       'icons':          path.join(ROOT_PATH, 'app/views/shared/icons'),
