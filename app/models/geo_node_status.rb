@@ -42,11 +42,11 @@ class GeoNodeStatus
   end
 
   def lfs_objects_total
-    @lfs_objects ||= LfsObject.count
+    @lfs_objects_total ||= LfsObject.count
   end
 
   def lfs_objects_total=(value)
-    @lfs_objects = value.to_i
+    @lfs_objects_total = value.to_i
   end
 
   def lfs_objects_synced
@@ -60,6 +60,6 @@ class GeoNodeStatus
   def lfs_objects_synced_in_percentage
     return 0 if lfs_objects.zero?
 
-    (lfs_objects_synced.to_f / lfs_objects.to_f) * 100.0
+    (lfs_objects_synced.to_f / lfs_objects_total.to_f) * 100.0
   end
 end

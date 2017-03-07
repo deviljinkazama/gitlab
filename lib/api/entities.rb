@@ -768,7 +768,7 @@ module API
       expose :repositories
       expose :repositories_synced
       expose :repositories_failed
-      expose :lfs_objects
+      expose :lfs_objects_total
       expose :lfs_objects_synced
     end
   end

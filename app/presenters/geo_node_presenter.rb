@@ -3,7 +3,7 @@ class GeoNodePresenter < Gitlab::View::Presenter::Delegated
 
   delegate :healthy?, :health, :repositories, :repositories_synced,
            :repositories_synced_in_percentage, :repositories_failed,
-           :lfs_objects, :lfs_objects_synced, :lfs_objects_synced_in_percentage,
+           :lfs_objects_total, :lfs_objects_synced, :lfs_objects_synced_in_percentage,
            to: :status
 
   private
