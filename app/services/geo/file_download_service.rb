@@ -1,12 +1,12 @@
 module Geo
   class FileDownloadService
-    attr_reader :object_type, :object_id
+    attr_reader :object_type, :object_db_id
 
     LEASE_TIMEOUT = 8.hours.freeze
 
-    def initialize(object_type, object_id)
+    def initialize(object_type, object_db_id)
       @object_type = object_type
-      @object_id = object_id
+      @object_db_id = object_db_id
     end
 
     def execute
@@ -33,7 +33,7 @@ module Geo
     end
 
     def download_lfs_object
-      lfs_object = LfsObject.find_by_id(object_id)
+      lfs_object = LfsObject.find_by_id(object_db_id)
 
       return unless lfs_object.present?
 
@@ -53,14 +53,14 @@ module Geo
     def update_registry(bytes_downloaded)
       transfer = Geo::FileRegistry.find_or_create_by(
         file_type: object_type,
-        file_id: object_id,
+        file_id: object_db_id,
         bytes: bytes_downloaded
       )
       transfer.save
     end
 
     def lease_key
-      "file_download_service:#{object_type}:#{object_id}"
+      "file_download_service:#{object_type}:#{object_db_id}"
     end
   end
 end
