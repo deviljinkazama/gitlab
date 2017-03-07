@@ -45,7 +45,7 @@ class GeoNodeStatus
     @lfs_objects ||= LfsObject.count
   end
 
-  def lfs_objects=(value)
+  def lfs_objects_total=(value)
     @lfs_objects = value.to_i
   end
 
