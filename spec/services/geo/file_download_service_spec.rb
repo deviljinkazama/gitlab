@@ -18,7 +18,7 @@ describe Geo::FileDownloadService, services: true do
       allow_any_instance_of(Gitlab::Geo::LfsTransfer)
         .to receive(:download_from_primary).and_return(100)
 
-      expect(subject.execute).to eq(100)
+      expect{ subject.execute }.to change { Geo::FileRegistry.count }.by(1)
     end
   end
 end
