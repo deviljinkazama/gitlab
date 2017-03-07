@@ -3,6 +3,7 @@ class Admin::GeoNodesController < Admin::ApplicationController
   before_action :load_node, only: [:destroy, :repair, :toggle]
 
   def index
+    # Ensure all nodes are using their Presenter
     @nodes = GeoNode.all.map(&:present)
     @node = GeoNode.new
 
@@ -44,10 +45,13 @@ class Admin::GeoNodesController < Admin::ApplicationController
     if @node.primary?
       flash[:alert] = "Primary node can't be disabled."
     else
-      @node.toggle!(:enabled)
-
-      new_status = @node.enabled? ? 'enabled' : 'disabled'
-      flash[:notice] = "Node #{@node.url} was successfully #{new_status}."
+      if @node.toggle!(:enabled)
+        new_status = @node.enabled? ? 'enabled' : 'disabled'
+        flash[:notice] = "Node #{@node.url} was successfully #{new_status}."
+      else
+        action = @node.enabled? ? 'disabling' : 'enabling'
+        flash[:alert] = "There was a problem #{action} node #{@node.url}."
+      end
     end
 
     redirect_to admin_geo_nodes_path
