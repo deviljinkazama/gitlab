@@ -58,7 +58,7 @@ class GeoNodeStatus
   end
 
   def lfs_objects_synced_in_percentage
-    return 0 if lfs_objects.zero?
+    return 0 if lfs_objects_total.zero?
 
     (lfs_objects_synced.to_f / lfs_objects_total.to_f) * 100.0
   end
