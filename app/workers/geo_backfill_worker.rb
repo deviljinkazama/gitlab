@@ -16,7 +16,7 @@ class GeoBackfillWorker
     project_ids.each do |project_id|
       begin
         break if over_time?(start_time)
-        break unless node_enabled?
+        break unless Gitlab::Geo.current_node_enabled?
 
         project = Project.find(project_id)
         next if synced?(project)
@@ -71,9 +71,5 @@ class GeoBackfillWorker
 
   def lease_timeout
     Geo::RepositoryBackfillService::LEASE_TIMEOUT
-  end
-
-  def node_enabled?
-    Gitlab::Geo.current_node_enabled?
   end
 end

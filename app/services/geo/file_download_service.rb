@@ -27,9 +27,11 @@ module Geo
 
       return unless uuid.present?
 
-      yield
-
-      Gitlab::ExclusiveLease.cancel(lease_key, uuid)
+      begin
+        yield
+      ensure
+        Gitlab::ExclusiveLease.cancel(lease_key, uuid)
+      end
     end
 
     def download_lfs_object
@@ -51,11 +53,10 @@ module Geo
     end
 
     def update_registry(bytes_downloaded)
-      transfer = Geo::FileRegistry.find_or_create_by(
+      transfer = Geo::FileRegistry.find_or_initialize_by(
         file_type: object_type,
-        file_id: object_db_id,
-        bytes: bytes_downloaded
-      )
+        file_id: object_db_id)
+      transfer.bytes = bytes_downloaded
       transfer.save
     end
 

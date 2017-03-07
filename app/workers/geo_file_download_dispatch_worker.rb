@@ -94,11 +94,11 @@ class GeoFileDownloadDispatchWorker
     # SidekiqStatus returns an array of booleans: true if the job has completed, false otherwise.
     # For each entry, first use `zip` to make { job_id: 123, id: 10 } -> [ { job_id: 123, id: 10 }, bool ]
     # Next, filter out the jobs that have completed.
-    @scheduled_lfs_jobs = @scheduled_lfs_jobs.zip(status).map{ |x| x[0] if x[1] }.compact
+    @scheduled_lfs_jobs = @scheduled_lfs_jobs.zip(status).map { |(job, completed)| job if completed }.compact
   end
 
   def job_ids
-    @scheduled_lfs_jobs.map{ |data| data[:job_id] }
+    @scheduled_lfs_jobs.map { |data| data[:job_id] }
   end
 
   def scheduled_lfs_ids
