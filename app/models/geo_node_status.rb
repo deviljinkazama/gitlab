@@ -28,9 +28,7 @@ class GeoNodeStatus
   end
 
   def repositories_synced_in_percentage
-    return 0 if repositories_count.zero?
-
-    (repositories_synced_count.to_f / repositories_count.to_f) * 100.0
+    sync_percentage(repositories_count, repositories_synced_count)
   end
 
   def repositories_failed_count
@@ -58,8 +56,12 @@ class GeoNodeStatus
   end
 
   def lfs_objects_synced_in_percentage
-    return 0 if lfs_objects_total.zero?
+    sync_percentage(lfs_objects_total, lfs_objects_synced)
+  end
 
-    (lfs_objects_synced.to_f / lfs_objects_total.to_f) * 100.0
+  def sync_percentage(total, synced)
+    return 0 if total.zero?
+
+    (synced.to_f / total.to_f) * 100.0
   end
 end
