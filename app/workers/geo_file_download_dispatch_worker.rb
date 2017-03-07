@@ -29,6 +29,8 @@ class GeoFileDownloadDispatchWorker
     # Prevent multiple Sidekiq workers from attempting to schedule downloads
     try_obtain_lease do
       loop do
+        break unless node_enabled?
+
         update_jobs_in_progress
         load_pending_downloads if reload_queue?
         # If we are still under the limit after refreshing our DB, we can end
@@ -112,5 +114,15 @@ class GeoFileDownloadDispatchWorker
 
   def release_lease(uuid)
     Gitlab::ExclusiveLease.cancel(LEASE_KEY, uuid)
+  end
+
+  def node_enabled?
+    # Only check every minute to avoid polling the DB excessively
+    unless @last_enabled_check.present? && (Time.now - @last_enabled_check > 1.minute)
+      @last_enabled_check = Time.now
+      @current_node_enabled = nil
+    end
+
+    @current_node_enabled ||= Gitlab::Geo.current_node_enabled?
   end
 end
