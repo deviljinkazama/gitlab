@@ -21,8 +21,13 @@ class GeoBackfillWorker
         project = Project.find(project_id)
         next if synced?(project)
 
+        # We try to obtain a lease here for the entire backfilling process
+        # because backfill the repositories continuously at a controlled rate
+        # instead of hammering the primary node. Initially, we are backfilling
+        # one repo at a time. If we don't obtain the lease here, every 5
+        # minutes all of 100 projects will be synced.
         try_obtain_lease do |lease|
-          GeoSingleRepositoryBackfillWorker.new.perform(project_id, lease)
+          Geo::RepositoryBackfillService.new(project_id).execute
         end
       rescue ActiveRecord::RecordNotFound
         logger.error("Couldn't find project with ID=#{project_id}, skipping syncing")
@@ -36,8 +41,6 @@ class GeoBackfillWorker
   private
 
   def find_project_ids
-    return [] if Project.count == Geo::ProjectRegistry.count
-
     Project.where.not(id: Geo::ProjectRegistry.pluck(:project_id))
            .limit(BATCH_SIZE)
            .pluck(:id)
@@ -62,7 +65,11 @@ class GeoBackfillWorker
 
     return unless lease
 
-    yield lease
+    begin
+      yield lease
+    ensure
+      Gitlab::ExclusiveLease.cancel(lease_key, lease)
+    end
   end
 
   def lease_key
@@ -71,5 +78,12 @@ class GeoBackfillWorker
 
   def lease_timeout
     Geo::RepositoryBackfillService::LEASE_TIMEOUT
+  end
+
+  def node_enabled?
+    # No caching of the enabled! If we cache it and an admin disables
+    # this node, an active GeoBackfillWorker would keep going for up
+    # to max run time after the node was disabled.
+    Gitlab::Geo.current_node.reload.enabled?
   end
 end

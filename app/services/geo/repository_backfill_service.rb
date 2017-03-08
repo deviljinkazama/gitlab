@@ -1,29 +1,23 @@
 module Geo
   class RepositoryBackfillService
-    attr_reader :project_id, :backfill_lease
+    attr_reader :project_id
 
     LEASE_TIMEOUT    = 8.hours.freeze
     LEASE_KEY_PREFIX = 'repository_backfill_service'.freeze
 
-    def initialize(project_id, backfill_lease)
+    def initialize(project_id)
       @project_id = project_id
-      @backfill_lease = backfill_lease
     end
 
     def execute
       try_obtain_lease do
         log('Started repository sync')
-
-        fetch_repositories do |started_at, finished_at|
-          update_registry(started_at, finished_at)
-        end
-
+        started_at, finished_at = fetch_repositories
+        update_registry(started_at, finished_at)
         log('Finished repository sync')
       end
     rescue ActiveRecord::RecordNotFound
       logger.error("Couldn't find project with ID=#{project_id}, skipping syncing")
-    ensure
-      Gitlab::ExclusiveLease.cancel(LEASE_KEY_PREFIX, backfill_lease)
     end
 
     private
@@ -46,7 +40,7 @@ module Geo
         Rails.logger.error "Error syncing repository for project #{project.path_with_namespace}: #{e}"
       end
 
-      yield started_at, finished_at
+      [started_at, finished_at]
     end
 
     def fetch_project_repository
@@ -80,6 +74,9 @@ module Geo
 
       yield
 
+      # We should release the lease for a repository, only if we have obtained
+      # it. If something went wrong when syncing the repository, we should wait
+      # for the lease timeout to try again.
       log('Releasing leases to sync repository')
       Gitlab::ExclusiveLease.cancel(lease_key, repository_lease)
     end
@@ -93,7 +90,7 @@ module Geo
     end
 
     def lease_key
-      @key ||= "#{LEASE_KEY_PREFIX}:#{project.id}"
+      @lease_key ||= "#{LEASE_KEY_PREFIX}:#{project.id}"
     end
 
     def primary_ssh_path_prefix

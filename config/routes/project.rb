@@ -192,6 +192,7 @@ constraints(ProjectUrlConstrainer.new) do
         member do
           post :stop
           get :terminal
+          get :metrics
           get :status, constraints: { format: :json }
           get '/terminal.ws/authorize', to: 'environments#terminal_websocket_authorize', constraints: { format: nil }
         end
@@ -370,6 +371,7 @@ constraints(ProjectUrlConstrainer.new) do
         resource :members, only: [:show]
         resource :ci_cd, only: [:show], controller: 'ci_cd'
         resource :integrations, only: [:show]
+        resource :repository, only: [:show], controller: :repository
       end
 
       # Since both wiki and repository routing contains wildcard characters
