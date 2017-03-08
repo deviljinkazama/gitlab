@@ -1,5 +1,6 @@
 module Geo
   class NodeStatusService
+    include Gitlab::CurrentSettings
     include HTTParty
 
 <<<<<<< HEAD
@@ -9,7 +10,7 @@ module Geo
 >>>>>>> origin/geo/backfilling
 
     # HTTParty timeout
-    default_timeout Gitlab.config.gitlab.geo_status_timeout
+    default_timeout current_application_settings.geo_status_timeout
 
     def call(status_url)
       values =
