@@ -47,7 +47,6 @@ class Projects::DeployKeysController < Projects::ApplicationController
   def deploy_key_params
     params.require(:deploy_key).permit(:key, :title, :can_push)
   end
-
   def log_audit_event(key_title, options = {})
     AuditEventService.new(current_user, @project, options)
       .for_deploy_key(key_title).security_event
