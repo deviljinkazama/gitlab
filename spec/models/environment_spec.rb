@@ -325,7 +325,6 @@ describe Environment, models: true do
 
     context 'when the environment does not have rollout status' do
       before { allow(environment).to receive(:deployment_service_ready?).and_return(false) }
-      it { is_expected.to eq(nil) }
     end
   end
 

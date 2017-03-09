@@ -22,6 +22,8 @@ Rails.application.routes.draw do
                 authorizations: 'oauth/authorizations'
   end
 
+  use_doorkeeper_openid_connect
+
   namespace :oauth do
     scope path: 'geo', controller: :geo_auth, as: :geo do
       get 'auth'
