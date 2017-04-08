@@ -3,8 +3,9 @@ module Gitlab
     class HealthCheck
       def self.perform_checks
         return '' unless Gitlab::Geo.secondary?
-        return 'The Geo database configuration file is missing.' unless Gitlab::Geo.configured?
         return 'The Geo node has a database that is not configured for streaming replication with the primary node.' unless self.database_secondary?
+        return 'The Geo node does not appear to be replicating data from the primary node.' unless self.replication_lag.present?
+        return 'The Geo database configuration file is missing.' unless Gitlab::Geo.configured?
 
         database_version  = self.get_database_version.to_i
         migration_version = self.get_migration_version.to_i
@@ -56,6 +57,21 @@ module Gitlab
         ActiveRecord::Base.connection.execute('SELECT pg_is_in_recovery()')
           .first
           .fetch('pg_is_in_recovery') == 't'
+      end
+
+      def self.replication_lag
+        raise NotImplementedError unless Gitlab::Database.postgresql?
+
+        ActiveRecord::Base.connection.execute('
+          SELECT CASE
+                 WHEN pg_last_xlog_receive_location() = pg_last_xlog_replay_location()
+                  THEN 0
+                 ELSE
+                  EXTRACT (EPOCH FROM now() - pg_last_xact_replay_timestamp())::INTEGER
+                 END
+                 AS replication_delay')
+          .first
+          .fetch('replication_delay')
       end
     end
   end
