@@ -1,25 +1,27 @@
 class License < ActiveRecord::Base
   include ActionView::Helpers::NumberHelper
 
+  AUDITOR_USER_FEATURE = 'GitLab_Auditor_User'.freeze
   DEPLOY_BOARD_FEATURE = 'GitLab_DeployBoard'.freeze
+  ELASTIC_SEARCH_FEATURE = 'GitLab_ElasticSearch'.freeze
   FILE_LOCK_FEATURE = 'GitLab_FileLocks'.freeze
   GEO_FEATURE = 'GitLab_Geo'.freeze
-  AUDITOR_USER_FEATURE = 'GitLab_Auditor_User'.freeze
-  SERVICE_DESK_FEATURE = 'GitLab_ServiceDesk'.freeze
+  MULTIPLE_ISSUE_ASSIGNEES_FEATURE = 'GitLab_MultipleIssueAssignees'.freeze
   OBJECT_STORAGE_FEATURE = 'GitLab_ObjectStorage'.freeze
-  ELASTIC_SEARCH_FEATURE = 'GitLab_ElasticSearch'.freeze
   RELATED_ISSUES_FEATURE = 'RelatedIssues'.freeze
+  SERVICE_DESK_FEATURE = 'GitLab_ServiceDesk'.freeze
 
   FEATURE_CODES = {
-    geo: GEO_FEATURE,
     auditor_user: AUDITOR_USER_FEATURE,
-    service_desk: SERVICE_DESK_FEATURE,
-    object_storage: OBJECT_STORAGE_FEATURE,
     elastic_search: ELASTIC_SEARCH_FEATURE,
+    geo: GEO_FEATURE,
+    object_storage: OBJECT_STORAGE_FEATURE,
     related_issues: RELATED_ISSUES_FEATURE,
+    service_desk: SERVICE_DESK_FEATURE,
     # Features that make sense to Namespace:
     deploy_board: DEPLOY_BOARD_FEATURE,
-    file_lock: FILE_LOCK_FEATURE
+    file_lock: FILE_LOCK_FEATURE,
+    multiple_issue_assignees: MULTIPLE_ISSUE_ASSIGNEES_FEATURE
   }.freeze
 
   STARTER_PLAN = 'starter'.freeze
@@ -29,17 +31,18 @@ class License < ActiveRecord::Base
 
   EES_FEATURES = [
     { ELASTIC_SEARCH_FEATURE => 1 },
+    { MULTIPLE_ISSUE_ASSIGNEES_FEATURE => 1 },
     { RELATED_ISSUES_FEATURE => 1 }
   ].freeze
 
   EEP_FEATURES = [
     *EES_FEATURES,
+    { AUDITOR_USER_FEATURE => 1 },
     { DEPLOY_BOARD_FEATURE => 1 },
     { FILE_LOCK_FEATURE => 1 },
     { GEO_FEATURE => 1 },
-    { AUDITOR_USER_FEATURE => 1 },
-    { SERVICE_DESK_FEATURE => 1 },
-    { OBJECT_STORAGE_FEATURE => 1 }
+    { OBJECT_STORAGE_FEATURE => 1 },
+    { SERVICE_DESK_FEATURE => 1 }
   ].freeze
 
   EEU_FEATURES = [
@@ -56,12 +59,12 @@ class License < ActiveRecord::Base
   EARLY_ADOPTER_FEATURES = [
     # TODO: Add EES features
     # https://gitlab.com/gitlab-org/gitlab-ee/issues/2335)
+    { AUDITOR_USER_FEATURE => 1 },
     { DEPLOY_BOARD_FEATURE => 1 },
     { FILE_LOCK_FEATURE => 1 },
     { GEO_FEATURE => 1 },
-    { AUDITOR_USER_FEATURE => 1 },
-    { SERVICE_DESK_FEATURE => 1 },
-    { OBJECT_STORAGE_FEATURE => 1 }
+    { OBJECT_STORAGE_FEATURE => 1 },
+    { SERVICE_DESK_FEATURE => 1 }
   ].freeze
 
   FEATURES_BY_PLAN = {
