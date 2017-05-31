@@ -432,11 +432,11 @@ Settings.cron_jobs['gitlab_usage_ping_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['gitlab_usage_ping_worker']['cron'] ||= Settings.__send__(:cron_random_weekly_time)
 Settings.cron_jobs['gitlab_usage_ping_worker']['job_class'] = 'GitlabUsagePingWorker'
 
-# Every day at 00:30
 Settings.cron_jobs['schedule_update_user_activity_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['schedule_update_user_activity_worker']['cron'] ||= '30 0 * * *'
 Settings.cron_jobs['schedule_update_user_activity_worker']['job_class'] = 'ScheduleUpdateUserActivityWorker'
 
+<<<<<<< HEAD
 Settings.cron_jobs['clear_shared_runners_minutes_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['clear_shared_runners_minutes_worker']['cron'] ||= '0 0 1 * *'
 Settings.cron_jobs['clear_shared_runners_minutes_worker']['job_class'] = 'ClearSharedRunnersMinutesWorker'
@@ -445,6 +445,11 @@ Settings.cron_jobs['clear_shared_runners_minutes_worker']['job_class'] = 'ClearS
 Settings.cron_jobs['schedule_update_user_activity_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['schedule_update_user_activity_worker']['cron'] ||= '30 0 * * *'
 Settings.cron_jobs['schedule_update_user_activity_worker']['job_class'] = 'ScheduleUpdateUserActivityWorker'
+=======
+Settings.cron_jobs['remove_old_web_hook_logs_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['remove_old_web_hook_logs_worker']['cron'] ||= '40 0 * * *'
+Settings.cron_jobs['remove_old_web_hook_logs_worker']['job_class'] = 'RemoveOldWebHookLogsWorker'
+>>>>>>> upstream/master
 
 #
 # GitLab Shell
@@ -567,7 +572,7 @@ Settings.rack_attack.git_basic_auth['bantime'] ||= 1.hour
 # Gitaly
 #
 Settings['gitaly'] ||= Settingslogic.new({})
-Settings.gitaly['enabled'] ||= false
+Settings.gitaly['enabled'] = true if Settings.gitaly['enabled'].nil?
 
 #
 # Webpack settings

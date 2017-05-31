@@ -1148,6 +1148,20 @@ describe Project, models: true do
     end
   end
 
+  describe '.starred_by' do
+    it 'returns only projects starred by the given user' do
+      user1 = create(:user)
+      user2 = create(:user)
+      project1 = create(:empty_project)
+      project2 = create(:empty_project)
+      create(:empty_project)
+      user1.toggle_star(project1)
+      user2.toggle_star(project2)
+
+      expect(Project.starred_by(user1)).to contain_exactly(project1)
+    end
+  end
+
   describe '.visible_to_user' do
     let!(:project) { create(:empty_project, :private) }
     let!(:user)    { create(:user) }
@@ -1703,6 +1717,7 @@ describe Project, models: true do
 
       expect(project.reload.import_status).to eq('finished')
     end
+<<<<<<< HEAD
 
     it 'imports a mirrored project' do
       allow_any_instance_of(RepositoryUpdateMirrorWorker).to receive(:perform)
@@ -1716,6 +1731,8 @@ describe Project, models: true do
 
       expect(project.reload.import_status).to eq('finished')
     end
+=======
+>>>>>>> upstream/master
   end
 
   describe '#latest_successful_builds_for' do
@@ -2297,19 +2314,9 @@ describe Project, models: true do
   describe '#http_url_to_repo' do
     let(:project) { create :empty_project }
 
-    context 'when no user is given' do
-      it 'returns the url to the repo without a username' do
-        expect(project.http_url_to_repo).to eq("#{project.web_url}.git")
-        expect(project.http_url_to_repo).not_to include('@')
-      end
-    end
-
-    context 'when user is given' do
-      it 'returns the url to the repo with the username' do
-        user = build_stubbed(:user)
-
-        expect(project.http_url_to_repo(user)).to start_with("http://#{user.username}@")
-      end
+    it 'returns the url to the repo without a username' do
+      expect(project.http_url_to_repo).to eq("#{project.web_url}.git")
+      expect(project.http_url_to_repo).not_to include('@')
     end
   end
 

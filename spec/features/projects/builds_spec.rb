@@ -190,7 +190,7 @@ feature 'Builds', :feature do
       end
 
       it do
-        expect(page).to have_link 'Raw'
+        expect(page).to have_css('.js-raw-link')
       end
     end
 
@@ -380,14 +380,14 @@ feature 'Builds', :feature do
     end
   end
 
-  describe 'GET /:project/builds/:id/raw' do
+  describe 'GET /:project/builds/:id/raw', :js do
     context 'access source' do
       context 'build from project' do
         before do
-          Capybara.current_session.driver.header('X-Sendfile-Type', 'X-Sendfile')
+          Capybara.current_session.driver.headers = { 'X-Sendfile-Type' => 'X-Sendfile' }
           build.run!
           visit namespace_project_build_path(project.namespace, project, build)
-          page.within('.js-build-sidebar') { click_link 'Raw' }
+          find('.js-raw-link-controller').click()
         end
 
         it 'sends the right headers' do
@@ -399,7 +399,7 @@ feature 'Builds', :feature do
 
       context 'build from other project' do
         before do
-          Capybara.current_session.driver.header('X-Sendfile-Type', 'X-Sendfile')
+          Capybara.current_session.driver.headers = { 'X-Sendfile-Type' => 'X-Sendfile' }
           build2.run!
           visit raw_namespace_project_build_path(project.namespace, project, build2)
         end
@@ -414,7 +414,7 @@ feature 'Builds', :feature do
       let(:existing_file) { Tempfile.new('existing-trace-file').path }
 
       before do
-        Capybara.current_session.driver.header('X-Sendfile-Type', 'X-Sendfile')
+        Capybara.current_session.driver.headers = { 'X-Sendfile-Type' => 'X-Sendfile' }
 
         build.run!
 
@@ -424,13 +424,13 @@ feature 'Builds', :feature do
         visit namespace_project_build_path(project.namespace, project, build)
       end
 
-      context 'when build has trace in file' do
+      context 'when build has trace in file', :js do
         let(:paths) do
           [existing_file]
         end
 
         before do
-          page.within('.js-build-sidebar') { click_link 'Raw' }
+          find('.js-raw-link-controller').click()
         end
 
         it 'sends the right headers' do
@@ -444,7 +444,7 @@ feature 'Builds', :feature do
         let(:paths) { [] }
 
         it 'sends the right headers' do
-          expect(page.status_code).not_to have_link('Raw')
+          expect(page.status_code).not_to have_selector('.js-raw-link-controller')
         end
       end
     end

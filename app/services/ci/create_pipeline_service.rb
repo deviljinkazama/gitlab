@@ -69,6 +69,21 @@ module Ci
       pipeline.tap(&:process!)
     end
 
+<<<<<<< HEAD
+=======
+    private
+
+    def update_merge_requests_head_pipeline
+      merge_requests = MergeRequest.where(source_branch: @pipeline.ref, source_project: @pipeline.project)
+
+      merge_requests = merge_requests.select do |mr|
+        mr.diff_head_sha == @pipeline.sha
+      end
+
+      MergeRequest.where(id: merge_requests).update_all(head_pipeline_id: @pipeline.id)
+    end
+
+>>>>>>> upstream/master
     def skip_ci?
       return false unless pipeline.git_commit_message
       pipeline.git_commit_message =~ /\[(ci[ _-]skip|skip[ _-]ci)\]/i
@@ -124,11 +139,6 @@ module Ci
 
     def valid_sha?
       origin_sha && origin_sha != Gitlab::Git::BLANK_SHA
-    end
-
-    def update_merge_requests_head_pipeline
-      MergeRequest.where(source_branch: @pipeline.ref, source_project: @pipeline.project).
-        update_all(head_pipeline_id: @pipeline.id)
     end
 
     def error(message, save: false)

@@ -466,11 +466,20 @@ describe GitPushService, services: true do
         stub_jira_urls("JIRA-1")
 
         allow(closing_commit).to receive_messages({
+<<<<<<< HEAD
           issue_closing_regex: Regexp.new(Gitlab.config.gitlab.issue_closing_pattern),
           safe_message: message,
           author_name: commit_author.name,
           author_email: commit_author.email
         })
+=======
+                                                    issue_closing_regex: Regexp.new(Gitlab.config.gitlab.issue_closing_pattern),
+                                                    safe_message: message,
+                                                    author_name: commit_author.name,
+                                                    author_email: commit_author.email
+                                                  })
+        allow(JIRA::Resource::Remotelink).to receive(:all).and_return([])
+>>>>>>> upstream/master
 
         allow(project.repository).to receive_messages(commits_between: [closing_commit])
       end

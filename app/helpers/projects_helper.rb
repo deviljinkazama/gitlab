@@ -122,6 +122,7 @@ module ProjectsHelper
 
   def last_push_event
     return unless current_user
+    return current_user.recent_push unless @project
 
     project_ids = [@project.id]
     if fork = current_user.fork_of(@project)
@@ -287,7 +288,7 @@ module ProjectsHelper
     when 'ssh'
       project.ssh_url_to_repo
     else
-      project.http_url_to_repo(current_user)
+      project.http_url_to_repo
     end
   end
 
