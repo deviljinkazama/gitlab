@@ -90,8 +90,7 @@ export default {
       <a
         :href="user.web_url"
         :title="user.email"
-        class="js-user-link commit-committer-link"
-        ref="tooltip">
+        class="js-user-link js-vue-tooltip commit-committer-link">
         {{user.name}}
       </a>
     </section>

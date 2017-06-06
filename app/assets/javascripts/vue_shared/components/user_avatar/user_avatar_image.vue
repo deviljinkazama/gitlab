@@ -66,7 +66,7 @@ export default {
 
 <template>
   <img
-    class="avatar"
+    class="avatar js-vue-tooltip"
     :class="[avatarSizeClass, cssClasses]"
     :src="imgSrc"
     :width="size"
@@ -75,6 +75,5 @@ export default {
     :data-container="tooltipContainer"
     :data-placement="tooltipPlacement"
     :title="tooltipText"
-    ref="tooltip"
   />
 </template>
