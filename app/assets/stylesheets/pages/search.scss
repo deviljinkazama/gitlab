@@ -1,4 +1,8 @@
 .search-results {
+  strong.highlighted-terms {
+    background-color: yellow;
+  }
+  
   .search-result-row {
     border-bottom: 1px solid $border-color;
     padding-bottom: $gl-padding;

@@ -98,6 +98,10 @@ class Blob < SimpleDelegator
     raw_size && raw_size > MAXIMUM_TEXT_HIGHLIGHT_SIZE
   end
 
+  def highlighted_terms
+    []
+  end
+
   def empty?
     raw_size == 0
   end

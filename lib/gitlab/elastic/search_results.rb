@@ -68,46 +68,42 @@ module Gitlab
       end
 
       def self.parse_search_result(result)
-        ref = result["_source"]["blob"]["commit_sha"]
-        filename = result["_source"]["blob"]["path"]
+        ref = result['_source']['blob']['commit_sha']
+        filename = result['_source']['blob']['path']
         extname = File.extname(filename)
         basename = filename.sub(/#{extname}$/, '')
-        content = result["_source"]["blob"]["content"]
-        total_lines = content.lines.size
+        content = result['_source']['blob']['content']
 
-        highlighted_content = result["highlight"]["blob.content"]
-        term = highlighted_content && highlighted_content[0].match(/gitlabelasticsearch→(.*?)←gitlabelasticsearch/)[1]
-
-        found_line_number = 0
-
-        content.each_line.each_with_index do |line, index|
-          if term && line.include?(term)
-            found_line_number = index
-            break
+        highlighted_content = result['highlight']['blob.content']
+        blobs_found_by_filename = result['highlight']['blob.file_name']
+        found_file = { filename: filename, ref: ref, blobs: []}
+        
+        if highlighted_content
+          found_file[:blobs] = highlighted_content.map do |snippet|
+            snippet_processor = ::Gitlab::Elastic::SnippetProcessor.new(content, snippet)
+            
+            ::Gitlab::SearchResults::FoundBlob.new(
+              filename: filename,
+              basename: basename,
+              ref: ref,
+              startline: snippet_processor.startline,
+              data: snippet_processor.clean_snippet,
+              highlighted_terms: snippet_processor.highlighted_terms
+            )
           end
         end
+        
+        if blobs_found_by_filename
+          found_file[:blobs] << ::Gitlab::SearchResults::FoundBlob.new(
+              filename: filename,
+              basename: basename,
+              ref: ref,
+              startline: 1,
+              data: content.lines[0..3].join
+          )
+        end
 
-        from = if found_line_number >= 2
-                 found_line_number - 2
-               else
-                 found_line_number
-               end
-
-        to = if (total_lines - found_line_number) > 3
-               found_line_number + 2
-             else
-               found_line_number
-             end
-
-        data = content.lines[from..to]
-
-        ::Gitlab::SearchResults::FoundBlob.new(
-          filename: filename,
-          basename: basename,
-          ref: ref,
-          startline: from + 1,
-          data: data.join
-        )
+        found_file
       end
 
       private

@@ -1,6 +1,13 @@
 module BlobHelper
-  def highlight(blob_name, blob_content, repository: nil, plain: false)
+  def highlight(blob_name, blob_content, repository: nil, plain: false, highlighted_terms: [])
     highlighted = Gitlab::Highlight.highlight(blob_name, blob_content, plain: plain, repository: repository)
+
+    if highlighted_terms.any?
+      escaped_terms = highlighted_terms.map {|term| Regexp.escape(term) }
+      regexp = Regexp.new("(#{escaped_terms.join('|')})")
+      highlighted.gsub!(regexp, '<strong class="highlighted-terms">\1</strong>').html_safe
+    end
+
     raw %(<pre class="code highlight"><code>#{highlighted}</code></pre>)
   end
 

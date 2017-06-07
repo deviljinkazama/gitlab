@@ -1,7 +1,7 @@
 module Gitlab
   class SearchResults
     class FoundBlob
-      attr_reader :id, :filename, :basename, :ref, :startline, :data
+      attr_reader :id, :filename, :basename, :ref, :startline, :data, :highlighted_terms
 
       def initialize(opts = {})
         @id = opts.fetch(:id, nil)
@@ -10,12 +10,13 @@ module Gitlab
         @ref = opts.fetch(:ref, nil)
         @startline = opts.fetch(:startline, nil)
         @data = opts.fetch(:data, nil)
+        @highlighted_terms = opts.fetch(:highlighted_terms, [])
       end
 
       def path
         filename
       end
-
+      
       def no_highlighting?
         false
       end
