@@ -176,20 +176,26 @@ class Namespace < ActiveRecord::Base
     projects.with_shared_runners.any?
   end
 
-  # Returns all the ancestors of the current namespaces.
+  # Scopes the model on ancestors of the record
   def ancestors
-    return self.class.none unless parent_id
+    if parent_id
+      path = route ? route.path : full_path
+      paths = []
 
-    Gitlab::GroupHierarchy.
-      new(self.class.where(id: parent_id)).
-      base_and_ancestors
+      until path.blank?
+        path = path.rpartition('/').first
+        paths << path
+      end
+
+      self.class.joins(:route).where('routes.path IN (?)', paths).reorder('routes.path ASC')
+    else
+      self.class.none
+    end
   end
 
-  # Returns all the descendants of the current namespace.
+  # Scopes the model on direct and indirect children of the record
   def descendants
-    Gitlab::GroupHierarchy.
-      new(self.class.where(parent_id: id)).
-      base_and_descendants
+    self.class.joins(:route).merge(Route.inside_path(route.path)).reorder('routes.path ASC')
   end
 
   def user_ids_for_project_authorizations

@@ -22,15 +22,16 @@ describe ProjectMember, models: true do
   end
 
   describe '.add_user' do
-    it 'adds the user as a member' do
-      user = create(:user)
-      project = create(:empty_project)
+    context 'when called with the project owner' do
+      it 'adds the user as a member' do
+        project = create(:empty_project)
 
-      expect(project.users).not_to include(user)
+        expect(project.users).not_to include(project.owner)
 
-      described_class.add_user(project, user, :master, current_user: project.owner)
+        described_class.add_user(project, project.owner, :master, current_user: project.owner)
 
-      expect(project.users.reload).to include(user)
+        expect(project.users.reload).to include(project.owner)
+      end
     end
   end
 
