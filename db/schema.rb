@@ -1554,14 +1554,10 @@ ActiveRecord::Schema.define(version: 20170606202615) do
     t.boolean "external", default: false
     t.string "incoming_email_token"
     t.string "organization"
-<<<<<<< HEAD
-    t.boolean "authorized_projects_populated"
-    t.boolean "auditor", default: false, null: false
-    t.boolean "ghost"
-=======
->>>>>>> ce/9-3-stable
     t.boolean "require_two_factor_authentication_from_group", default: false, null: false
     t.integer "two_factor_grace_period", default: 48, null: false
+    t.boolean "ghost"
+    t.boolean "auditor", default: false, null: false
     t.date "last_activity_on"
     t.boolean "notified_of_own_activity"
     t.boolean "support_bot"
