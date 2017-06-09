@@ -2098,4 +2098,16 @@ describe User, models: true do
       expect { subject.remember_me! }.not_to change(subject, :remember_created_at)
     end
   end
+
+  describe 'audit changes' do
+    let!(:user) { create(:user) }
+
+    it 'audits an email change' do
+      expect { user.update!(email: 'test@example.com') }.to change { AuditEvent.count }.by(1)
+    end
+
+    it 'audits a password change' do
+      expect { user.update!(password: 'asdfasdf', password_confirmation: 'asdfasdf') }.to change { AuditEvent.count }.by(1)
+    end
+  end
 end
