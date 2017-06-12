@@ -44,10 +44,6 @@ export default {
     jobId(job) {
       return `ci-badge-${job.name}`;
     },
-
-    buildConnnectorClass(index) {
-      return index === 0 && !this.isFirstColumn ? 'left-connector' : '';
-    },
   },
 };
 </script>

@@ -208,7 +208,7 @@ module Elastic
                           { term: { visibility_level: Project::PUBLIC } }
                         end
 
-          if current_user && !current_user.external?
+          if current_user
             conditions << if feature
                             {
                               bool: {

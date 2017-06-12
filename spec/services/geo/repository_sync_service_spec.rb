@@ -6,10 +6,6 @@ describe Geo::RepositorySyncService, services: true do
   subject { described_class.new(project.id) }
 
   describe '#execute' do
-    before do
-      allow_any_instance_of(Gitlab::ExclusiveLease).to receive(:try_obtain).and_return(true)
-    end
-
     context 'when repository is empty' do
       let(:project) { create(:project_empty_repo) }
 
@@ -137,8 +133,6 @@ describe Geo::RepositorySyncService, services: true do
 
       context 'tracking database' do
         it 'does not create a new registry' do
-          allow_any_instance_of(Repository).to receive(:fetch_geo_mirror) { true }
-
           expect { subject.execute }.not_to change(Geo::ProjectRegistry, :count)
         end
 

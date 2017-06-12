@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Private Project Access", feature: true  do
   include AccessMatchers
 
-  let(:project) { create(:project, :private, public_builds: false) }
+  set(:project) { create(:project, :private, public_builds: false) }
 
   describe "Project should be private" do
     describe '#private?' do

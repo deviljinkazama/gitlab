@@ -66,7 +66,7 @@ module Geo
       log('Trying to obtain lease to sync repository')
       repository_lease = Gitlab::ExclusiveLease.new(lease_key, timeout: LEASE_TIMEOUT).try_obtain
 
-      unless repository_lease
+      if repository_lease.nil?
         log('Could not obtain lease to sync repository')
         return
       end

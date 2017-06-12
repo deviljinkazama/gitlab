@@ -375,15 +375,6 @@ describe License do
           expect(license.add_ons.keys).to include(License::DEPLOY_BOARD_FEATURE, *eep_features)
         end
       end
-
-      context 'with extra features mapped by plan' do
-        it 'returns all available add-ons and extra features' do
-          license = build_license_with_add_ons({ 'support' => 1 }, plan: 'premium')
-          eep_features = License::EEP_FEATURES.reduce({}, :merge).keys
-
-          expect(license.add_ons.keys).to include('support', *eep_features)
-        end
-      end
     end
 
     describe '#feature_available?' do

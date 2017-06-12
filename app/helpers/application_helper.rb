@@ -184,7 +184,7 @@ module ApplicationHelper
   end
 
   def edited_time_ago_with_tooltip(object, placement: 'top', html_class: 'time_ago', exclude_author: false)
-    return unless object.is_edited?
+    return if object.last_edited_at == object.created_at || object.last_edited_at.blank?
 
     content_tag :small, class: 'edited-text' do
       output = content_tag(:span, 'Edited ')

@@ -36,14 +36,6 @@ of the instance.
 
 You can view the exact JSON payload in the administration panel.
 
-GitLab sends a weekly payload containing usage data to GitLab Inc. The usage
-ping uses high-level data to help our product, support, and sales teams. It does
-not send any project names, usernames, or any other specific data. The
-information from the usage ping is not anonymous, it is linked to the hostname
-of the instance.
-
-You can view the exact JSON payload in the administration panel.
-
 ### Deactivate the usage ping
 
 The usage ping is opt-out. If you want to deactivate this feature, go to

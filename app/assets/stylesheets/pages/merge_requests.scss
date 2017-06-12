@@ -818,7 +818,6 @@
     display: flex;
     align-items: center;
     margin-right: 5px;
-    float: left;
   }
 
   .unapprove-btn {
@@ -908,25 +907,6 @@
       li.failed {
         color: $red-500;
       }
-    }
-  }
-}
-
-.mr-memory-usage {
-  p.usage-info-loading,
-  p.usage-info-unavailable,
-  p.usage-info-failed {
-    margin-bottom: 5px;
-  }
-
-  p.usage-info-loading .usage-info-load-spinner {
-    margin-right: 10px;
-    font-size: 16px;
-  }
-
-  @media (max-width: $screen-md-min) {
-    .mr-info-list.mr-memory-usage .legend {
-      height: 80%;
     }
   }
 }

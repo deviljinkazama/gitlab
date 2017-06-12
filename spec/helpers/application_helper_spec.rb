@@ -103,7 +103,7 @@ describe ApplicationHelper do
       user = create(:user, avatar: File.open(uploaded_image_temp_path))
 
       expect(helper.avatar_icon(user.email).to_s).
-        to match("/gitlab/uploads/system/user/avatar/#{user.id}/banana_sample.gif")
+        to match("/gitlab/uploads/user/avatar/#{user.id}/banana_sample.gif")
     end
 
     it 'calls gravatar_icon when no User exists with the given email' do
@@ -117,7 +117,7 @@ describe ApplicationHelper do
         user = create(:user, avatar: File.open(uploaded_image_temp_path))
 
         expect(helper.avatar_icon(user).to_s).
-          to match("/uploads/system/user/avatar/#{user.id}/banana_sample.gif")
+          to match("/gitlab/uploads/user/avatar/#{user.id}/banana_sample.gif")
       end
     end
   end

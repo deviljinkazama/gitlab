@@ -3,10 +3,7 @@ require 'rails_helper'
 describe UpdateAllMirrorsWorker do
   subject(:worker) { described_class.new }
 
-  before do
-    allow(Gitlab::UrlBlocker).to receive(:blocked_url?).and_return(false)
-    allow_any_instance_of(Gitlab::ExclusiveLease).to receive(:try_obtain).and_return(true)
-  end
+  before { allow_any_instance_of(Gitlab::ExclusiveLease).to receive(:try_obtain).and_return(true) }
 
   describe '#perform' do
     it 'fails stuck mirrors' do
