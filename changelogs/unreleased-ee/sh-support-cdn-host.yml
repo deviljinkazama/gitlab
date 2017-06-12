@@ -1,0 +1,4 @@
+---
+title: Support a configurable Rails asset_host to allow for CDNs
+merge_request:
+author:
