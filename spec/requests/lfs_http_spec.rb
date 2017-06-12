@@ -425,7 +425,7 @@ describe 'Git LFS API and storage' do
                   'size' => sample_size,
                   'error' => {
                     'code' => 404,
-                    'message' => "Object does not exist on the server or you don't have permissions to access it",
+                    'message' => "Object does not exist on the server or you don't have permissions to access it"
                   }
                 }
               ]
@@ -456,7 +456,7 @@ describe 'Git LFS API and storage' do
                   'size' => 1575078,
                   'error' => {
                     'code' => 404,
-                    'message' => "Object does not exist on the server or you don't have permissions to access it",
+                    'message' => "Object does not exist on the server or you don't have permissions to access it"
                   }
                 }
               ]
@@ -493,7 +493,7 @@ describe 'Git LFS API and storage' do
                   'size' => 1575078,
                   'error' => {
                     'code' => 404,
-                    'message' => "Object does not exist on the server or you don't have permissions to access it",
+                    'message' => "Object does not exist on the server or you don't have permissions to access it"
                   }
                 },
                 {
@@ -795,8 +795,8 @@ describe 'Git LFS API and storage' do
             context 'tries to push to own project' do
               let(:build) { create(:ci_build, :running, pipeline: pipeline, user: user) }
 
-              it 'responds with 401' do
-                expect(response).to have_http_status(401)
+              it 'responds with 403 (not 404 because project is public)' do
+                expect(response).to have_http_status(403)
               end
             end
 
@@ -805,8 +805,9 @@ describe 'Git LFS API and storage' do
               let(:pipeline) { create(:ci_empty_pipeline, project: other_project) }
               let(:build) { create(:ci_build, :running, pipeline: pipeline, user: user) }
 
-              it 'responds with 401' do
-                expect(response).to have_http_status(401)
+              # I'm not sure what this tests that is different from the previous test
+              it 'responds with 403 (not 404 because project is public)' do
+                expect(response).to have_http_status(403)
               end
             end
           end
@@ -814,8 +815,8 @@ describe 'Git LFS API and storage' do
           context 'does not have user' do
             let(:build) { create(:ci_build, :running, pipeline: pipeline) }
 
-            it 'responds with 401' do
-              expect(response).to have_http_status(401)
+            it 'responds with 403 (not 404 because project is public)' do
+              expect(response).to have_http_status(403)
             end
           end
         end
@@ -1026,8 +1027,8 @@ describe 'Git LFS API and storage' do
               put_authorize
             end
 
-            it 'responds with 401' do
-              expect(response).to have_http_status(401)
+            it 'responds with 403 (not 404 because the build user can read the project)' do
+              expect(response).to have_http_status(403)
             end
           end
 
@@ -1040,8 +1041,8 @@ describe 'Git LFS API and storage' do
               put_authorize
             end
 
-            it 'responds with 401' do
-              expect(response).to have_http_status(401)
+            it 'responds with 404 (do not leak non-public project existence)' do
+              expect(response).to have_http_status(404)
             end
           end
         end
@@ -1053,8 +1054,8 @@ describe 'Git LFS API and storage' do
             put_authorize
           end
 
-          it 'responds with 401' do
-            expect(response).to have_http_status(401)
+          it 'responds with 404 (do not leak non-public project existence)' do
+            expect(response).to have_http_status(404)
           end
         end
       end
@@ -1126,8 +1127,8 @@ describe 'Git LFS API and storage' do
           context 'tries to push to own project' do
             let(:build) { create(:ci_build, :running, pipeline: pipeline, user: user) }
 
-            it 'responds with 401' do
-              expect(response).to have_http_status(401)
+            it 'responds with 403 (not 404 because project is public)' do
+              expect(response).to have_http_status(403)
             end
           end
 
@@ -1136,8 +1137,9 @@ describe 'Git LFS API and storage' do
             let(:pipeline) { create(:ci_empty_pipeline, project: other_project) }
             let(:build) { create(:ci_build, :running, pipeline: pipeline, user: user) }
 
-            it 'responds with 401' do
-              expect(response).to have_http_status(401)
+            # I'm not sure what this tests that is different from the previous test
+            it 'responds with 403 (not 404 because project is public)' do
+              expect(response).to have_http_status(403)
             end
           end
         end
@@ -1145,8 +1147,8 @@ describe 'Git LFS API and storage' do
         context 'does not have user' do
           let(:build) { create(:ci_build, :running, pipeline: pipeline) }
 
-          it 'responds with 401' do
-            expect(response).to have_http_status(401)
+          it 'responds with 403 (not 404 because project is public)' do
+            expect(response).to have_http_status(403)
           end
         end
       end

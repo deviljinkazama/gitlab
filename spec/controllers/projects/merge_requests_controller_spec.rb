@@ -284,13 +284,18 @@ describe Projects::MergeRequestsController do
 
       context 'number of queries' do
         it 'verifies number of queries' do
+          RequestStore.begin!
+
           # pre-create objects
           merge_request
 
           recorded = ActiveRecord::QueryRecorder.new { go(format: :json) }
 
-          expect(recorded.count).to be_within(10).of(100)
+          expect(recorded.count).to be_within(1).of(31)
           expect(recorded.cached_count).to eq(0)
+
+          RequestStore.end!
+          RequestStore.clear!
         end
       end
     end
@@ -647,7 +652,7 @@ describe Projects::MergeRequestsController do
         end
 
         before do
-          create(:ci_empty_pipeline, project: project, sha: merge_request.diff_head_sha, ref: merge_request.source_branch)
+          create(:ci_empty_pipeline, project: project, sha: merge_request.diff_head_sha, ref: merge_request.source_branch, head_pipeline_of: merge_request)
         end
 
         it 'returns :merge_when_pipeline_succeeds' do
@@ -1464,12 +1469,15 @@ describe Projects::MergeRequestsController do
       let!(:pipeline) do
         create(:ci_pipeline, project: merge_request.source_project,
                              ref: merge_request.source_branch,
-                             sha: merge_request.diff_head_sha)
+                             sha: merge_request.diff_head_sha,
+                             head_pipeline_of: merge_request)
       end
 
       let(:status) { pipeline.detailed_status(double('user')) }
 
-      before { get_pipeline_status }
+      before do
+        get_pipeline_status
+      end
 
       it 'return a detailed head_pipeline status in json' do
         expect(response).to have_http_status(:ok)

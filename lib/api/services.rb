@@ -304,7 +304,13 @@ module API
           required: true,
           name: :url,
           type: String,
-          desc: 'The URL to the JIRA project which is being linked to this GitLab project, e.g., https://jira.example.com'
+          desc: 'The base URL to the JIRA instance web interface which is being linked to this GitLab project. E.g., https://jira.example.com'
+        },
+        {
+          required: false,
+          name: :api_url,
+          type: String,
+          desc: 'The base URL to the JIRA instance API. Web URL value will be used if not set. E.g., https://jira-api.example.com'
         },
         {
           required: true,
@@ -355,7 +361,7 @@ module API
           name: :ca_pem,
           type: String,
           desc: 'A custom certificate authority bundle to verify the Kubernetes cluster with (PEM format)'
-        },
+        }
       ],
       'mattermost-slash-commands' => [
         {
@@ -561,13 +567,13 @@ module API
           required: true,
           name: :project_url,
           type: String,
-          desc: 'Jenkins project URL like http://jenkins.example.com/job/my-project/',
+          desc: 'Jenkins project URL like http://jenkins.example.com/job/my-project/'
         },
         {
           required: false,
           name: :pass_unstable,
           type: Boolean,
-          desc: 'Multi-project setup enabled?',
+          desc: 'Multi-project setup enabled?'
         },
         {
           required: false,
@@ -625,7 +631,7 @@ module API
       service_classes += [
         MockCiService,
         MockDeploymentService,
-        MockMonitoringService,
+        MockMonitoringService
       ]
     end
 

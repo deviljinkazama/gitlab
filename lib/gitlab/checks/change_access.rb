@@ -3,6 +3,20 @@ module Gitlab
     class ChangeAccess
       include PathLocksHelper
 
+      ERROR_MESSAGES = {
+        push_code: 'You are not allowed to push code to this project.',
+        delete_default_branch: 'The default branch of a project cannot be deleted.',
+        force_push_protected_branch: 'You are not allowed to force push code to a protected branch on this project.',
+        non_master_delete_protected_branch: 'You are not allowed to delete protected branches from this project. Only a project master or owner can delete a protected branch.',
+        non_web_delete_protected_branch: 'You can only delete protected branches using the web interface.',
+        merge_protected_branch: 'You are not allowed to merge code into protected branches on this project.',
+        push_protected_branch: 'You are not allowed to push code to protected branches on this project.',
+        change_existing_tags: 'You are not allowed to change existing tags on this project.',
+        update_protected_tag: 'Protected tags cannot be updated.',
+        delete_protected_tag: 'Protected tags cannot be deleted.',
+        create_protected_tag: 'You are not allowed to create this tag as it is protected.'
+      }.freeze
+
       # protocol is currently used only in EE
       attr_reader :user_access, :project, :skip_authorization, :protocol
 
@@ -20,74 +34,88 @@ module Gitlab
       end
 
       def exec
-        error = push_checks || tag_checks || protected_branch_checks || push_rule_check
+        return true if skip_authorization
 
-        if error
-          GitAccessStatus.new(false, error)
-        else
-          GitAccessStatus.new(true)
-        end
+        push_checks
+        branch_checks
+        tag_checks
+        push_rule_check
+
+        true
       end
 
       protected
 
-      def protected_branch_checks
-        return if skip_authorization
+      def push_checks
+        if user_access.cannot_do_action?(:push_code)
+          raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:push_code]
+        end
+      end
+
+      def branch_checks
         return unless @branch_name
+
+        if deletion? && @branch_name == project.default_branch
+          raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:delete_default_branch]
+        end
+
+        protected_branch_checks
+      end
+
+      def protected_branch_checks
         return unless ProtectedBranch.protected?(project, @branch_name)
 
         if forced_push?
-          return "You are not allowed to force push code to a protected branch on this project."
-        elsif deletion?
-          return "You are not allowed to delete protected branches from this project."
+          raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:force_push_protected_branch]
         end
 
+        if deletion?
+          protected_branch_deletion_checks
+        else
+          protected_branch_push_checks
+        end
+      end
+
+      def protected_branch_deletion_checks
+        unless user_access.can_delete_branch?(@branch_name)
+          raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:non_master_delete_protected_branch]
+        end
+
+        unless protocol == 'web'
+          raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:non_web_delete_protected_branch]
+        end
+      end
+
+      def protected_branch_push_checks
         if matching_merge_request?
-          if user_access.can_merge_to_branch?(@branch_name) || user_access.can_push_to_branch?(@branch_name)
-            return
-          else
-            "You are not allowed to merge code into protected branches on this project."
+          unless user_access.can_merge_to_branch?(@branch_name) || user_access.can_push_to_branch?(@branch_name)
+            raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:merge_protected_branch]
           end
         else
-          if user_access.can_push_to_branch?(@branch_name)
-            return
-          else
-            "You are not allowed to push code to protected branches on this project."
+          unless user_access.can_push_to_branch?(@branch_name)
+            raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:push_protected_branch]
           end
         end
       end
 
       def tag_checks
-        return if skip_authorization
-
         return unless @tag_name
 
         if tag_exists? && user_access.cannot_do_action?(:admin_project)
-          return "You are not allowed to change existing tags on this project."
+          raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:change_existing_tags]
         end
 
         protected_tag_checks
       end
 
       def protected_tag_checks
-        return unless tag_protected?
-        return "Protected tags cannot be updated." if update?
-        return "Protected tags cannot be deleted." if deletion?
+        return unless ProtectedTag.protected?(project, @tag_name)
+
+        raise(GitAccess::UnauthorizedError, ERROR_MESSAGES[:update_protected_tag]) if update?
+        raise(GitAccess::UnauthorizedError, ERROR_MESSAGES[:delete_protected_tag]) if deletion?
 
         unless user_access.can_create_tag?(@tag_name)
-          return "You are not allowed to create this tag as it is protected."
-        end
-      end
-
-      def tag_protected?
-        ProtectedTag.protected?(project, @tag_name)
-      end
-
-      def push_checks
-        return if skip_authorization
-
-        if user_access.cannot_do_action?(:push_code)
-          "You are not allowed to push code to this project."
+          raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:create_protected_tag]
         end
       end
 
@@ -121,7 +149,7 @@ module Gitlab
         # Prevent tag removal
         if @tag_name
           if tag_deletion_denied_by_push_rule?(push_rule)
-            return 'You cannot delete a tag'
+            raise GitAccess::UnauthorizedError, 'You cannot delete a tag'
           end
         else
           commit_validation = push_rule.try(:commit_validation?)
@@ -132,16 +160,14 @@ module Gitlab
           commits.each do |commit|
             if commit_validation
               error = check_commit(commit, push_rule)
-              return error if error
+              raise GitAccess::UnauthorizedError, error if error
             end
 
             if error = check_commit_diff(commit, push_rule)
-              return error
+              raise GitAccess::UnauthorizedError, error
             end
           end
         end
-
-        nil
       end
 
       def tag_deletion_denied_by_push_rule?(push_rule)
@@ -152,11 +178,15 @@ module Gitlab
       end
 
       # If commit does not pass push rule validation the whole push should be rejected.
-      # This method should return nil if no error found or status object if there are some errors.
+      # This method should return nil if no error found or a string if error.
       # In case of errors - all other checks will be canceled and push will be rejected.
       def check_commit(commit, push_rule)
         unless push_rule.commit_message_allowed?(commit.safe_message)
           return "Commit message does not follow the pattern '#{push_rule.commit_message_regex}'"
+        end
+
+        if @branch_name && !push_rule.branch_name_allowed?(@branch_name)
+          return "Branch name does not follow the pattern '#{push_rule.branch_name_regex}'"
         end
 
         unless push_rule.author_email_allowed?(commit.committer_email)
@@ -188,7 +218,7 @@ module Gitlab
 
         return if validations.empty?
 
-        commit.raw_diffs(deltas_only: true).each do |diff|
+        commit.raw_deltas.each do |diff|
           validations.each do |validation|
             if error = validation.call(diff)
               return error
@@ -218,7 +248,7 @@ module Gitlab
       end
 
       def validate_path_locks?
-        @validate_path_locks ||= license_allows_file_locks? &&
+        @validate_path_locks ||= @project.feature_available?(:file_lock) &&
           project.path_locks.any? && @newrev && @oldrev &&
           project.default_branch == @branch_name # locks protect default branch only
       end

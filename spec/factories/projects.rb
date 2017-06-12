@@ -24,20 +24,25 @@ FactoryGirl.define do
       visibility_level Gitlab::VisibilityLevel::PRIVATE
     end
 
+    trait :import_scheduled do
+      import_status :scheduled
+    end
+
     trait :import_started do
-      import_url { generate(:url) }
       import_status :started
     end
 
     trait :import_finished do
-      import_started
       import_status :finished
     end
 
-    trait :mirror do
-      import_started
+    trait :import_failed do
+      import_status :failed
+    end
 
+    trait :mirror do
       mirror true
+      import_url { generate(:url) }
       mirror_user_id { creator_id }
     end
 
@@ -92,7 +97,9 @@ FactoryGirl.define do
 
     trait :test_repo do
       after :create do |project|
-        TestEnv.copy_repo(project)
+        TestEnv.copy_repo(project,
+          bare_repo: TestEnv.factory_repo_path_bare,
+          refs: TestEnv::BRANCH_SHA)
       end
     end
 
@@ -183,7 +190,9 @@ FactoryGirl.define do
     end
 
     after :create do |project, evaluator|
-      TestEnv.copy_repo(project)
+      TestEnv.copy_repo(project,
+        bare_repo: TestEnv.factory_repo_path_bare,
+        refs: TestEnv::BRANCH_SHA)
 
       if evaluator.create_template
         args = evaluator.create_template
@@ -216,7 +225,9 @@ FactoryGirl.define do
     path { 'forked-gitlabhq' }
 
     after :create do |project|
-      TestEnv.copy_forked_repo_with_submodules(project)
+      TestEnv.copy_repo(project,
+        bare_repo: TestEnv.forked_repo_path_bare,
+        refs: TestEnv::FORKED_BRANCH_SHA)
     end
   end
 

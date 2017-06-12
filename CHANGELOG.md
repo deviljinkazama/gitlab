@@ -8,10 +8,13 @@ entry.
 
 ## 9.2.4 (2017-06-02)
 
+- No changes.
 - Fix visibility when referencing snippets.
 
 ## 9.2.3 (2017-05-31)
 
+- No changes.
+- No changes.
 - Move uploads from 'public/uploads' to 'public/uploads/system'.
 - Escapes html content before appending it to the DOM.
 - Restrict API X-Frame-Options to same origin.
@@ -42,6 +45,7 @@ entry.
 - Display slash commands outcome when previewing Markdown. !10054 (Rares Sfirlogea)
 - Resolve "Add more tests for spec/controllers/projects/builds_controller_spec.rb". !10244 (dosuken123)
 - Add keyboard edit shotcut for wiki. !10245 (George Andrinopoulos)
+- Update issue board cards design. !10353
 - Redirect old links after renaming a user/group/project. !10370
 - Add system note on description change of issue/merge request. !10392 (blackst0ne)
 - Improve validation of namespace & project paths. !10413
@@ -156,6 +160,7 @@ entry.
 - Remove `#` being added on commit sha in MR widget.
 - Remove spinner from loading comment.
 - Fixes an issue preventing screen readers from reading some icons.
+- Add metrics events for incoming emails.
 - Load milestone tabs asynchronously to increase initial load performance.
 - [BB Importer] Save the error trace and the whole raw document to debug problems easier.
 - Fixed branches dropdown rendering branch names as HTML.
@@ -227,6 +232,31 @@ entry.
 - Fix preemptive scroll bar on user activity calendar.
 - Pipeline chat notifications convert seconds to minutes and hours.
 
+## 9.1.7 (2017-06-07)
+
+- No changes.
+
+## 9.1.6 (2017-06-02)
+
+- Fix visibility when referencing snippets.
+
+## 9.1.5 (2017-05-31)
+
+- Move uploads from 'public/uploads' to 'public/uploads/system'.
+- Restrict API X-Frame-Options to same origin.
+- Allow users autocomplete by author_id only for authenticated users.
+
+## 9.1.4 (2017-05-12)
+
+- Fix error on CI/CD Settings page related to invalid pipeline trigger. !10948 (dosuken123)
+- Sort the network graph both by commit date and topographically. !11057
+- Fix cross referencing for private and internal projects. !11243
+- Handle incoming emails from aliases correctly.
+- Gracefully handle failures for incoming emails which do not match on the To header, and have no References header.
+- Add missing project attributes to Import/Export.
+- Fixed search terms not correctly highlighting.
+- Fixed bug where merge request JSON would be displayed.
+
 ## 9.1.3 (2017-05-05)
 
 - Do not show private groups on subgroups page if user doesn't have access to.
@@ -267,6 +297,7 @@ entry.
 
 ## 9.1.0 (2017-04-22)
 
+- Add Jupyter notebook rendering !10017
 - Added merge requests empty state. !7342
 - Add option to start a new resolvable discussion in an MR. !7527
 - Hide form inputs for group member without editing rights. !7816
@@ -513,6 +544,20 @@ entry.
 - Removed the hours & minutes from the users start date on their profile.
 - Only send chat notifications for the default branch.
 - Don't fill in the default kubernetes namespace.
+
+## 9.0.10 (2017-06-07)
+
+- No changes.
+
+## 9.0.9 (2017-06-02)
+
+- Fix visibility when referencing snippets.
+
+## 9.0.8 (2017-05-31)
+
+- Move uploads from 'public/uploads' to 'public/uploads/system'.
+- Restrict API X-Frame-Options to same origin.
+- Allow users autocomplete by author_id only for authenticated users.
 
 ## 9.0.7 (2017-05-05)
 

@@ -55,6 +55,7 @@ Note:
 - type
 - position
 - original_position
+- change_position
 - resolved_at
 - resolved_by_id
 - discussion_id
@@ -162,6 +163,7 @@ MergeRequest:
 - squash
 - last_edited_at
 - last_edited_by_id
+- head_pipeline_id
 MergeRequestDiff:
 - id
 - state
@@ -193,6 +195,7 @@ Ci::Pipeline:
 - lock_version
 - auto_canceled_by_id
 - pipeline_schedule_id
+- source
 CommitStatus:
 - id
 - project_id
@@ -295,7 +298,7 @@ Service:
 - tag_push_events
 - note_events
 - pipeline_events
-- build_events
+- job_events
 - category
 - default
 - wiki_page_events
@@ -315,11 +318,12 @@ ProjectHook:
 - note_events
 - pipeline_events
 - enable_ssl_verification
-- build_events
+- job_events
 - wiki_page_events
 - token
 - group_id
 - confidential_issues_events
+- repository_update_events
 ProtectedBranch:
 - id
 - project_id

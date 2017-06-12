@@ -1,5 +1,5 @@
 class AuditEvent < ActiveRecord::Base
-  serialize :details, Hash
+  serialize :details, Hash # rubocop:disable Cop/ActiverecordSerialize
 
   belongs_to :user, foreign_key: :author_id
 
@@ -9,11 +9,15 @@ class AuditEvent < ActiveRecord::Base
 
   after_initialize :initialize_details
 
+  def author_name
+    details[:author_name].blank? ? user&.name : details[:author_name]
+  end
+
   def initialize_details
     self.details = {} if details.nil?
   end
 
-  def author_name
-    self.user.try(:name) || details[:author_name]
+  def present
+    AuditEventPresenter.new(self)
   end
 end

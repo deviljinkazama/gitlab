@@ -20,13 +20,39 @@ describe Ci::Pipeline, models: true do
   it { is_expected.to have_many(:builds) }
   it { is_expected.to have_many(:auto_canceled_pipelines) }
   it { is_expected.to have_many(:auto_canceled_jobs) }
+  it { is_expected.to have_one(:source_pipeline) }
+  it { is_expected.to have_many(:sourced_pipelines) }
+  it { is_expected.to have_one(:triggered_by_pipeline) }
+  it { is_expected.to have_many(:triggered_pipelines) }
 
-  it { is_expected.to validate_presence_of :sha }
-  it { is_expected.to validate_presence_of :status }
+  it { is_expected.to validate_presence_of(:sha) }
+  it { is_expected.to validate_presence_of(:status) }
 
   it { is_expected.to respond_to :git_author_name }
   it { is_expected.to respond_to :git_author_email }
   it { is_expected.to respond_to :short_sha }
+
+  describe '#source' do
+    context 'when creating new pipeline' do
+      let(:pipeline) do
+        build(:ci_empty_pipeline, status: :created, project: project, source: nil)
+      end
+
+      it "prevents from creating an object" do
+        expect(pipeline).not_to be_valid
+      end
+    end
+
+    context 'when updating existing pipeline' do
+      before do
+        pipeline.update_attribute(:source, nil)
+      end
+
+      it "object is valid" do
+        expect(pipeline).to be_valid
+      end
+    end
+  end
 
   describe '#block' do
     it 'changes pipeline status to manual' do
@@ -854,6 +880,16 @@ describe Ci::Pipeline, models: true do
         end
       end
     end
+
+    context 'when there is a manual action present in the pipeline' do
+      before do
+        create(:ci_build, :manual, pipeline: pipeline)
+      end
+
+      it 'is not cancelable' do
+        expect(pipeline).not_to be_cancelable
+      end
+    end
   end
 
   describe '#cancel_running' do
@@ -955,7 +991,7 @@ describe Ci::Pipeline, models: true do
     end
 
     before do
-      ProjectWebHookWorker.drain
+      WebHookWorker.drain
     end
 
     context 'with pipeline hooks enabled' do
@@ -1050,8 +1086,8 @@ describe Ci::Pipeline, models: true do
     let(:pipeline) { create(:ci_empty_pipeline, status: 'created', project: project, ref: 'master', sha: 'a288a022a53a5a944fae87bcec6efc87b7061808') }
 
     it "returns merge requests whose `diff_head_sha` matches the pipeline's SHA" do
-      merge_request = create(:merge_request, source_project: project, source_branch: pipeline.ref)
       allow_any_instance_of(MergeRequest).to receive(:diff_head_sha) { 'a288a022a53a5a944fae87bcec6efc87b7061808' }
+      merge_request = create(:merge_request, source_project: project, head_pipeline: pipeline, source_branch: pipeline.ref)
 
       expect(pipeline.merge_requests).to eq([merge_request])
     end
@@ -1206,6 +1242,32 @@ describe Ci::Pipeline, models: true do
       end
 
       it_behaves_like 'not sending any notification'
+    end
+  end
+
+  describe '#codeclimate_artifact' do
+    context 'has codeclimate build' do
+      let!(:build) do
+        create(
+          :ci_build,
+          :artifacts,
+          name: 'codeclimate',
+          pipeline: pipeline,
+          options: {
+            artifacts: {
+              paths: ['codeclimate.json']
+            }
+          }
+        )
+      end
+
+      it { expect(pipeline.codeclimate_artifact).to eq(build) }
+    end
+
+    context 'no codeclimate build' do
+      before { create(:ci_build, pipeline: pipeline) }
+
+      it { expect(pipeline.codeclimate_artifact).to be_nil }
     end
   end
 end

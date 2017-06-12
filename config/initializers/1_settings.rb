@@ -264,6 +264,9 @@ Settings.gitlab['default_projects_features'] ||= {}
 Settings.gitlab['webhook_timeout'] ||= 10
 Settings.gitlab['max_attachment_size'] ||= 10
 Settings.gitlab['session_expire_delay'] ||= 10080
+Settings.gitlab['mirror_max_delay'] ||= 5
+Settings.gitlab['mirror_max_capacity'] ||= 30
+Settings.gitlab['mirror_capacity_threshold'] ||= 15
 Settings.gitlab.default_projects_features['issues']             = true if Settings.gitlab.default_projects_features['issues'].nil?
 Settings.gitlab.default_projects_features['merge_requests']     = true if Settings.gitlab.default_projects_features['merge_requests'].nil?
 Settings.gitlab.default_projects_features['wiki']               = true if Settings.gitlab.default_projects_features['wiki'].nil?
@@ -339,6 +342,10 @@ Settings.pages['external_https']  ||= false unless Settings.pages['external_http
 # Geo
 #
 Settings.gitlab['geo_status_timeout'] ||= 10
+Settings['geo_primary_role'] ||= Settingslogic.new({})
+Settings.geo_primary_role['enabled'] = false if Settings.geo_primary_role['enabled'].nil?
+Settings['geo_secondary_role'] ||= Settingslogic.new({})
+Settings.geo_secondary_role['enabled'] = false if Settings.geo_secondary_role['enabled'].nil?
 
 #
 # Git LFS
@@ -393,19 +400,16 @@ Settings.cron_jobs['ldap_sync_worker']['cron'] ||= '30 1 * * *'
 Settings.cron_jobs['ldap_sync_worker']['job_class'] = 'LdapSyncWorker'
 Settings.cron_jobs['ldap_group_sync_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['ldap_group_sync_worker']['cron'] ||= '0 * * * *'
-Settings.cron_jobs['ldap_group_sync_worker']['job_class'] = 'LdapGroupSyncWorker'
+Settings.cron_jobs['ldap_group_sync_worker']['job_class'] = 'LdapAllGroupsSyncWorker'
 Settings.cron_jobs['geo_bulk_notify_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['geo_bulk_notify_worker']['cron'] ||= '*/10 * * * * *'
 Settings.cron_jobs['geo_bulk_notify_worker']['job_class'] ||= 'GeoBulkNotifyWorker'
-Settings.cron_jobs['geo_backfill_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['geo_backfill_worker']['cron'] ||= '*/5 * * * *'
-Settings.cron_jobs['geo_backfill_worker']['job_class'] ||= 'GeoBackfillWorker'
-Settings.cron_jobs['geo_download_dispatch_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['geo_download_dispatch_worker']['cron'] ||= '5 * * * *'
-Settings.cron_jobs['geo_download_dispatch_worker']['job_class'] ||= 'GeoFileDownloadDispatchWorker'
-Settings.cron_jobs['gitlab_usage_ping_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['gitlab_usage_ping_worker']['cron'] ||= Settings.send(:cron_random_weekly_time)
-Settings.cron_jobs['gitlab_usage_ping_worker']['job_class'] = 'GitlabUsagePingWorker'
+Settings.cron_jobs['geo_repository_sync_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['geo_repository_sync_worker']['cron'] ||= '*/5 * * * *'
+Settings.cron_jobs['geo_repository_sync_worker']['job_class'] ||= 'GeoRepositorySyncWorker'
+Settings.cron_jobs['geo_file_download_dispatch_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['geo_file_download_dispatch_worker']['cron'] ||= '5 * * * *'
+Settings.cron_jobs['geo_file_download_dispatch_worker']['job_class'] ||= 'GeoFileDownloadDispatchWorker'
 Settings.cron_jobs['import_export_project_cleanup_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['import_export_project_cleanup_worker']['cron'] ||= '0 * * * *'
 Settings.cron_jobs['import_export_project_cleanup_worker']['job_class'] = 'ImportExportProjectCleanupWorker'
@@ -435,7 +439,6 @@ Settings.cron_jobs['gitlab_usage_ping_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['gitlab_usage_ping_worker']['cron'] ||= Settings.__send__(:cron_random_weekly_time)
 Settings.cron_jobs['gitlab_usage_ping_worker']['job_class'] = 'GitlabUsagePingWorker'
 
-# Every day at 00:30
 Settings.cron_jobs['schedule_update_user_activity_worker'] ||= Settingslogic.new({})
 Settings.cron_jobs['schedule_update_user_activity_worker']['cron'] ||= '30 0 * * *'
 Settings.cron_jobs['schedule_update_user_activity_worker']['job_class'] = 'ScheduleUpdateUserActivityWorker'
@@ -444,10 +447,9 @@ Settings.cron_jobs['clear_shared_runners_minutes_worker'] ||= Settingslogic.new(
 Settings.cron_jobs['clear_shared_runners_minutes_worker']['cron'] ||= '0 0 1 * *'
 Settings.cron_jobs['clear_shared_runners_minutes_worker']['job_class'] = 'ClearSharedRunnersMinutesWorker'
 
-# Every day at 00:30
-Settings.cron_jobs['schedule_update_user_activity_worker'] ||= Settingslogic.new({})
-Settings.cron_jobs['schedule_update_user_activity_worker']['cron'] ||= '30 0 * * *'
-Settings.cron_jobs['schedule_update_user_activity_worker']['job_class'] = 'ScheduleUpdateUserActivityWorker'
+Settings.cron_jobs['remove_old_web_hook_logs_worker'] ||= Settingslogic.new({})
+Settings.cron_jobs['remove_old_web_hook_logs_worker']['cron'] ||= '40 0 * * *'
+Settings.cron_jobs['remove_old_web_hook_logs_worker']['job_class'] = 'RemoveOldWebHookLogsWorker'
 
 #
 # GitLab Shell
@@ -570,7 +572,7 @@ Settings.rack_attack.git_basic_auth['bantime'] ||= 1.hour
 # Gitaly
 #
 Settings['gitaly'] ||= Settingslogic.new({})
-Settings.gitaly['enabled'] ||= false
+Settings.gitaly['enabled'] = true if Settings.gitaly['enabled'].nil?
 
 #
 # Webpack settings

@@ -23,7 +23,7 @@ module LfsRequest
     render(
       json: {
         message: 'Git LFS is not enabled on this GitLab server, contact your admin.',
-        documentation_url: help_url,
+        documentation_url: help_url
       },
       status: 501
     )
@@ -48,7 +48,7 @@ module LfsRequest
     render(
       json: {
         message: 'Access forbidden. Check your access level.',
-        documentation_url: help_url,
+        documentation_url: help_url
       },
       content_type: "application/vnd.git-lfs+json",
       status: 403
@@ -59,7 +59,7 @@ module LfsRequest
     render(
       json: {
         message: 'Not found.',
-        documentation_url: help_url,
+        documentation_url: help_url
       },
       content_type: "application/vnd.git-lfs+json",
       status: 404
@@ -108,6 +108,10 @@ module LfsRequest
     @objects ||= (params[:objects] || []).to_a
   end
 
+  def has_authentication_ability?(capability)
+    (authentication_abilities || []).include?(capability)
+  end
+
   module EE
     def lfs_forbidden!
       raise NotImplementedError unless defined?(super)
@@ -123,7 +127,7 @@ module LfsRequest
       render(
         json: {
           message: Gitlab::RepositorySizeError.new(project).push_error(@exceeded_limit),
-          documentation_url: help_url,
+          documentation_url: help_url
         },
         content_type: "application/vnd.git-lfs+json",
         status: 406

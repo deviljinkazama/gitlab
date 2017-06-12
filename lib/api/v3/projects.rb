@@ -48,7 +48,7 @@ module API
         end
 
         def set_only_allow_merge_if_pipeline_succeeds!
-          if params.has_key?(:only_allow_merge_if_build_succeeds)
+          if params.key?(:only_allow_merge_if_build_succeeds)
             params[:only_allow_merge_if_pipeline_succeeds] = params.delete(:only_allow_merge_if_build_succeeds)
           end
         end
@@ -92,7 +92,7 @@ module API
             options = options.reverse_merge(
               with: ::API::V3::Entities::Project,
               current_user: current_user,
-              simple: params[:simple],
+              simple: params[:simple]
             )
 
             projects = filter_projects(projects)
@@ -151,7 +151,7 @@ module API
         get '/starred' do
           authenticate!
 
-          present_projects current_user.viewable_starred_projects
+          present_projects ProjectsFinder.new(current_user: current_user, params: { starred: true }).execute
         end
 
         desc 'Get all projects for admin user' do

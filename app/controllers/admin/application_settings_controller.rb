@@ -53,7 +53,7 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
   private
 
   def set_application_setting
-    @application_setting = ApplicationSetting.current
+    @application_setting = current_application_settings
   end
 
   def application_setting_params
@@ -172,9 +172,13 @@ class Admin::ApplicationSettingsController < Admin::ApplicationController
       :elasticsearch_search,
       :repository_size_limit,
       :shared_runners_minutes,
-      :minimum_mirror_sync_time,
       :geo_status_timeout,
       :elasticsearch_experimental_indexer,
+      :check_namespace_plan,
+      :mirror_max_delay,
+      :mirror_max_capacity,
+      :mirror_capacity_threshold,
+      :authorized_keys_enabled
     ]
   end
 end

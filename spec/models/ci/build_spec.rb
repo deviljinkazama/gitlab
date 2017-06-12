@@ -17,6 +17,7 @@ describe Ci::Build, :models do
   it { is_expected.to belong_to(:trigger_request) }
   it { is_expected.to belong_to(:erased_by) }
   it { is_expected.to have_many(:deployments) }
+  it { is_expected.to have_many(:sourced_pipelines) }
   it { is_expected.to validate_presence_of(:ref) }
   it { is_expected.to respond_to(:has_trace?) }
   it { is_expected.to respond_to(:trace) }
@@ -972,7 +973,7 @@ describe Ci::Build, :models do
       'fix-1-foo' => 'fix-1-foo',
       'a' * 63    => 'a' * 63,
       'a' * 64    => 'a' * 63,
-      'FOO'       => 'foo',
+      'FOO'       => 'foo'
     }.each do |ref, slug|
       it "transforms #{ref} to #{slug}" do
         build.ref = ref
@@ -1144,7 +1145,7 @@ describe Ci::Build, :models do
         { key: 'CI_PIPELINE_ID', value: pipeline.id.to_s, public: true },
         { key: 'CI_REGISTRY_USER', value: 'gitlab-ci-token', public: true },
         { key: 'CI_REGISTRY_PASSWORD', value: build.token, public: false },
-        { key: 'CI_REPOSITORY_URL', value: build.repo_url, public: false },
+        { key: 'CI_REPOSITORY_URL', value: build.repo_url, public: false }
       ]
     end
 
@@ -1215,16 +1216,49 @@ describe Ci::Build, :models do
       it { is_expected.to include(tag_variable) }
     end
 
-    context 'when secure variable is defined' do
-      let(:secure_variable) do
+    context 'when secret variable is defined' do
+      let(:secret_variable) do
         { key: 'SECRET_KEY', value: 'secret_value', public: false }
       end
 
       before do
-        build.project.variables << Ci::Variable.new(key: 'SECRET_KEY', value: 'secret_value')
+        create(:ci_variable,
+               secret_variable.slice(:key, :value).merge(project: project))
       end
 
-      it { is_expected.to include(secure_variable) }
+      it { is_expected.to include(secret_variable) }
+    end
+
+    context 'when protected variable is defined' do
+      let(:protected_variable) do
+        { key: 'PROTECTED_KEY', value: 'protected_value', public: false }
+      end
+
+      before do
+        create(:ci_variable,
+               :protected,
+               protected_variable.slice(:key, :value).merge(project: project))
+      end
+
+      context 'when the branch is protected' do
+        before do
+          create(:protected_branch, project: build.project, name: build.ref)
+        end
+
+        it { is_expected.to include(protected_variable) }
+      end
+
+      context 'when the tag is protected' do
+        before do
+          create(:protected_tag, project: build.project, name: build.ref)
+        end
+
+        it { is_expected.to include(protected_variable) }
+      end
+
+      context 'when the ref is not protected' do
+        it { is_expected.not_to include(protected_variable) }
+      end
     end
 
     context 'when build is for triggers' do
@@ -1346,15 +1380,30 @@ describe Ci::Build, :models do
     end
 
     context 'returns variables in valid order' do
+      let(:build_pre_var) { { key: 'build', value: 'value' } }
+      let(:project_pre_var) { { key: 'project', value: 'value' } }
+      let(:pipeline_pre_var) { { key: 'pipeline', value: 'value' } }
+      let(:build_yaml_var) { { key: 'yaml', value: 'value' } }
+
       before do
-        allow(build).to receive(:predefined_variables) { ['predefined'] }
-        allow(project).to receive(:predefined_variables) { ['project'] }
-        allow(pipeline).to receive(:predefined_variables) { ['pipeline'] }
-        allow(build).to receive(:yaml_variables) { ['yaml'] }
-        allow(project).to receive(:secret_variables) { ['secret'] }
+        allow(build).to receive(:predefined_variables) { [build_pre_var] }
+        allow(project).to receive(:predefined_variables) { [project_pre_var] }
+        allow(pipeline).to receive(:predefined_variables) { [pipeline_pre_var] }
+        allow(build).to receive(:yaml_variables) { [build_yaml_var] }
+
+        allow(project).to receive(:secret_variables_for).with(build.ref) do
+          [create(:ci_variable, key: 'secret', value: 'value')]
+        end
       end
 
-      it { is_expected.to eq(%w[predefined project pipeline yaml secret]) }
+      it do
+        is_expected.to eq(
+          [build_pre_var,
+           project_pre_var,
+           pipeline_pre_var,
+           build_yaml_var,
+           { key: 'secret', value: 'value', public: false }])
+      end
     end
   end
 
@@ -1365,6 +1414,40 @@ describe Ci::Build, :models do
       expect(BuildQueueWorker).to receive(:perform_async).with(build.id)
 
       build.enqueue
+    end
+  end
+
+  describe '#has_codeclimate_json?' do
+    context 'valid build' do
+      let!(:build) do
+        create(
+          :ci_build,
+          :artifacts,
+          name: 'codeclimate',
+          pipeline: pipeline,
+          options: {
+            artifacts: {
+              paths: ['codeclimate.json']
+            }
+          }
+        )
+      end
+
+      it { expect(build.has_codeclimate_json?).to be_truthy }
+    end
+
+    context 'invalid build' do
+      let!(:build) do
+        create(
+          :ci_build,
+          :artifacts,
+          name: 'codeclimate',
+          pipeline: pipeline,
+          options: {}
+        )
+      end
+
+      it { expect(build.has_codeclimate_json?).to be_falsey }
     end
   end
 end

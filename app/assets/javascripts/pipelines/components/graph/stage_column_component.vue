@@ -25,6 +25,10 @@ export default {
       required: false,
       default: '',
     },
+    hasTriggeredBy: {
+      type: Boolean,
+      required: true,
+    },
   },
 
   components: {
@@ -60,7 +64,9 @@ export default {
           v-for="(job, index) in jobs"
           :key="job.id"
           class="build"
-          :class="buildConnnectorClass(index)"
+          :class="{
+            'left-connector': index === 0 && (!isFirstColumn || hasTriggeredBy)
+          }"
           :id="jobId(job)">
 
           <div class="curve"></div>

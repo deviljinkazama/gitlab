@@ -29,6 +29,7 @@ import {
   eventHub,
   stateMaps,
   SquashBeforeMerge,
+  notify,
 } from './dependencies';
 
 export default {
@@ -79,15 +80,15 @@ export default {
       this.service.checkStatus()
         .then(res => res.json())
         .then((res) => {
+          this.handleNotification(res);
           this.mr.setData(res);
           this.setFavicon();
+
           if (cb) {
             cb.call(null, res);
           }
         })
-        .catch(() => {
-          new Flash('Something went wrong. Please try again.'); // eslint-disable-line
-        });
+        .catch(() => new Flash('Something went wrong. Please try again.'));
     },
     initPolling() {
       this.pollingInterval = new gl.SmartInterval({
@@ -134,9 +135,16 @@ export default {
             document.body.appendChild(el);
           }
         })
-        .catch(() => {
-          new Flash('Something went wrong. Please try again.'); // eslint-disable-line
-        });
+        .catch(() => new Flash('Something went wrong. Please try again.'));
+    },
+    handleNotification(data) {
+      if (data.ci_status === this.mr.ciStatus) return;
+
+      const label = data.pipeline.details.status.label;
+      const title = `Pipeline ${label}`;
+      const message = `Pipeline ${label} for "${data.title}"`;
+
+      notify.notifyMe(title, message, this.mr.gitlabLogo);
     },
     resumePolling() {
       this.pollingInterval.resume();

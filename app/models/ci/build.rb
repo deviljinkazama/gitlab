@@ -9,6 +9,8 @@ module Ci
     belongs_to :trigger_request
     belongs_to :erased_by, class_name: 'User'
 
+    has_many :sourced_pipelines, class_name: Ci::Sources::Pipeline, foreign_key: :source_job_id
+
     has_many :deployments, as: :deployable
     has_one :last_deployment, -> { order('deployments.id DESC') }, as: :deployable, class_name: 'Deployment'
 
@@ -20,8 +22,8 @@ module Ci
       )
     end
 
-    serialize :options
-    serialize :yaml_variables, Gitlab::Serializer::Ci::Variables
+    serialize :options # rubocop:disable Cop/ActiverecordSerialize
+    serialize :yaml_variables, Gitlab::Serializer::Ci::Variables # rubocop:disable Cop/ActiverecordSerialize
 
     delegate :name, to: :project, prefix: true
 
@@ -35,6 +37,7 @@ module Ci
     scope :with_expired_artifacts, ->() { with_artifacts.where('artifacts_expire_at < ?', Time.now) }
     scope :last_month, ->() { where('created_at > ?', Date.today - 1.month) }
     scope :manual_actions, ->() { where(when: :manual).relevant }
+    scope :codeclimate, ->() { where(name: 'codeclimate') }
 
     mount_uploader :artifacts_file, ArtifactUploader
     mount_uploader :artifacts_metadata, ArtifactUploader
@@ -48,10 +51,16 @@ module Ci
     before_destroy { unscoped_project }
 
     after_create :execute_hooks
-    after_save :update_project_statistics, if: :artifacts_size_changed?
-    after_destroy :update_project_statistics
+    after_commit :update_project_statistics_after_save, on: [:create, :update]
+    after_commit :update_project_statistics, on: :destroy
 
     class << self
+      # This is needed for url_for to work,
+      # as the controller is JobsController
+      def model_name
+        ActiveModel::Name.new(self, nil, 'job')
+      end
+
       def first_pending
         pending.unstarted.order('created_at ASC').first
       end
@@ -186,7 +195,7 @@ module Ci
       variables += project.deployment_variables if has_environment?
       variables += yaml_variables
       variables += user_variables
-      variables += project.secret_variables
+      variables += project.secret_variables_for(ref).map(&:to_runner_variable)
       variables += trigger_request.user_variables if trigger_request
       variables
     end
@@ -199,14 +208,19 @@ module Ci
     end
 
     def merge_request
-      merge_requests = MergeRequest.includes(:merge_request_diff)
-                                   .where(source_branch: ref,
-                                          source_project: pipeline.project)
-                                   .reorder(iid: :asc)
+      return @merge_request if defined?(@merge_request)
 
-      merge_requests.find do |merge_request|
-        merge_request.commits_sha.include?(pipeline.sha)
-      end
+      @merge_request ||=
+        begin
+          merge_requests = MergeRequest.includes(:merge_request_diff)
+            .where(source_branch: ref,
+                   source_project: pipeline.project)
+            .reorder(iid: :desc)
+
+          merge_requests.find do |merge_request|
+            merge_request.commits_sha.include?(pipeline.sha)
+          end
+        end
     end
 
     def repo_url
@@ -250,38 +264,6 @@ module Ci
       Time.now - updated_at > 15.minutes.to_i
     end
 
-    ##
-    # Deprecated
-    #
-    # This contains a hotfix for CI build data integrity, see #4246
-    #
-    # This method is used by `ArtifactUploader` to create a store_dir.
-    # Warning: Uploader uses it after AND before file has been stored.
-    #
-    # This method returns old path to artifacts only if it already exists.
-    #
-    def artifacts_path
-      # We need the project even if it's soft deleted, because whenever
-      # we're really deleting the project, we'll also delete the builds,
-      # and in order to delete the builds, we need to know where to find
-      # the artifacts, which is depending on the data of the project.
-      # We need to retain the project in this case.
-      the_project = project || unscoped_project
-
-      old = File.join(created_at.utc.strftime('%Y_%m'),
-                      the_project.ci_id.to_s,
-                      id.to_s)
-
-      old_store = File.join(ArtifactUploader.artifacts_path, old)
-      return old if the_project.ci_id && File.directory?(old_store)
-
-      File.join(
-        created_at.utc.strftime('%Y_%m'),
-        the_project.id.to_s,
-        id.to_s
-      )
-    end
-
     def valid_token?(token)
       self.token && ActiveSupport::SecurityUtils.variable_size_secure_compare(token, self.token)
     end
@@ -301,8 +283,8 @@ module Ci
     def execute_hooks
       return unless project
       build_data = Gitlab::DataBuilder::Build.build(self)
-      project.execute_hooks(build_data.dup, :build_hooks)
-      project.execute_services(build_data.dup, :build_hooks)
+      project.execute_hooks(build_data.dup, :job_hooks)
+      project.execute_services(build_data.dup, :job_hooks)
       PagesService.new(build_data).execute
       project.running_or_pending_build_count(force: true)
     end
@@ -362,7 +344,7 @@ module Ci
     end
 
     def has_expiring_artifacts?
-      artifacts_expire_at.present?
+      artifacts_expire_at.present? && artifacts_expire_at > Time.now
     end
 
     def keep_artifacts!
@@ -438,6 +420,11 @@ module Ci
       Ci::MaskSecret.mask!(trace, project.runners_token) if project
       Ci::MaskSecret.mask!(trace, token)
       trace
+    end
+
+    def has_codeclimate_json?
+      options.dig(:artifacts, :paths) == ['codeclimate.json'] &&
+        artifacts_metadata?
     end
 
     private
@@ -517,6 +504,12 @@ module Ci
       return unless project
 
       ProjectCacheWorker.perform_async(project_id, [], [:build_artifacts_size])
+    end
+
+    def update_project_statistics_after_save
+      if previous_changes.include?('artifacts_size')
+        update_project_statistics
+      end
     end
   end
 end

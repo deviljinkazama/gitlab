@@ -4,7 +4,8 @@
 - [Introduced][ci-229] in GitLab CE 7.14.
 - GitLab 8.12 has a completely redesigned job permissions system. Read all
   about the [new model and its implications](../../user/project/new_ci_build_permissions_model.md#job-triggers).
-- GitLab 9.0 introduced a trigger ownership to solve permission problems.
+- GitLab 9.0 introduced a trigger ownership to solve permission problems,
+- GitLab 9.3 introduced an ability to use CI Job Token to trigger dependent pipelines,
 
 Triggers can be used to force a rebuild of a specific `ref` (branch or tag)
 with an API call.
@@ -12,7 +13,7 @@ with an API call.
 ## Add a trigger
 
 You can add a new trigger by going to your project's
-**Settings ➔ CI/CD Pipelines ➔ Triggers**. The **Add trigger** button will
+**Settings ➔ Pipelines ➔ Triggers**. The **Add trigger** button will
 create a new token which you can then use to trigger a rerun of this
 particular project's pipeline.
 
@@ -60,7 +61,7 @@ POST /projects/:id/trigger/pipeline
 The required parameters are the trigger's `token` and the Git `ref` on which
 the trigger will be performed. Valid refs are the branch and the tag. The `:id`
 of a project can be found by [querying the API](../../api/projects.md)
-or by visiting the **CI/CD Pipelines** settings page which provides
+or by visiting the **Pipelines** settings page which provides
 self-explanatory examples.
 
 When a rerun of a pipeline is triggered, the information is exposed in GitLab's
@@ -160,6 +161,25 @@ _**Note:** If your project is public, passing the token in plain text is
 probably not the wisest idea, so you might want to use a
 [secure variable](../variables/README.md#user-defined-variables-secure-variables)
 for that purpose._
+
+---
+
+Since GitLab 9.3 you can trigger a new pipeline using a CI_JOB_TOKEN.
+This method currently doesn't support Variables.
+The support for them will be included in 9.4 of GitLab.
+
+This way of triggering creates a dependent pipeline relation visible on the Pipeline Graph.
+
+```yaml
+build_docs:
+  stage: deploy
+  script:
+  - "curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
+  only:
+  - tags
+```
+
+Pipelines triggered that way do expose a special variable: `CI_PIPELINE_SOURCE=pipeline`.
 
 ### Making use of trigger variables
 

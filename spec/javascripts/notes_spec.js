@@ -14,6 +14,7 @@ import '~/notes';
   gl.utils = gl.utils || {};
 
   describe('Notes', function() {
+    const FLASH_TYPE_ALERT = 'alert';
     var commentsTemplate = 'issues/issue_with_comment.html.raw';
     preloadFixtures(commentsTemplate);
 
@@ -33,7 +34,9 @@ import '~/notes';
       });
 
       it('modifies the Markdown field', function() {
-        $('input[type=checkbox]').attr('checked', true).trigger('change');
+        const changeEvent = document.createEvent('HTMLEvents');
+        changeEvent.initEvent('change', true, true);
+        $('input[type=checkbox]').attr('checked', true)[0].dispatchEvent(changeEvent);
         expect($('.js-task-list-field').val()).toBe('- [x] Task List Item');
       });
 
@@ -127,7 +130,6 @@ import '~/notes';
       beforeEach(() => {
         note = {
           id: 1,
-          discussion_html: null,
           valid: true,
           note: 'heya',
           html: '<div>heya</div>',
@@ -621,6 +623,34 @@ import '~/notes';
 
         expect($tempNote.prop('nodeName')).toEqual('LI');
         expect($tempNote.find('.timeline-content').hasClass('discussion')).toBeTruthy();
+      });
+    });
+
+    describe('appendFlash', () => {
+      beforeEach(() => {
+        this.notes = new Notes();
+      });
+
+      it('shows a flash message', () => {
+        this.notes.addFlash('Error message', FLASH_TYPE_ALERT, this.notes.parentTimeline);
+
+        expect(document.querySelectorAll('.flash-alert').length).toBe(1);
+      });
+    });
+
+    describe('clearFlash', () => {
+      beforeEach(() => {
+        $(document).off('ajax:success');
+        this.notes = new Notes();
+      });
+
+      it('removes all the associated flash messages', () => {
+        this.notes.addFlash('Error message 1', FLASH_TYPE_ALERT, this.notes.parentTimeline);
+        this.notes.addFlash('Error message 2', FLASH_TYPE_ALERT, this.notes.parentTimeline);
+
+        this.notes.clearFlash();
+
+        expect(document.querySelectorAll('.flash-alert').length).toBe(0);
       });
     });
   });

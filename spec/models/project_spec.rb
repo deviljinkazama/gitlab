@@ -50,7 +50,8 @@ describe Project, models: true do
     it { is_expected.to have_one(:external_wiki_service).dependent(:destroy) }
     it { is_expected.to have_one(:project_feature).dependent(:destroy) }
     it { is_expected.to have_one(:statistics).class_name('ProjectStatistics').dependent(:delete) }
-    it { is_expected.to have_one(:import_data).class_name('ProjectImportData').dependent(:destroy) }
+    it { is_expected.to have_one(:import_data).class_name('ProjectImportData').dependent(:delete) }
+    it { is_expected.to have_one(:mirror_data).class_name('ProjectMirrorData').dependent(:delete) }
     it { is_expected.to have_one(:last_event).class_name('Event') }
     it { is_expected.to have_one(:forked_from_project).through(:forked_project_link) }
     it { is_expected.to have_many(:commit_statuses) }
@@ -76,6 +77,8 @@ describe Project, models: true do
     it { is_expected.to have_many(:approver_groups).dependent(:destroy) }
     it { is_expected.to have_many(:uploads).dependent(:destroy) }
     it { is_expected.to have_many(:pipeline_schedules).dependent(:destroy) }
+    it { is_expected.to have_many(:sourced_pipelines) }
+    it { is_expected.to have_many(:source_pipelines) }
 
     context 'after initialized' do
       it "has a project_feature" do
@@ -260,6 +263,18 @@ describe Project, models: true do
 
       expect(project2).to be_invalid
       expect(project2.errors[:import_url]).to include('imports are not allowed from that URL')
+    end
+
+    it 'creates mirror data when enabled' do
+      project2 = create(:empty_project, :mirror, mirror: false)
+
+      expect { project2.update_attributes(mirror: true) }.to change { ProjectMirrorData.count }.from(0).to(1)
+    end
+
+    it 'destroys mirror data when disabled' do
+      project2 = create(:empty_project, :mirror)
+
+      expect { project2.update_attributes(mirror: false) }.to change { ProjectMirrorData.count }.from(1).to(0)
     end
 
     describe 'project pending deletion' do
@@ -971,9 +986,17 @@ describe Project, models: true do
 
     context 'when avatar file is uploaded' do
       let(:project) { create(:empty_project, :with_avatar) }
-      let(:avatar_path) { "/uploads/system/project/avatar/#{project.id}/dk.png" }
+      let(:avatar_path) { "/uploads/project/avatar/#{project.id}/dk.png" }
+      let(:gitlab_host) { "http://#{Gitlab.config.gitlab.host}" }
 
-      it { should eq "http://#{Gitlab.config.gitlab.host}#{avatar_path}" }
+      it 'shows correct url' do
+        expect(project.avatar_url).to eq(avatar_path)
+        expect(project.avatar_url(only_path: false)).to eq([gitlab_host, avatar_path].join)
+
+        allow(ActionController::Base).to receive(:asset_host).and_return(gitlab_host)
+
+        expect(project.avatar_url).to eq([gitlab_host, avatar_path].join)
+      end
 
       context 'When in a geo secondary node' do
         let(:geo_url) { 'http://geo.example.com' }
@@ -1032,13 +1055,6 @@ describe Project, models: true do
       project.namespace.update(share_with_group_lock: true)
       expect(project.allowed_to_share_with_group?).to be_falsey
     end
-  end
-
-  describe '#pipeline' do
-    let(:project) { create :project }
-    let(:pipeline) { create :ci_pipeline, project: project, ref: 'master' }
-
-    subject { project.pipeline(pipeline.sha, 'master') }
   end
 
   describe '#pipeline_for' do
@@ -1147,6 +1163,20 @@ describe Project, models: true do
     end
   end
 
+  describe '.starred_by' do
+    it 'returns only projects starred by the given user' do
+      user1 = create(:user)
+      user2 = create(:user)
+      project1 = create(:empty_project)
+      project2 = create(:empty_project)
+      create(:empty_project)
+      user1.toggle_star(project1)
+      user2.toggle_star(project2)
+
+      expect(Project.starred_by(user1)).to contain_exactly(project1)
+    end
+  end
+
   describe '.visible_to_user' do
     let!(:project) { create(:empty_project, :private) }
     let!(:user)    { create(:user) }
@@ -1172,7 +1202,7 @@ describe Project, models: true do
     before do
       storages = {
         'default' => { 'path' => 'tmp/tests/repositories' },
-        'picked'  => { 'path' => 'tmp/tests/repositories' },
+        'picked'  => { 'path' => 'tmp/tests/repositories' }
       }
       allow(Gitlab.config.repositories).to receive(:storages).and_return(storages)
     end
@@ -1680,15 +1710,12 @@ describe Project, models: true do
   end
 
   describe 'Project import job' do
-    let(:project) { create(:empty_project) }
-    let(:mirror) { false }
+    let(:project) { create(:empty_project, import_url: generate(:url)) }
 
     before do
       allow_any_instance_of(Gitlab::Shell).to receive(:import_repository)
         .with(project.repository_storage_path, project.path_with_namespace, project.import_url)
         .and_return(true)
-
-      allow(project).to receive(:repository_exists?).and_return(true)
 
       expect_any_instance_of(Repository).to receive(:after_import)
         .and_call_original
@@ -1697,23 +1724,21 @@ describe Project, models: true do
     it 'imports a project' do
       expect_any_instance_of(RepositoryImportWorker).to receive(:perform).and_call_original
 
-      project.import_start
-      project.add_import_job
+      project.import_schedule
 
       expect(project.reload.import_status).to eq('finished')
     end
 
-    it 'imports a mirrored project' do
-      allow_any_instance_of(RepositoryUpdateMirrorWorker).to receive(:perform)
-      expect_any_instance_of(RepositoryImportWorker).to receive(:perform).and_call_original
+    context 'with a mirrored project' do
+      let(:project) { create(:empty_project, :mirror) }
 
-      project.import_start
+      it 'first calls RepositoryImportWorker and RepositoryUpdateMirrorWorker after' do
+        allow_any_instance_of(Project).to receive(:repository_exists?).and_return(false, true)
+        expect_any_instance_of(RepositoryUpdateMirrorWorker).to receive(:perform).with(project.id)
+        expect_any_instance_of(RepositoryImportWorker).to receive(:perform).with(project.id).and_call_original
 
-      project.mirror = true
-
-      project.add_import_job
-
-      expect(project.reload.import_status).to eq('finished')
+        project.import_schedule
+      end
     end
   end
 
@@ -1796,9 +1821,61 @@ describe Project, models: true do
     end
   end
 
+  describe  '#updating_mirror?' do
+    context 'when repository is empty' do
+      it 'returns false' do
+        project = create(:empty_project, :mirror, :import_started)
+
+        expect(project.updating_mirror?).to be false
+      end
+    end
+
+    context 'when project is not a mirror' do
+      it 'returns false' do
+        project = create(:project, :import_started)
+
+        expect(project.updating_mirror?).to be false
+      end
+    end
+
+    context 'when project is in progress' do
+      it 'returns true' do
+        project = create(:project, :mirror, :import_started)
+
+        expect(project.updating_mirror?).to be true
+      end
+    end
+
+    context 'when project is expected to run soon' do
+      it 'returns true' do
+        timestamp = Time.now
+        project = create(:project, :mirror, :import_finished)
+
+        project.mirror_last_update_at = timestamp - 3.minutes
+        project.mirror_data.next_execution_timestamp = timestamp - 2.minutes
+
+        expect(project.updating_mirror?).to be true
+      end
+    end
+  end
+
+  describe '#force_import_job!' do
+    it 'sets next execution timestamp to now and schedules UpdateAllMirrorsWorker' do
+      timestamp = Time.now
+      project = create(:project, :mirror)
+
+      project.mirror_data.update_attributes(next_execution_timestamp: timestamp - 3.minutes)
+
+      expect(UpdateAllMirrorsWorker).to receive(:perform_async)
+      Timecop.freeze(timestamp) do
+        expect { project.force_import_job! }.to change { project.mirror_data.reload.next_execution_timestamp }.to be_within(1.second).of(timestamp)
+      end
+    end
+  end
+
   describe '#add_import_job' do
     context 'forked' do
-      let(:forked_project_link) { create(:forked_project_link) }
+      let(:forked_project_link) { create(:forked_project_link, :forked_to_empty_project) }
       let(:forked_from_project) { forked_project_link.forked_from_project }
       let(:project) { forked_project_link.forked_to_project }
 
@@ -1809,15 +1886,33 @@ describe Project, models: true do
 
         project.add_import_job
       end
-    end
 
-    context 'not forked' do
-      let(:project) { create(:empty_project) }
+      context 'without mirror' do
+        it 'returns nil' do
+          project = create(:project)
 
-      it 'schedules a RepositoryImportWorker job' do
-        expect(RepositoryImportWorker).to receive(:perform_async).with(project.id)
+          expect(project.add_import_job).to be_nil
+        end
+      end
 
-        project.add_import_job
+      context 'without repository' do
+        it 'schedules RepositoryImportWorker' do
+          project = create(:empty_project, import_url: generate(:url))
+
+          expect(RepositoryImportWorker).to receive(:perform_async).with(project.id)
+
+          project.add_import_job
+        end
+      end
+
+      context 'with mirror' do
+        it 'schedules RepositoryUpdateMirrorWorker' do
+          project = create(:project, :mirror)
+
+          expect(RepositoryUpdateMirrorWorker).to receive(:perform_async).with(project.id)
+
+          project.add_import_job
+        end
       end
     end
   end
@@ -2122,6 +2217,90 @@ describe Project, models: true do
     end
   end
 
+  describe '#secret_variables_for' do
+    let(:project) { create(:empty_project) }
+
+    let!(:secret_variable) do
+      create(:ci_variable, value: 'secret', project: project)
+    end
+
+    let!(:protected_variable) do
+      create(:ci_variable, :protected, value: 'protected', project: project)
+    end
+
+    subject { project.secret_variables_for('ref') }
+
+    shared_examples 'ref is protected' do
+      it 'contains all the variables' do
+        is_expected.to contain_exactly(secret_variable, protected_variable)
+      end
+    end
+
+    context 'when the ref is not protected' do
+      before do
+        stub_application_setting(
+          default_branch_protection: Gitlab::Access::PROTECTION_NONE)
+      end
+
+      it 'contains only the secret variables' do
+        is_expected.to contain_exactly(secret_variable)
+      end
+    end
+
+    context 'when the ref is a protected branch' do
+      before do
+        create(:protected_branch, name: 'ref', project: project)
+      end
+
+      it_behaves_like 'ref is protected'
+    end
+
+    context 'when the ref is a protected tag' do
+      before do
+        create(:protected_tag, name: 'ref', project: project)
+      end
+
+      it_behaves_like 'ref is protected'
+    end
+  end
+
+  describe '#protected_for?' do
+    let(:project) { create(:empty_project) }
+
+    subject { project.protected_for?('ref') }
+
+    context 'when the ref is not protected' do
+      before do
+        stub_application_setting(
+          default_branch_protection: Gitlab::Access::PROTECTION_NONE)
+      end
+
+      it 'returns false' do
+        is_expected.to be_falsey
+      end
+    end
+
+    context 'when the ref is a protected branch' do
+      before do
+        create(:protected_branch, name: 'ref', project: project)
+      end
+
+      it 'returns true' do
+        is_expected.to be_truthy
+      end
+    end
+
+    context 'when the ref is a protected tag' do
+      before do
+        create(:protected_tag, name: 'ref', project: project)
+      end
+
+      it 'returns true' do
+        is_expected.to be_truthy
+      end
+    end
+  end
+
   describe '#update_project_statistics' do
     let(:project) { create(:empty_project) }
 
@@ -2139,6 +2318,16 @@ describe Project, models: true do
       project.update(namespace: namespace)
 
       expect(project.statistics.namespace_id).to eq namespace.id
+    end
+  end
+
+  describe '#create_mirror_data' do
+    it 'it is called after save' do
+      project = create(:project)
+
+      expect(project).to receive(:create_mirror_data)
+
+      project.update(mirror: true, mirror_user: project.owner, import_url: 'http://foo.com')
     end
   end
 
@@ -2296,19 +2485,9 @@ describe Project, models: true do
   describe '#http_url_to_repo' do
     let(:project) { create :empty_project }
 
-    context 'when no user is given' do
-      it 'returns the url to the repo without a username' do
-        expect(project.http_url_to_repo).to eq("#{project.web_url}.git")
-        expect(project.http_url_to_repo).not_to include('@')
-      end
-    end
-
-    context 'when user is given' do
-      it 'returns the url to the repo with the username' do
-        user = build_stubbed(:user)
-
-        expect(project.http_url_to_repo(user)).to start_with("http://#{user.username}@")
-      end
+    it 'returns the url to the repo without a username' do
+      expect(project.http_url_to_repo).to eq("#{project.web_url}.git")
+      expect(project.http_url_to_repo).not_to include('@')
     end
   end
 

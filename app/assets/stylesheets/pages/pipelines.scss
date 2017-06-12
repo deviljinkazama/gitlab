@@ -1,10 +1,31 @@
-.pipelines {
-  .realtime-loading {
-    font-size: 40px;
-    text-align: center;
-    margin: 0 auto;
+@mixin flat-connector-before($length: 44px) {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 48%;
+    left: -$length;
+    border-top: 2px solid $border-color;
+    width: $length;
+    height: 1px;
   }
+}
 
+@mixin build-content($border-radius: 30px) {
+  display: inline-block;
+  padding: 8px 10px 9px;
+  width: 100%;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  background-color: $white-light;
+
+  &:hover {
+    background-color: $stage-hover-bg;
+    border: 1px solid $stage-hover-border;
+    color: $gl-text-color;
+  }
+}
+
+.pipelines {
   .stage {
     max-width: 90px;
     width: 90px;
@@ -12,10 +33,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .empty-state {
-    margin: 5% auto 0;
   }
 
   .table-holder {
@@ -98,6 +115,10 @@
         }
       }
 
+      .btn .text-center {
+        display: inline;
+      }
+
       .tooltip {
         white-space: nowrap;
       }
@@ -172,9 +193,13 @@
     float: none;
   }
 
+  .api {
+    @extend .monospace;
+  }
+
   .branch-commit {
 
-    .branch-name {
+    .ref-name {
       font-weight: bold;
       max-width: 120px;
       overflow: hidden;
@@ -196,12 +221,11 @@
       color: $gl-text-color;
     }
 
-    .commit-id {
+    .commit-sha {
       color: $gl-link-color;
     }
 
     .commit-title {
-      margin-top: 4px;
       max-width: 225px;
       overflow: hidden;
       white-space: nowrap;
@@ -234,7 +258,7 @@
   .duration,
   .finished-at {
     color: $gl-text-color-secondary;
-    margin: 4px 0;
+    margin: 0;
     white-space: nowrap;
 
     .fa {
@@ -261,7 +285,7 @@
 
 .stage-cell {
   font-size: 0;
-  padding: 10px 4px;
+  padding: 0 4px;
 
   > .stage-container > div > button > span > svg,
   > .stage-container > button > svg {
@@ -384,15 +408,7 @@
         margin-left: 44px;
 
         .left-connector {
-          &::before {
-            content: '';
-            position: absolute;
-            top: 48%;
-            left: -44px;
-            border-top: 2px solid $border-color;
-            width: 44px;
-            height: 1px;
-          }
+          @include flat-connector-before;
         }
       }
     }
@@ -405,7 +421,8 @@
       list-style: none;
     }
 
-    &:last-child {
+    // when downstream pipelines are present, the last stage isn't the last column
+    &:last-child:not(.has-downstream) {
       .build {
         // Remove right connecting horizontal line from first build in last stage
         &:first-child {
@@ -428,7 +445,8 @@
       }
     }
 
-    &:first-child {
+    // when upstream pipelines are present, the first stage isn't the first column
+    &:first-child:not(.has-upstream) {
       .build {
         // Remove left curved connectors from all builds in first stage
         &:not(:first-child) {
@@ -546,20 +564,8 @@
     }
 
     .build-content {
-      display: inline-block;
-      padding: 8px 10px 9px;
-      width: 100%;
-      border: 1px solid $border-color;
-      border-radius: 30px;
-      background-color: $white-light;
-
-      &:hover {
-        background-color: $stage-hover-bg;
-        border: 1px solid $stage-hover-border;
-        color: $gl-text-color;
-      }
+      @include build-content();
     }
-
 
     // Connect first build in each stage with right horizontal line
     &:first-child {
@@ -990,4 +996,116 @@
     height: 13px;
     width: 12px;
   }
+}
+
+/**
+ * Cross-project pipelines (applied conditionally to pipeline graph)
+ */
+
+.has-linked-pipelines.stage-column-list {
+  display: inline-block;
+}
+
+.linked-pipelines-column.stage-column {
+  position: relative;
+
+  & > ul {
+    padding: 0;
+  }
+
+  &.graph-position-left {
+    margin-right: 36px;
+
+    .cross-project-triangle {
+      right: -42px;
+    }
+  }
+
+  &.graph-position-right {
+    margin-left: 60px;
+
+    .cross-project-triangle {
+      left: -64px;
+    }
+  }
+
+  .linked-pipeline.build {
+    height: 40px;
+
+    // apply custom dimensions to connector before and after for triangle arrow
+    &.flat-connector-before {
+      @include flat-connector-before($linked-project-column-margin);
+    }
+
+    &::after {
+      right: -$linked-project-column-margin;
+      width: $linked-project-column-margin;
+    }
+
+    .linked-pipeline-content {
+      @include build-content(0);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.stage-column.has-upstream {
+  margin-left: 60px;
+
+  .left-connector {
+    @include flat-connector-before(60px)
+  }
+
+  &.has-only-one-job {
+    margin-left: 30px;
+    margin-right: 0;
+
+    .left-connector {
+      @include flat-connector-before;
+    }
+  }
+}
+
+.stage-column.has-downstream {
+  margin-right: $linked-project-column-margin;
+
+  &.has-only-one-job:not(:first-child) {
+    margin-right: 36px;
+    margin-left: 0;
+
+    .left-connector {
+      @include flat-connector-before;
+    }
+  }
+
+  .build {
+    &:first-child {
+      &::after {
+        right: -$linked-project-column-margin;
+        width: $linked-project-column-margin;
+      }
+    }
+  }
+}
+
+.cross-project-triangle {
+  position: absolute;
+  top: 48px;
+  width: 0;
+  height: 0;
+  border-bottom: 7px solid transparent;
+  border-top: 7px solid transparent;
+  border-left: 7px solid $gray-darkest;
+  font-size: 0;
+  line-height: 0;
+  z-index: 10;
+}
+
+.project-name-pipeline-id-separator {
+  display: inline-block;
+  margin: 4px 2px 0;
+  font-size: 10px;
+  vertical-align: top;
 }

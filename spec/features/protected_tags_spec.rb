@@ -1,11 +1,21 @@
 require 'spec_helper'
-Dir["./spec/features/protected_tags/*.rb"].sort.each { |f| require f }
 
 feature 'Projected Tags', feature: true, js: true do
   let(:user) { create(:user, :admin) }
   let(:project) { create(:project, :repository) }
 
   before { login_as(user) }
+
+  def set_allowed_to(operation, option = 'Masters', form: '.new-protected-tag')
+    within form do
+      find(".js-allowed-to-#{operation}").click
+      wait_for_requests
+
+      Array(option).each { |opt| click_on(opt) }
+
+      find(".js-allowed-to-#{operation}").click # needed to submit form in some cases
+    end
+  end
 
   def set_protected_tag_name(tag_name)
     find(".js-protected-tag-select").click
@@ -18,6 +28,7 @@ feature 'Projected Tags', feature: true, js: true do
     it "allows creating explicit protected tags" do
       visit namespace_project_protected_tags_path(project.namespace, project)
       set_protected_tag_name('some-tag')
+      set_allowed_to('create')
       click_on "Protect"
 
       within(".protected-tags-list") { expect(page).to have_content('some-tag') }
@@ -31,6 +42,7 @@ feature 'Projected Tags', feature: true, js: true do
 
       visit namespace_project_protected_tags_path(project.namespace, project)
       set_protected_tag_name('some-tag')
+      set_allowed_to('create')
       click_on "Protect"
 
       within(".protected-tags-list") { expect(page).to have_content(commit.id[0..7]) }
@@ -39,6 +51,7 @@ feature 'Projected Tags', feature: true, js: true do
     it "displays an error message if the named tag does not exist" do
       visit namespace_project_protected_tags_path(project.namespace, project)
       set_protected_tag_name('some-tag')
+      set_allowed_to('create')
       click_on "Protect"
 
       within(".protected-tags-list") { expect(page).to have_content('tag was removed') }
@@ -49,6 +62,7 @@ feature 'Projected Tags', feature: true, js: true do
     it "allows creating protected tags with a wildcard" do
       visit namespace_project_protected_tags_path(project.namespace, project)
       set_protected_tag_name('*-stable')
+      set_allowed_to('create')
       click_on "Protect"
 
       within(".protected-tags-list") { expect(page).to have_content('*-stable') }
@@ -62,6 +76,7 @@ feature 'Projected Tags', feature: true, js: true do
 
       visit namespace_project_protected_tags_path(project.namespace, project)
       set_protected_tag_name('*-stable')
+      set_allowed_to('create')
       click_on "Protect"
 
       within(".protected-tags-list") { expect(page).to have_content("2 matching tags") }
@@ -74,6 +89,7 @@ feature 'Projected Tags', feature: true, js: true do
 
       visit namespace_project_protected_tags_path(project.namespace, project)
       set_protected_tag_name('*-stable')
+      set_allowed_to('create')
       click_on "Protect"
 
       visit namespace_project_protected_tags_path(project.namespace, project)
@@ -88,6 +104,6 @@ feature 'Projected Tags', feature: true, js: true do
   end
 
   describe "access control" do
-    include_examples "protected tags > access control > CE"
+    include_examples "protected tags > access control > EE"
   end
 end

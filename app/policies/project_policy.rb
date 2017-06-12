@@ -55,6 +55,9 @@ class ProjectPolicy < BasePolicy
       can! :read_pipeline_schedule
       can! :read_build
     end
+
+    # EE-only
+    can! :read_issue_link
   end
 
   def reporter_access!
@@ -76,9 +79,12 @@ class ProjectPolicy < BasePolicy
     can! :read_deployment
     can! :read_merge_request
 
-    if License.current&.add_on?('GitLab_DeployBoard') || Rails.env.development?
+    if project.feature_available?(:deploy_board) || Rails.env.development?
       can! :read_deploy_board
     end
+
+    # EE-only
+    can! :admin_issue_link
   end
 
   # Permissions given when an user is team member of a project
@@ -111,6 +117,7 @@ class ProjectPolicy < BasePolicy
 
   def master_access!
     can! :push_code_to_protected_branches
+    can! :delete_protected_branch
     can! :update_project_snippet
     can! :update_environment
     can! :update_deployment
@@ -189,6 +196,7 @@ class ProjectPolicy < BasePolicy
     cannot! :create_merge_request
     cannot! :push_code
     cannot! :push_code_to_protected_branches
+    cannot! :delete_protected_branch
     cannot! :update_merge_request
     cannot! :admin_merge_request
   end
@@ -237,6 +245,7 @@ class ProjectPolicy < BasePolicy
     unless repository_enabled
       cannot! :push_code
       cannot! :push_code_to_protected_branches
+      cannot! :delete_protected_branch
       cannot! :download_code
       cannot! :fork_project
       cannot! :read_commit_status
@@ -318,5 +327,8 @@ class ProjectPolicy < BasePolicy
 
     # NOTE: may be overridden by IssuePolicy
     can! :read_issue
+
+    # EE-only
+    can! :read_issue_link
   end
 end
