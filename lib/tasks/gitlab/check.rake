@@ -34,8 +34,10 @@ namespace :gitlab do
         SystemCheck::App::RubyVersionCheck,
         SystemCheck::App::GitVersionCheck,
         SystemCheck::App::ActiveUsersCheck,
-        SystemCheck::App::ElasticsearchCheck
       ]
+
+      # EE only
+      checks << SystemCheck::App::ElasticsearchCheck
 
       SystemCheck.run('GitLab', checks)
     end
@@ -540,7 +542,6 @@ namespace :gitlab do
     end
   end
 
-<<<<<<< HEAD
   namespace :geo do
     desc 'GitLab | Check Geo configuration and dependencies'
     task check: :environment do
@@ -578,14 +579,6 @@ namespace :gitlab do
         puts 'yes'.color(:green)
       else
         puts 'no'.color(:red)
-=======
-  # Helper methods
-  ##########################
-
-  def check_gitlab_shell
-    required_version = Gitlab::VersionInfo.new(gitlab_shell_major_version, gitlab_shell_minor_version, gitlab_shell_patch_version)
-    current_version = Gitlab::VersionInfo.parse(gitlab_shell_version)
->>>>>>> ce/9-3-stable
 
         try_fixing_it(
           'Follow Geo Setup instructions to configure primary and secondary nodes'
@@ -595,7 +588,6 @@ namespace :gitlab do
       end
     end
 
-<<<<<<< HEAD
     def check_nodes_http_connection
       return unless Gitlab::Geo.enabled?
 
@@ -640,8 +632,6 @@ namespace :gitlab do
     end
   end
 
-=======
->>>>>>> ce/9-3-stable
   def check_repo_integrity(repo_dir)
     puts "\nChecking repo at #{repo_dir.color(:yellow)}"
 
