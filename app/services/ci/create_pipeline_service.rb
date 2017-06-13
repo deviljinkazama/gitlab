@@ -60,13 +60,9 @@ module Ci
       Ci::Pipeline.transaction do
         update_merge_requests_head_pipeline if pipeline.save
 
-<<<<<<< HEAD
         yield(pipeline) if block_given?
 
         Ci::CreatePipelineBuildsService
-=======
-        Ci::CreatePipelineStagesService
->>>>>>> ce/9-3-stable
           .new(project, current_user)
           .execute(pipeline)
       end
