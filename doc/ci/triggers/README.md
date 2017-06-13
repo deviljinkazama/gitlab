@@ -4,11 +4,6 @@
 - [Introduced][ci-229] in GitLab CE 7.14.
 - GitLab 8.12 has a completely redesigned job permissions system. Read all
   about the [new model and its implications](../../user/project/new_ci_build_permissions_model.md#job-triggers).
-<<<<<<< HEAD
-- GitLab 9.0 introduced a trigger ownership to solve permission problems,
-- GitLab 9.3 introduced an ability to use CI Job Token to trigger dependent pipelines,
-=======
->>>>>>> ce/9-3-stable
 
 Triggers can be used to force a pipeline rerun of a specific `ref` (branch or
 tag) with an API call.
@@ -20,6 +15,33 @@ The following methods of authentication are supported.
 ### Trigger token
 
 A unique trigger token can be obtained when [adding a new trigger](#adding-a-new-trigger).
+
+### CI job token
+
+> **Note**:
+[Introduced][ee-2017] in [GitLab Enterprise Edition Premium][ee] 9.3
+
+You can trigger a new pipeline using the `CI_JOB_TOKEN` [variable][predef]
+which is used to authenticate with the [GitLab Container Registry][registry].
+
+This way of triggering can only be used when invoked inside `.gitlab-ci.yml`,
+and it creates a dependent pipeline relation visible on the
+[pipeline graph](../pipelines.md#pipelines-graphs). For example:
+
+```yaml
+build_docs:
+  stage: deploy
+  script:
+  - "curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
+  only:
+  - tags
+```
+
+Pipelines triggered that way also expose a special variable:
+`CI_PIPELINE_SOURCE=pipeline`. This method currently doesn't support
+[the usage of trigger variables](#making-use-of-trigger-variables).
+
+For more information, read about [triggering a pipeline](#triggering-a-pipeline).
 
 ## Adding a new trigger
 
@@ -126,35 +148,12 @@ Now, whenever a new tag is pushed on project A, the job will run and the
 
 ## Triggering a pipeline from a webhook
 
-<<<<<<< HEAD
----
-
-Since GitLab 9.3 you can trigger a new pipeline using a CI_JOB_TOKEN.
-This method currently doesn't support Variables.
-The support for them will be included in 9.4 of GitLab.
-
-This way of triggering creates a dependent pipeline relation visible on the Pipeline Graph.
-
-```yaml
-build_docs:
-  stage: deploy
-  script:
-  - "curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://gitlab.example.com/api/v4/projects/9/trigger/pipeline"
-  only:
-  - tags
-```
-
-Pipelines triggered that way do expose a special variable: `CI_PIPELINE_SOURCE=pipeline`.
-
-### Making use of trigger variables
-=======
 > **Notes**:
 - Introduced in GitLab 8.14.
 - `ref` should be passed as part of the URL in order to take precedence over
   `ref` from the webhook body that designates the branch ref that fired the
   trigger in the source repository.
 - `ref` should be URL-encoded if it contains slashes.
->>>>>>> ce/9-3-stable
 
 To trigger a job from a webhook of another project you need to add the following
 webhook URL for Push and Tag events (change the project ID, ref and token):
