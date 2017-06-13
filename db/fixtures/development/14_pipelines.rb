@@ -75,7 +75,15 @@ class Gitlab::Seeder::Pipelines
 
   def create_master_pipelines
     @project.repository.commits('master', limit: 4).map do |commit|
-      create_pipeline!(@project, 'master', commit)
+      create_pipeline!(@project, 'master', commit).tap do |pipeline|
+        random_pipeline.tap do |triggered_by_pipeline|
+          triggered_by_pipeline.sourced_pipelines.create(
+            source_job: triggered_by_pipeline.builds.all.sample,
+            source_project: triggered_by_pipeline.project,
+            project: pipeline.project,
+            pipeline: pipeline)
+        end
+      end
     end
   rescue
     []
@@ -96,9 +104,8 @@ class Gitlab::Seeder::Pipelines
     []
   end
 
-
   def create_pipeline!(project, ref, commit)
-    project.pipelines.create(sha: commit.id, ref: ref)
+    project.pipelines.create(sha: commit.id, ref: ref, source: :push)
   end
 
   def build_create!(pipeline, opts = {})
@@ -149,6 +156,10 @@ class Gitlab::Seeder::Pipelines
 
   def build_user
     @project.team.users.sample
+  end
+
+  def random_pipeline
+    Ci::Pipeline.limit(4).all.sample
   end
 
   def build_status

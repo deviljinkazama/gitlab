@@ -5,10 +5,10 @@ class GeoNode < ActiveRecord::Base
   belongs_to :oauth_application, class_name: 'Doorkeeper::Application', dependent: :destroy
   belongs_to :system_hook, dependent: :destroy
 
-  default_values schema: 'http',
+  default_values schema: lambda { Gitlab.config.gitlab.protocol },
                  host: lambda { Gitlab.config.gitlab.host },
-                 port: 80,
-                 relative_url_root: '',
+                 port: lambda { Gitlab.config.gitlab.port },
+                 relative_url_root: lambda { Gitlab.config.gitlab.relative_url_root },
                  primary: false
 
   accepts_nested_attributes_for :geo_node_key, :system_hook
@@ -21,9 +21,7 @@ class GeoNode < ActiveRecord::Base
   validates :encrypted_secret_access_key, presence: true
 
   after_initialize :build_dependents
-  after_save :refresh_bulk_notify_worker_status
   after_save :expire_cache!
-  after_destroy :refresh_bulk_notify_worker_status
   after_destroy :expire_cache!
   before_validation :update_dependents_attributes
 
@@ -95,6 +93,18 @@ class GeoNode < ActiveRecord::Base
     self.primary? ? false : !oauth_application.present?
   end
 
+  def update_clone_url!
+    update_clone_url
+
+    # Update with update_column to prevent calling callbacks as this method will
+    # be called in an initializer and we don't want other callbacks
+    # to mess with uninitialized dependencies.
+    if clone_url_prefix_changed?
+      Rails.logger.info "Geo: modified clone_url_prefix to #{clone_url_prefix}"
+      update_column(:clone_url_prefix, clone_url_prefix)
+    end
+  end
+
   private
 
   def geo_api_url(suffix)
@@ -118,10 +128,6 @@ class GeoNode < ActiveRecord::Base
     { protocol: schema, host: host, port: port, script_name: relative_url }
   end
 
-  def refresh_bulk_notify_worker_status
-    Gitlab::Geo.configure_cron_jobs!
-  end
-
   def build_dependents
     unless persisted?
       self.build_geo_node_key if geo_node_key.nil?
@@ -134,6 +140,7 @@ class GeoNode < ActiveRecord::Base
 
     if self.primary?
       self.oauth_application = nil
+      update_clone_url
     else
       update_oauth_application!
       update_system_hook!
@@ -149,6 +156,10 @@ class GeoNode < ActiveRecord::Base
     end
   end
 
+  def update_clone_url
+    self.clone_url_prefix = Gitlab.config.gitlab_shell.ssh_path_prefix
+  end
+
   def update_oauth_application!
     self.build_oauth_application if oauth_application.nil?
     self.oauth_application.name = "Geo node: #{self.url}"
@@ -159,8 +170,9 @@ class GeoNode < ActiveRecord::Base
     self.build_system_hook if system_hook.nil?
     self.system_hook.token = SecureRandom.hex(20) unless self.system_hook.token.present?
     self.system_hook.url = geo_events_url if uri.present?
-    self.system_hook.push_events = true
-    self.system_hook.tag_push_events = true
+    self.system_hook.push_events = false
+    self.system_hook.tag_push_events = false
+    self.system_hook.repository_update_events = true
   end
 
   def expire_cache!

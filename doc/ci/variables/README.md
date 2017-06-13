@@ -10,7 +10,7 @@ The variables can be overwritten and they take precedence over each other in
 this order:
 
 1. [Trigger variables][triggers] (take precedence over all)
-1. [Secret variables](#secret-variables)
+1. [Secret variables](#secret-variables) or [protected secret variables](#protected-secret-variables)
 1. YAML-defined [job-level variables](../yaml/README.md#job-variables)
 1. YAML-defined [global variables](../yaml/README.md#variables)
 1. [Deployment variables](#deployment-variables)
@@ -53,6 +53,7 @@ future GitLab releases.**
 | **CI_RUNNER_ID**                | 8.10   | 0.5    | The unique id of runner being used |
 | **CI_RUNNER_TAGS**              | 8.10   | 0.5    | The defined runner tags |
 | **CI_PIPELINE_ID**              | 8.10   | 0.5    | The unique id of the current pipeline that GitLab CI uses internally |
+| **CI_PIPELINE_SOURCE**          | 9.3    | all    | The variable indicates how the pipeline was triggered, possible options are: push, web, trigger, schedule, api, pipeline |
 | **CI_PIPELINE_TRIGGERED**       | all    | all    | The flag to indicate that job was [triggered] |
 | **CI_PROJECT_DIR**              | all    | all    | The full path where the repository is cloned and where the job is run |
 | **CI_PROJECT_ID**               | all    | all    | The unique id of the current project that GitLab CI uses internally |
@@ -152,10 +153,26 @@ available in the build environment. It's the recommended method to use for
 storing things like passwords, secret keys and credentials.
 
 Secret variables can be added by going to your project's
-**Settings ➔ CI/CD Pipelines**, then finding the section called
-**Secret Variables**.
+**Settings ➔ Pipelines**, then finding the section called
+**Secret variables**.
 
-Once you set them, they will be available for all subsequent jobs.
+Once you set them, they will be available for all subsequent pipelines.
+
+## Protected secret variables
+
+>**Notes:**
+This feature requires GitLab 9.3 or higher.
+
+Secret variables could be protected. Whenever a secret variable is
+protected, it would only be securely passed to pipelines running on the
+[protected branches] or [protected tags]. The other pipelines would not get any
+protected variables.
+
+Protected variables can be added by going to your project's
+**Settings ➔ Pipelines**, then finding the section called
+**Secret variables**, and check *Protected*.
+
+Once you set them, they will be available for all subsequent pipelines.
 
 ## Deployment variables
 
@@ -327,20 +344,45 @@ All variables are set as environment variables in the build environment, and
 they are accessible with normal methods that are used to access such variables.
 In most cases `bash` or `sh` is used to execute the job script.
 
-To access the variables (predefined and user-defined) in a `bash`/`sh` environment,
-prefix the variable name with the dollar sign (`$`):
+To access environment variables, use the syntax for your Runner's [shell][shellexecutors].
 
-```
+| Shell                | Usage           |
+|----------------------|-----------------|
+| bash/sh              | `$variable`     |
+| windows batch        | `%variable%`    |
+| PowerShell           | `$env:variable` |
+
+To access environment variables in bash, prefix the variable name with (`$`):
+
+```yaml
 job_name:
   script:
-    - echo $CI_job_ID
+    - echo $CI_JOB_ID
+```
+
+To access environment variables in **Windows Batch**, surround the variable
+with (`%`):
+
+```yaml
+job_name:
+  script:
+    - echo %CI_JOB_ID%
+```
+
+To access environment variables in a **Windows PowerShell** environment, prefix
+the variable name with (`$env:`):
+
+```yaml
+job_name:
+  script:
+    - echo $env:CI_JOB_ID
 ```
 
 You can also list all environment variables with the `export` command,
 but be aware that this will also expose the values of all the secret variables
 you set, in the job log:
 
-```
+```yaml
 job_name:
   script:
     - export
@@ -385,3 +427,6 @@ export CI_REGISTRY_PASSWORD="longalfanumstring"
 [runner]: https://docs.gitlab.com/runner/
 [triggered]: ../triggers/README.md
 [triggers]: ../triggers/README.md#pass-job-variables-to-a-trigger
+[protected branches]: ../../user/project/protected_branches.md
+[protected tags]: ../../user/project/protected_tags.md
+[shellexecutors]: https://docs.gitlab.com/runner/executors/

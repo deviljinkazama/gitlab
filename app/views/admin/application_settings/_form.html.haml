@@ -72,10 +72,6 @@
           Includes LFS objects. It can be overridden per group, or per project. 0 for unlimited.
           = link_to icon('question-circle'), help_page_path("user/admin_area/settings/account_and_limit_settings")
     .form-group
-      = f.label :minimum_mirror_sync_time, class: 'control-label col-sm-2'
-      .col-sm-10
-        = f.select :minimum_mirror_sync_time, options_for_select(Gitlab::Mirror::SYNC_TIME_OPTIONS, @application_setting.minimum_mirror_sync_time), {}, class: 'form-control'
-    .form-group
       = f.label :session_expire_delay, 'Session duration (minutes)', class: 'control-label col-sm-2'
       .col-sm-10
         = f.number_field :session_expire_delay, class: 'form-control'
@@ -94,6 +90,18 @@
           = f.label :user_default_external do
             = f.check_box :user_default_external
             Newly registered users will by default be external
+
+    - if Gitlab.com? || Rails.env.development?
+      .form-group
+        = f.label :check_namespace_plan, 'Check feature availability on namespace plan', class: 'control-label col-sm-2'
+        .col-sm-10
+          .checkbox
+            = f.label :check_namespace_plan do
+              = f.check_box :check_namespace_plan
+              Enabling this will only make licensed EE features available to projects if the project namespace's plan
+              includes the feature or if the project is public.
+
+  = render partial: 'repository_mirrors_form', locals: { f: f }
 
   %fieldset
     %legend Sign-up Restrictions
@@ -628,6 +636,22 @@
           The default value (1) is a reasonable choice for the majority of GitLab
           installations. Set to 0 to completely disable polling.
           = link_to icon('question-circle'), help_page_path('administration/polling')
+
+  %fieldset
+    %legend Performance optimization
+    .form-group
+      .col-sm-offset-2.col-sm-10
+        .checkbox
+          = f.label :authorized_keys_enabled do
+            = f.check_box :authorized_keys_enabled
+            Write to "authorized_keys" file
+          .help-block
+            By default, we write to the "authorized_keys" file to support Git
+            over SSH without additional configuration. GitLab can be optimized
+            to authenticate SSH keys via the database file. Only uncheck this
+            if you have configured your OpenSSH server to use the
+            AuthorizedKeysCommand. Click on the help icon for more details.
+            = link_to icon('question-circle'), help_page_path('administration/operations/speed_up_ssh', anchor: 'the-solution')
 
   - if Gitlab::Geo.license_allows?
     %fieldset

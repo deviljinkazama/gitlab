@@ -169,7 +169,7 @@ production: &base
   ## Gravatar
   ## For Libravatar see: http://doc.gitlab.com/ce/customization/libravatar.html
   gravatar:
-    # gravatar urls: possible placeholders: %{hash} %{size} %{email}
+    # gravatar urls: possible placeholders: %{hash} %{size} %{email} %{username}
     # plain_url: "http://..."     # default: http://www.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon
     # ssl_url:   "https://..."    # default: https://secure.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon
 
@@ -182,7 +182,7 @@ production: &base
       cron: "0 * * * *"
     # Execute scheduled triggers
     pipeline_schedule_worker:
-      cron: "0 */12 * * *"
+      cron: "19 * * * *"
     # Remove expired build artifacts
     expire_build_artifacts_worker:
       cron: "50 * * * *"
@@ -216,14 +216,14 @@ production: &base
     geo_bulk_notify_worker:
       cron: "*/10 * * * * *"
 
-    # GitLab Geo backfill worker
+    # GitLab Geo repository sync worker
     # NOTE: This will only take effect if Geo is enabled
-    geo_backfill_worker:
+    geo_repository_sync_worker:
       cron: "*/5 * * * *"
 
-    # GitLab Geo file download worker
+    # GitLab Geo file download dispatch worker
     # NOTE: This will only take effect if Geo is enabled
-    geo_download_dispatch_worker:
+    geo_file_download_dispatch_worker:
       cron: "*/10 * * * *"
 
   registry:
@@ -536,7 +536,7 @@ production: &base
     # This setting controls whether GitLab uses Gitaly (new component
     # introduced in 9.0). Eventually Gitaly use will become mandatory and
     # this option will disappear.
-    enabled: false
+    enabled: true
 
   #
   # 4. Advanced settings
@@ -622,6 +622,12 @@ production: &base
     #   host: localhost
     #   port: 3808
 
+  ## GitLab Geo settings (EE-only)
+  geo_primary_role:
+    enabled: false
+  geo_secondary_role:
+    enabled: false
+
   #
   # 5. Extra customization
   # ==========================
@@ -705,6 +711,10 @@ test:
         user_filter: ''
         group_base: 'ou=groups,dc=example,dc=com'
         admin_group: ''
+  geo_primary_role:
+    enabled: true
+  geo_secondary_role:
+    enabled: true
 
 staging:
   <<: *base

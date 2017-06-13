@@ -1,15 +1,9 @@
 # Advanced search syntax
 
 >**Notes:**
-- Introduced in [GitLab Enterprise Premium][ee] 9.2
-- The [Elasticsearch integration](../../integration/elasticsearch.md) needs to
-  be enabled
-
->**Notes:**
 - Introduced in [GitLab Enterprise Starter][ee] 9.2
 - The [Elasticsearch integration](../../integration/elasticsearch.md) needs to
   be enabled
->>>>>>> 97f17efa... Merge branch 'fix-advanced-search-syntax-link' into 'master':doc/user/search/advanced_search_syntax.md
 
 Full details can be found in the
 [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#_simple_query_string_syntax)

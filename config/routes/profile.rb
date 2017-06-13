@@ -5,6 +5,7 @@ resource :profile, only: [:show, :update] do
 
     put :reset_private_token
     put :reset_incoming_email_token
+    put :reset_rss_token
     put :update_username
   end
 
@@ -46,5 +47,9 @@ resource :profile, only: [:show, :update] do
     end
 
     resources :u2f_registrations, only: [:destroy]
+
+    ## EE-specific
+    resources :pipeline_quota, only: [:index]
+    ## EE-specific
   end
 end

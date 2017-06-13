@@ -147,6 +147,10 @@ variables:
   DATABASE_URL: "postgres://postgres@postgres/my_database"
 ```
 
+>**Note:**
+Integers (as well as strings) are legal both for variable's name and value.
+Floats are not legal and cannot be used.
+
 These variables can be later used in all executed commands and scripts.
 The YAML-defined variables are also set to all created service containers,
 thus allowing to fine tune them. Variables can be also defined on a
@@ -290,6 +294,15 @@ If you use **Windows Batch** to run your shell scripts you need to replace
 ```yaml
 cache:
   key: "%CI_JOB_STAGE%/%CI_COMMIT_REF_NAME%"
+  untracked: true
+```
+
+If you use **Windows PowerShell** to run your shell scripts you need to replace
+`$` with `$env:`:
+
+```yaml
+cache:
+  key: "$env:CI_JOB_STAGE/$env:CI_COMMIT_REF_NAME"
   untracked: true
 ```
 
@@ -587,7 +600,7 @@ Optional manual actions have `allow_failure: true` set by default.
 **Manual actions are considered to be write actions, so permissions for
 protected branches are used when user wants to trigger an action. In other
 words, in order to trigger a manual action assigned to a branch that the
-pipeline is running for, user needs to have ability to push to this branch.**
+pipeline is running for, user needs to have ability to merge to this branch.**
 
 ### environment
 
@@ -905,6 +918,16 @@ job:
     untracked: true
 ```
 
+If you use **Windows PowerShell** to run your shell scripts you need to replace
+`$` with `$env:`:
+
+```yaml
+job:
+  artifacts:
+    name: "$env:CI_JOB_STAGE_$env:CI_COMMIT_REF_NAME"
+    untracked: true
+```
+
 #### artifacts:when
 
 > Introduced in GitLab 8.9 and GitLab Runner v1.3.0.
@@ -1101,6 +1124,36 @@ variables:
   GIT_STRATEGY: none
 ```
 
+## Git Checkout
+
+> Introduced in GitLab Runner 9.3
+
+The `GIT_CHECKOUT` variable can be used when the `GIT_STRATEGY` is set to either
+`clone` or `fetch` to specify whether a `git checkout` should be run. If not
+specified, it defaults to true. Like `GIT_STRATEGY`, it can be set in either the
+global [`variables`](#variables) section or the [`variables`](#job-variables)
+section for individual jobs.
+
+If set to `false`, the Runner will:
+
+- when doing `fetch` - update the repository and leave working copy on
+  the current revision,
+- when doing `clone` - clone the repository and leave working copy on the
+  default branch.
+
+Having this setting set to `true` will mean that for both `clone` and `fetch`
+strategies the Runner will checkout the working copy to a revision related
+to the CI pipeline:
+
+```yaml
+variables:
+  GIT_STRATEGY: clone
+  GIT_CHECKOUT: false
+script:
+  - git checkout master
+  - git merge $CI_BUILD_REF_NAME
+```
+
 ## Git Submodule Strategy
 
 > Requires GitLab Runner v1.10+.
@@ -1158,7 +1211,7 @@ Example:
 
 ```yaml
 variables:
-  GET_SOURCES_ATTEMPTS: "3"
+  GET_SOURCES_ATTEMPTS: 3
 ```
 
 You can set them in the global [`variables`](#variables) section or the

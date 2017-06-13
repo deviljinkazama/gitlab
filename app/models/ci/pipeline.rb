@@ -11,12 +11,23 @@ module Ci
     belongs_to :auto_canceled_by, class_name: 'Ci::Pipeline'
     belongs_to :pipeline_schedule, class_name: 'Ci::PipelineSchedule'
 
+    has_one :source_pipeline, class_name: Ci::Sources::Pipeline
+
+    has_many :sourced_pipelines, class_name: Ci::Sources::Pipeline, foreign_key: :source_pipeline_id
+
+    has_one :triggered_by_pipeline, through: :source_pipeline, source: :source_pipeline
+    has_many :triggered_pipelines, through: :sourced_pipelines, source: :pipeline
+
     has_many :auto_canceled_pipelines, class_name: 'Ci::Pipeline', foreign_key: 'auto_canceled_by_id'
     has_many :auto_canceled_jobs, class_name: 'CommitStatus', foreign_key: 'auto_canceled_by_id'
 
     has_many :statuses, class_name: 'CommitStatus', foreign_key: :commit_id
     has_many :builds, foreign_key: :commit_id
     has_many :trigger_requests, dependent: :destroy, foreign_key: :commit_id
+
+    # Merge requests for which the current pipeline is running against
+    # the merge request's latest commit.
+    has_many :merge_requests, foreign_key: "head_pipeline_id"
 
     has_many :pending_builds, -> { pending }, foreign_key: :commit_id, class_name: 'Ci::Build'
     has_many :retryable_builds, -> { latest.failed_or_canceled }, foreign_key: :commit_id, class_name: 'Ci::Build'
@@ -26,12 +37,24 @@ module Ci
 
     delegate :id, to: :project, prefix: true
 
+    validates :source, exclusion: { in: %w(unknown), unless: :importing? }, on: :create
     validates :sha, presence: { unless: :importing? }
     validates :ref, presence: { unless: :importing? }
     validates :status, presence: { unless: :importing? }
     validate :valid_commit_sha, unless: :importing?
 
     after_create :keep_around_commits, unless: :importing?
+
+    enum source: {
+      unknown: nil,
+      push: 1,
+      web: 2,
+      trigger: 3,
+      schedule: 4,
+      api: 5,
+      external: 6,
+      pipeline: 7
+    }
 
     state_machine :status, initial: :created do
       event :enqueue do
@@ -265,10 +288,6 @@ module Ci
       commit.sha == sha
     end
 
-    def triggered?
-      trigger_requests.any?
-    end
-
     def retried
       @retried ||= (statuses.order(id: :desc) - statuses.latest)
     end
@@ -358,7 +377,8 @@ module Ci
 
     def predefined_variables
       [
-        { key: 'CI_PIPELINE_ID', value: id.to_s, public: true }
+        { key: 'CI_PIPELINE_ID', value: id.to_s, public: true },
+        { key: 'CI_PIPELINE_SOURCE', value: source.to_s, public: true }
       ]
     end
 
@@ -381,14 +401,6 @@ module Ci
       project.execute_services(data, :pipeline_hooks)
     end
 
-    # Merge requests for which the current pipeline is running against
-    # the merge request's latest commit.
-    def merge_requests
-      @merge_requests ||= project.merge_requests
-        .where(source_branch: self.ref)
-        .select { |merge_request| merge_request.head_pipeline.try(:id) == self.id }
-    end
-
     # All the merge requests for which the current pipeline runs/ran against
     def all_merge_requests
       @all_merge_requests ||= project.merge_requests.where(source_branch: ref)
@@ -398,6 +410,10 @@ module Ci
       Gitlab::Ci::Status::Pipeline::Factory
         .new(self, current_user)
         .fabricate!
+    end
+
+    def codeclimate_artifact
+      artifacts.codeclimate.find(&:has_codeclimate_json?)
     end
 
     private

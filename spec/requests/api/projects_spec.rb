@@ -390,6 +390,14 @@ describe API::Projects do
       expect(json_response['visibility']).to eq('private')
     end
 
+    it 'sets tag list to a project' do
+      project = attributes_for(:project, tag_list: %w[tagFirst tagSecond])
+
+      post api('/projects', user), project
+
+      expect(json_response['tag_list']).to eq(%w[tagFirst tagSecond])
+    end
+
     it 'sets a project as allowing merge even if build fails' do
       project = attributes_for(:project, { only_allow_merge_if_pipeline_succeeds: false })
       post api('/projects', user), project
@@ -710,7 +718,7 @@ describe API::Projects do
           'name' => user.namespace.name,
           'path' => user.namespace.path,
           'kind' => user.namespace.kind,
-          'full_path' => user.namespace.full_path,
+          'full_path' => user.namespace.full_path
         })
       end
 

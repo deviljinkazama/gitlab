@@ -43,6 +43,31 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Feature availability check using feature list AND license addons.
 - Disable mirror workers for Geo secondaries.
 
+## 9.1.7 (2017-06-07)
+
+- No changes.
+
+## 9.1.6 (2017-06-02)
+
+- No changes.
+
+## 9.1.5 (2017-05-31)
+
+- Respect the external user setting in Elasticsearch.
+
+## 9.1.4 (2017-05-12)
+
+- Remove warning about protecting Service Desk email from form.
+- Backfill projects where the last attempt to backfill failed.
+
+## 9.1.3 (2017-05-05)
+
+- No changes.
+- No changes.
+- No changes.
+- Respect project features when searching alternative branches with elasticsearch enabled.
+- Fix for XSS in project mirror errors caused by Hamlit filter usage.
+
 ## 9.1.2 (2017-05-01)
 
 - No changes.
@@ -96,6 +121,23 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Remove N+1 queries for Groups::AnalyticsController.
 - Show user cohorts data when usage ping is enabled.
 - Visualise Canary Deployments.
+
+## 9.0.10 (2017-06-07)
+
+- No changes.
+
+## 9.0.9 (2017-06-02)
+
+- No changes.
+
+## 9.0.8 (2017-05-31)
+
+- Respect the external user setting in Elasticsearch.
+
+## 9.0.7 (2017-05-05)
+
+- Respect project features when searching alternative branches with elasticsearch enabled.
+- Fix for XSS in project mirror errors caused by Hamlit filter usage.
 
 ## 9.0.6 (2017-04-21)
 
@@ -171,6 +213,10 @@ Please view this file on the master branch, on stable branches it's out of date.
 - Update Elasticsearch to 5.1.
 - [Elasticsearch] More efficient search.
 - Get Geo secondaries nodes statuses over AJAX.
+
+## 8.17.6 (2017-05-05)
+
+- Respect project features when searching alternative branches with elasticsearch enabled.
 
 ## 8.17.5 (2017-04-05)
 

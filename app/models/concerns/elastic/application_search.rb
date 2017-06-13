@@ -147,7 +147,7 @@ module Elastic
         query_hash
       end
 
-      def iid_query_hash(query_hash, iid)
+      def iid_query_hash(iid)
         {
           query: {
             bool: {
@@ -208,7 +208,7 @@ module Elastic
                           { term: { visibility_level: Project::PUBLIC } }
                         end
 
-          if current_user && !current_user.external?
+          if current_user
             conditions << if feature
                             {
                               bool: {

@@ -4,13 +4,16 @@ describe PostReceive do
   let(:changes) { "123456 789012 refs/heads/tést\n654321 210987 refs/tags/tag" }
   let(:wrongly_encoded_changes) { changes.encode("ISO-8859-1").force_encoding("UTF-8") }
   let(:base64_changes) { Base64.encode64(wrongly_encoded_changes) }
-  let(:project) { create(:project, :repository) }
   let(:project_identifier) { "project-#{project.id}" }
   let(:key) { create(:key, user: project.owner) }
   let(:key_id) { key.shell_id }
 
-  context "as a resque worker" do
-    it "reponds to #perform" do
+  let(:project) do
+    create(:project, :repository, auto_cancel_pending_pipelines: 'disabled')
+  end
+
+  context "as a sidekiq worker" do
+    it "responds to #perform" do
       expect(described_class.new).to respond_to(:perform)
     end
   end
@@ -91,23 +94,30 @@ describe PostReceive do
         it { expect{ subject }.not_to change{ Ci::Pipeline.count } }
       end
     end
+
+    context 'after project changes hooks' do
+      let(:changes) { '123456 789012 refs/heads/tést' }
+      let(:fake_hook_data) { Hash.new(event_name: 'repository_update') }
+
+      before do
+        allow_any_instance_of(Gitlab::DataBuilder::Repository).to receive(:update).and_return(fake_hook_data)
+        # silence hooks so we can isolate
+        allow_any_instance_of(Key).to receive(:post_create_hook).and_return(true)
+        allow_any_instance_of(GitPushService).to receive(:execute).and_return(true)
+      end
+
+      it 'calls SystemHooksService' do
+        expect_any_instance_of(SystemHooksService).to receive(:execute_hooks).with(fake_hook_data, :repository_update_hooks).and_return(true)
+
+        described_class.new.perform(project_identifier, key_id, base64_changes)
+      end
+    end
   end
 
   context "webhook" do
     it "fetches the correct project" do
       expect(Project).to receive(:find_by).with(id: project.id.to_s)
       described_class.new.perform(project_identifier, key_id, base64_changes)
-    end
-
-    it "triggers wiki index update" do
-      expect(Project).to receive(:find_by_full_path).with("#{project.full_path}.wiki").and_return(nil)
-      expect(Project).to receive(:find_by_full_path).with(project.full_path).and_return(project)
-      stub_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
-      expect_any_instance_of(ProjectWiki).to receive(:index_blobs)
-
-      repo_path = "#{pwd(project)}.wiki"
-
-      described_class.new.perform(repo_path, key_id, base64_changes)
     end
 
     it "does not run if the author is not in the project" do

@@ -1,13 +1,11 @@
 require 'spec_helper'
 
 describe 'GlobalSearch' do
-  let(:features) { %i(issues merge_requests repository builds) }
+  let(:features) { %i(issues merge_requests repository builds wiki) }
   let(:admin) { create :user, admin: true }
   let(:auditor) {create :user, auditor: true }
   let(:non_member) { create :user }
-  let(:external_non_member) { create :user, external: true }
   let(:member) { create :user }
-  let(:external_member) { create :user, external: true }
   let(:guest) { create :user }
 
   before do
@@ -15,7 +13,6 @@ describe 'GlobalSearch' do
     Gitlab::Elastic::Helper.create_empty_index
 
     project.team << [member, :developer]
-    project.team << [external_member, :developer]
     project.team << [guest, :guest]
   end
 
@@ -35,10 +32,8 @@ describe 'GlobalSearch' do
         expect_no_items_to_be_found(admin)
         expect_no_items_to_be_found(auditor)
         expect_no_items_to_be_found(member)
-        expect_no_items_to_be_found(external_member)
         expect_no_items_to_be_found(guest)
         expect_no_items_to_be_found(non_member)
-        expect_no_items_to_be_found(external_non_member)
         expect_no_items_to_be_found(nil)
       end
 
@@ -48,10 +43,8 @@ describe 'GlobalSearch' do
         expect_items_to_be_found(admin)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
-        expect_items_to_be_found(external_member)
         expect_non_code_items_to_be_found(guest)
         expect_no_items_to_be_found(non_member)
-        expect_no_items_to_be_found(external_non_member)
         expect_no_items_to_be_found(nil)
       end
     end
@@ -66,10 +59,8 @@ describe 'GlobalSearch' do
         expect_no_items_to_be_found(admin)
         expect_no_items_to_be_found(auditor)
         expect_no_items_to_be_found(member)
-        expect_no_items_to_be_found(external_member)
         expect_no_items_to_be_found(guest)
         expect_no_items_to_be_found(non_member)
-        expect_no_items_to_be_found(external_non_member)
         expect_no_items_to_be_found(nil)
       end
 
@@ -79,10 +70,8 @@ describe 'GlobalSearch' do
         expect_items_to_be_found(admin)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
-        expect_items_to_be_found(external_member)
         expect_items_to_be_found(guest)
         expect_items_to_be_found(non_member)
-        expect_no_items_to_be_found(external_non_member)
         expect_no_items_to_be_found(nil)
       end
 
@@ -92,10 +81,8 @@ describe 'GlobalSearch' do
         expect_items_to_be_found(admin)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
-        expect_items_to_be_found(external_member)
         expect_non_code_items_to_be_found(guest)
         expect_no_items_to_be_found(non_member)
-        expect_no_items_to_be_found(external_non_member)
         expect_no_items_to_be_found(nil)
       end
     end
@@ -110,10 +97,8 @@ describe 'GlobalSearch' do
         expect_no_items_to_be_found(admin)
         expect_no_items_to_be_found(auditor)
         expect_no_items_to_be_found(member)
-        expect_no_items_to_be_found(external_member)
         expect_no_items_to_be_found(guest)
         expect_no_items_to_be_found(non_member)
-        expect_no_items_to_be_found(external_non_member)
         expect_no_items_to_be_found(nil)
       end
 
@@ -123,10 +108,8 @@ describe 'GlobalSearch' do
         expect_items_to_be_found(admin)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
-        expect_items_to_be_found(external_member)
         expect_items_to_be_found(guest)
         expect_items_to_be_found(non_member)
-        expect_items_to_be_found(external_non_member)
         expect_items_to_be_found(nil)
       end
 
@@ -136,10 +119,8 @@ describe 'GlobalSearch' do
         expect_items_to_be_found(admin)
         expect_items_to_be_found(auditor)
         expect_items_to_be_found(member)
-        expect_items_to_be_found(external_member)
         expect_non_code_items_to_be_found(guest)
         expect_no_items_to_be_found(non_member)
-        expect_no_items_to_be_found(external_non_member)
         expect_no_items_to_be_found(nil)
       end
     end
@@ -149,11 +130,13 @@ describe 'GlobalSearch' do
     Sidekiq::Testing.inline! do
       create :issue, title: 'term', project: project
       create :merge_request, title: 'term', target_project: project, source_project: project
+      project.wiki.create_page('index_page', 'term')
 
       project.project_feature.update!(feature_settings) if feature_settings
 
       project.repository.index_blobs
       project.repository.index_commits
+      project.wiki.index_blobs
 
       Gitlab::Elastic::Helper.refresh_index
     end
@@ -168,6 +151,7 @@ describe 'GlobalSearch' do
     results = search(user, 'term')
     expect(results.issues_count).to eq(0)
     expect(results.merge_requests_count).to eq(0)
+    expect(results.wiki_blobs_count).to eq(0)
     expect(search(user, 'def').blobs_count).to eq(0)
     expect(search(user, 'add').commits_count).to eq(0)
   end
@@ -176,6 +160,7 @@ describe 'GlobalSearch' do
     results = search(user, 'term')
     expect(results.issues_count).not_to eq(0)
     expect(results.merge_requests_count).not_to eq(0)
+    expect(results.wiki_blobs_count).not_to eq(0)
     expect(search(user, 'def').blobs_count).not_to eq(0)
     expect(search(user, 'add').commits_count).not_to eq(0)
   end
@@ -183,12 +168,13 @@ describe 'GlobalSearch' do
   def expect_non_code_items_to_be_found(user)
     results = search(user, 'term')
     expect(results.issues_count).not_to eq(0)
+    expect(results.wiki_blobs_count).not_to eq(0)
     expect(results.merge_requests_count).to eq(0)
     expect(search(user, 'def').blobs_count).to eq(0)
     expect(search(user, 'add').commits_count).to eq(0)
   end
 
-  def search(user, search, snippets: false)
-    SearchService.new(user, search: search, snippets: snippets ? 'true' : 'false').search_results
+  def search(user, search)
+    Search::GlobalService.new(user, search: search).execute
   end
 end

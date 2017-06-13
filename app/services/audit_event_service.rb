@@ -18,7 +18,7 @@ class AuditEventService
           author_name: author_name,
           target_id: user_id,
           target_type: "User",
-          target_details: user_name,
+          target_details: user_name
         }
       when :create
         {
@@ -27,9 +27,9 @@ class AuditEventService
           author_name: author_name,
           target_id: user_id,
           target_type: "User",
-          target_details: user_name,
+          target_details: user_name
         }
-      when :update
+      when :update, :override
         {
           change: "access_level",
           from: old_access_level,
@@ -37,7 +37,7 @@ class AuditEventService
           author_name: author_name,
           target_id: user_id,
           target_type: "User",
-          target_details: user_name,
+          target_details: user_name
         }
       end
 
@@ -56,7 +56,7 @@ class AuditEventService
           author_name: author_name,
           target_id: key_title,
           target_type: "DeployKey",
-          target_details: key_title,
+          target_details: key_title
         }
       when :create
         {
@@ -64,7 +64,7 @@ class AuditEventService
           author_name: author_name,
           target_id: key_title,
           target_type: "DeployKey",
-          target_details: key_title,
+          target_details: key_title
         }
       end
 
@@ -76,7 +76,7 @@ class AuditEventService
       with: @details[:with],
       target_id: @author.id,
       target_type: 'User',
-      target_details: @author.name,
+      target_details: @author.name
     }
 
     self
@@ -87,7 +87,8 @@ class AuditEventService
       author_id: @author.id,
       entity_id: @entity.id,
       entity_type: @entity.class.name,
-      details: @details
+      details: @details.merge(ip_address: @author.current_sign_in_ip,
+                              entity_path: @entity.full_path)
     )
   end
 end

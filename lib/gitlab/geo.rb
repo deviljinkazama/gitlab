@@ -13,7 +13,7 @@ module Gitlab
     ).freeze
 
     PRIMARY_JOBS = %i(bulk_notify_job).freeze
-    SECONDARY_JOBS = %i(backfill_job file_download_job).freeze
+    SECONDARY_JOBS = %i(repository_sync_job file_download_job).freeze
 
     def self.current_node
       self.cache_value(:geo_node_current) do
@@ -37,17 +37,21 @@ module Gitlab
 
     def self.current_node_enabled?
       # No caching of the enabled! If we cache it and an admin disables
-      # this node, an active GeoBackfillWorker would keep going for up
+      # this node, an active GeoRepositorySyncWorker would keep going for up
       # to max run time after the node was disabled.
       Gitlab::Geo.current_node.reload.enabled?
     end
 
-    def self.configured?
-      Rails.configuration.respond_to?(:geo_database)
+    def self.primary_role_enabled?
+      Gitlab.config.geo_primary_role['enabled']
+    end
+
+    def self.secondary_role_enabled?
+      Gitlab.config.geo_secondary_role['enabled']
     end
 
     def self.license_allows?
-      ::License.current && ::License.current.add_on?('GitLab_Geo')
+      ::License.current&.feature_available?(:geo)
     end
 
     def self.primary?
@@ -56,10 +60,6 @@ module Gitlab
 
     def self.secondary?
       self.cache_value(:geo_node_secondary) { self.enabled? && self.current_node && self.current_node.secondary? }
-    end
-
-    def self.primary_ssh_path_prefix
-      self.cache_value(:geo_primary_ssh_path_prefix) { self.enabled? && self.primary_node && build_primary_ssh_path_prefix }
     end
 
     def self.geo_node?(host:, port:)
@@ -74,12 +74,12 @@ module Gitlab
       Sidekiq::Cron::Job.find('geo_bulk_notify_worker')
     end
 
-    def self.backfill_job
-      Sidekiq::Cron::Job.find('geo_backfill_worker')
+    def self.repository_sync_job
+      Sidekiq::Cron::Job.find('geo_repository_sync_worker')
     end
 
     def self.file_download_job
-      Sidekiq::Cron::Job.find('geo_download_dispatch_worker')
+      Sidekiq::Cron::Job.find('geo_file_download_dispatch_worker')
     end
 
     def self.configure_primary_jobs!
@@ -98,9 +98,9 @@ module Gitlab
     end
 
     def self.configure_cron_jobs!
-      if self.primary?
+      if self.primary_role_enabled?
         self.configure_primary_jobs!
-      elsif self.secondary?
+      elsif self.secondary_role_enabled?
         self.configure_secondary_jobs!
       else
         self.disable_all_jobs!
@@ -144,20 +144,6 @@ module Gitlab
     def self.generate_random_string(size)
       # urlsafe_base64 may return a string of size * 4/3
       SecureRandom.urlsafe_base64(size)[0, size]
-    end
-
-    def self.build_primary_ssh_path_prefix
-      primary_host = "#{Gitlab.config.gitlab_shell.ssh_user}@#{self.primary_node.host}"
-
-      if Gitlab.config.gitlab_shell.ssh_port != 22
-        "ssh://#{primary_host}:#{Gitlab.config.gitlab_shell.ssh_port}/"
-      else
-        if self.primary_node.host.include? ':'
-          "[#{primary_host}]:"
-        else
-          "#{primary_host}:"
-        end
-      end
     end
   end
 end

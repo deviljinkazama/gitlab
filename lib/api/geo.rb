@@ -35,7 +35,6 @@ module API
       get 'status' do
         authenticate_by_gitlab_geo_node_token!
         require_node_to_be_secondary!
-        require_node_to_have_tracking_db!
 
         present GeoNodeStatus.new(id: Gitlab::Geo.current_node.id), with: Entities::GeoNodeStatus
       end
@@ -66,7 +65,7 @@ module API
           required_attributes! %w(key id)
           ::Geo::ScheduleKeyChangeService.new(params).execute
         when 'repository_update'
-          required_attributes! %w(event_name project_id remote_url)
+          required_attributes! %w(event_name project_id project)
           ::Geo::ScheduleRepoFetchService.new(params).execute
         when 'push'
           required_attributes! %w(event_name project_id project)
@@ -94,8 +93,12 @@ module API
       def authenticate_by_gitlab_geo_node_token!
         auth_header = headers['Authorization']
 
-        unless auth_header && Gitlab::Geo::JwtRequestDecoder.new(auth_header).decode
-          unauthorized!
+        begin
+          unless auth_header && Gitlab::Geo::JwtRequestDecoder.new(auth_header).decode
+            unauthorized!
+          end
+        rescue Gitlab::Geo::InvalidDecryptionKeyError => e
+          render_api_error!(e.to_s, 401)
         end
       end
 
@@ -105,10 +108,6 @@ module API
 
       def require_node_to_be_secondary!
         forbidden! 'Geo node is not secondary node.' unless Gitlab::Geo.current_node&.secondary?
-      end
-
-      def require_node_to_have_tracking_db!
-        not_found! 'Geo node does not have its tracking database enabled.' unless Gitlab::Geo.configured?
       end
     end
   end

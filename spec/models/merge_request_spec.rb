@@ -239,10 +239,10 @@ describe MergeRequest, models: true do
     end
 
     context 'when there are no MR diffs' do
-      it 'delegates to the compare object, setting no_collapse: true' do
+      it 'delegates to the compare object, setting expanded: true' do
         merge_request.compare = double(:compare)
 
-        expect(merge_request.compare).to receive(:diffs).with(options.merge(no_collapse: true))
+        expect(merge_request.compare).to receive(:diffs).with(options.merge(expanded: true))
 
         merge_request.diffs(options)
       end
@@ -523,7 +523,7 @@ describe MergeRequest, models: true do
     it "includes approvers set on the MR" do
       expect do
         create(:approver, user: create(:user), target: merge_request)
-      end.to change { merge_request.number_of_potential_approvers }.by(1)
+      end.to change { merge_request.reload.number_of_potential_approvers }.by(1)
     end
 
     it "includes approvers from group" do
@@ -531,16 +531,16 @@ describe MergeRequest, models: true do
 
       expect do
         create(:approver_group, group: group, target: merge_request)
-      end.to change { merge_request.number_of_potential_approvers }.by(1)
+      end.to change { merge_request.reload.number_of_potential_approvers }.by(1)
     end
 
     it "includes project members with developer access and up" do
       expect do
-        project.team << [create(:user), :guest]
-        project.team << [create(:user), :reporter]
-        project.team << [create(:user), :developer]
-        project.team << [create(:user), :master]
-      end.to change { merge_request.number_of_potential_approvers }.by(2)
+        project.add_guest(create(:user))
+        project.add_reporter(create(:user))
+        project.add_developer(create(:user))
+        project.add_master(create(:user))
+      end.to change { merge_request.reload.number_of_potential_approvers }.by(2)
     end
 
     it "excludes users who have already approved the MR" do
@@ -548,23 +548,21 @@ describe MergeRequest, models: true do
         approver = create(:user)
         create(:approver, user: approver, target: merge_request)
         create(:approval, user: approver, merge_request: merge_request)
-      end.not_to change { merge_request.number_of_potential_approvers }
+      end.not_to change { merge_request.reload.number_of_potential_approvers }
     end
 
     it "excludes the MR author" do
       expect do
         create(:approver, user: create(:user), target: merge_request)
         create(:approver, user: author, target: merge_request)
-      end.to change { merge_request.number_of_potential_approvers }.by(1)
+      end.to change { merge_request.reload.number_of_potential_approvers }.by(1)
     end
 
     it "excludes blocked users" do
       developer = create(:user)
       project.team << [developer, :developer]
 
-      expect do
-        developer.block!
-      end.to change { merge_request.number_of_potential_approvers }.by(-1)
+      expect(merge_request.reload.number_of_potential_approvers).to eq(2)
     end
 
     context "when the project is part of a group" do
@@ -579,7 +577,7 @@ describe MergeRequest, models: true do
           group.add_master(create(:user))
           blocked_developer = create(:user).tap { |u| u.block! }
           group.add_developer(blocked_developer)
-        end.to change { merge_request.number_of_potential_approvers }.by(2)
+        end.to change { merge_request.reload.number_of_potential_approvers }.by(2)
       end
     end
   end
@@ -975,13 +973,7 @@ describe MergeRequest, models: true do
   describe '#head_pipeline' do
     describe 'when the source project exists' do
       it 'returns the latest pipeline' do
-        pipeline = double(:ci_pipeline, ref: 'master')
-
-        allow(subject).to receive(:diff_head_sha).and_return('123abc')
-
-        expect(subject.source_project).to receive(:pipeline_for).
-          with('master', '123abc').
-          and_return(pipeline)
+        pipeline = create(:ci_empty_pipeline, project: subject.source_project, ref: 'master', status: 'running', sha: "123abc", head_pipeline_of: subject)
 
         expect(subject.head_pipeline).to eq(pipeline)
       end
@@ -1191,6 +1183,26 @@ describe MergeRequest, models: true do
       expect(subject).to receive(:can_be_merged?) { true }
 
       expect(subject.mergeable?).to be_truthy
+    end
+
+    context 'when using approvals' do
+      let(:user) { create(:user) }
+      before do
+        allow(subject).to receive(:mergeable_state?).and_return(true)
+
+        subject.target_project.update_attributes(approvals_before_merge: 1)
+        project.team << [user, :developer]
+      end
+
+      it 'return false if not approved' do
+        expect(subject.mergeable?).to be_falsey
+      end
+
+      it 'return true if approved' do
+        subject.approvals.create(user: user)
+
+        expect(subject.mergeable?).to be_truthy
+      end
     end
   end
 
@@ -1441,7 +1453,7 @@ describe MergeRequest, models: true do
   end
 
   describe "#reload_diff" do
-    let(:note) { create(:diff_note_on_merge_request, project: subject.project, noteable: subject) }
+    let(:discussion) { create(:diff_note_on_merge_request, project: subject.project, noteable: subject).to_discussion }
 
     let(:commit) { subject.project.commit(sample_commit.id) }
 
@@ -1460,7 +1472,7 @@ describe MergeRequest, models: true do
       subject.reload_diff
     end
 
-    it "updates diff note positions" do
+    it "updates diff discussion positions" do
       old_diff_refs = subject.diff_refs
 
       # Update merge_request_diff so that #diff_refs will return commit.diff_refs
@@ -1474,18 +1486,18 @@ describe MergeRequest, models: true do
         subject.merge_request_diff(true)
       end
 
-      expect(Notes::DiffPositionUpdateService).to receive(:new).with(
+      expect(Discussions::UpdateDiffPositionService).to receive(:new).with(
         subject.project,
-        nil,
+        subject.author,
         old_diff_refs: old_diff_refs,
         new_diff_refs: commit.diff_refs,
-        paths: note.position.paths
+        paths: discussion.position.paths
       ).and_call_original
 
-      expect_any_instance_of(Notes::DiffPositionUpdateService).to receive(:execute).with(note)
+      expect_any_instance_of(Discussions::UpdateDiffPositionService).to receive(:execute).with(discussion).and_call_original
       expect_any_instance_of(DiffNote).to receive(:save).once
 
-      subject.reload_diff
+      subject.reload_diff(subject.author)
     end
   end
 
@@ -1712,7 +1724,7 @@ describe MergeRequest, models: true do
     end
   end
 
-  describe "#diff_sha_refs" do
+  describe "#diff_refs" do
     context "with diffs" do
       subject { create(:merge_request, :with_diffs) }
 
@@ -1721,7 +1733,7 @@ describe MergeRequest, models: true do
 
         expect_any_instance_of(Repository).not_to receive(:commit)
 
-        subject.diff_sha_refs
+        subject.diff_refs
       end
 
       it "returns expected diff_refs" do
@@ -1731,7 +1743,7 @@ describe MergeRequest, models: true do
           head_sha:  subject.merge_request_diff.head_commit_sha
         )
 
-        expect(subject.diff_sha_refs).to eq(expected_diff_refs)
+        expect(subject.diff_refs).to eq(expected_diff_refs)
       end
     end
   end
@@ -1860,11 +1872,14 @@ describe MergeRequest, models: true do
 
   describe '#mergeable_with_slash_command?' do
     def create_pipeline(status)
-      create(:ci_pipeline_with_one_job,
+      pipeline = create(:ci_pipeline_with_one_job,
         project: project,
         ref:     merge_request.source_branch,
         sha:     merge_request.diff_head_sha,
-        status:  status)
+        status:  status,
+        head_pipeline_of: merge_request)
+
+      pipeline
     end
 
     let(:project)       { create(:project, :public, :repository, only_allow_merge_if_pipeline_succeeds: true) }
@@ -1957,6 +1972,22 @@ describe MergeRequest, models: true do
           expect(merge_request.mergeable_with_slash_command?(developer, last_diff_sha: mr_sha)).to be_truthy
         end
       end
+
+      context 'with approvals' do
+        before do
+          merge_request.target_project.update_attributes(approvals_before_merge: 1)
+        end
+
+        it 'is not mergeable when not approved' do
+          expect(merge_request.mergeable_with_slash_command?(developer, last_diff_sha: mr_sha)).to be_falsey
+        end
+
+        it 'is mergeable when approved' do
+          merge_request.approvals.create(user: user)
+
+          expect(merge_request.mergeable_with_slash_command?(developer, last_diff_sha: mr_sha)).to be_truthy
+        end
+      end
     end
   end
 
@@ -1998,6 +2029,82 @@ describe MergeRequest, models: true do
       it 'returns the diffs' do
         expect(subject.merge_request_diff_for(merge_request_diff3.head_commit_sha)).to eq(merge_request_diff3)
       end
+    end
+  end
+
+  describe '#version_params_for' do
+    subject { create(:merge_request, importing: true) }
+    let(:project) { subject.project }
+    let!(:merge_request_diff1) { subject.merge_request_diffs.create(head_commit_sha: '6f6d7e7ed97bb5f0054f2b1df789b39ca89b6ff9') }
+    let!(:merge_request_diff2) { subject.merge_request_diffs.create(head_commit_sha: nil) }
+    let!(:merge_request_diff3) { subject.merge_request_diffs.create(head_commit_sha: '5937ac0a7beb003549fc5fd26fc247adbce4a52e') }
+
+    context 'when the diff refs are for an older merge request version' do
+      let(:diff_refs) { merge_request_diff1.diff_refs }
+
+      it 'returns the diff ID for the version to show' do
+        expect(subject.version_params_for(diff_refs)).to eq(diff_id: merge_request_diff1.id)
+      end
+    end
+
+    context 'when the diff refs are for a comparison between merge request versions' do
+      let(:diff_refs) { merge_request_diff3.compare_with(merge_request_diff1.head_commit_sha).diff_refs }
+
+      it 'returns the diff ID and start sha of the versions to compare' do
+        expect(subject.version_params_for(diff_refs)).to eq(diff_id: merge_request_diff3.id, start_sha: merge_request_diff1.head_commit_sha)
+      end
+    end
+
+    context 'when the diff refs are not for a merge request version' do
+      let(:diff_refs) { project.commit(sample_commit.id).diff_refs }
+
+      it 'returns nil' do
+        expect(subject.version_params_for(diff_refs)).to be_nil
+      end
+    end
+  end
+
+  describe '#base_pipeline' do
+    let!(:pipeline) { create(:ci_empty_pipeline, project: subject.project, sha: subject.diff_base_sha) }
+
+    it { expect(subject.base_pipeline).to eq(pipeline) }
+  end
+
+  describe '#base_codeclimate_artifact' do
+    before do
+      allow(subject.base_pipeline).to receive(:codeclimate_artifact).
+        and_return(1)
+    end
+
+    it 'delegates to merge request diff' do
+      expect(subject.base_codeclimate_artifact).to eq(1)
+    end
+  end
+
+  describe '#head_codeclimate_artifact' do
+    before do
+      allow(subject.head_pipeline).to receive(:codeclimate_artifact).
+        and_return(1)
+    end
+
+    it 'delegates to merge request diff' do
+      expect(subject.head_codeclimate_artifact).to eq(1)
+    end
+  end
+
+  describe '#has_codeclimate_data?' do
+    context 'with codeclimate artifact' do
+      before do
+        artifact = double(success?: true)
+        allow(subject.head_pipeline).to receive(:codeclimate_artifact).and_return(artifact)
+        allow(subject.base_pipeline).to receive(:codeclimate_artifact).and_return(artifact)
+      end
+
+      it { expect(subject.has_codeclimate_data?).to be_truthy }
+    end
+
+    context 'without codeclimate artifact' do
+      it { expect(subject.has_codeclimate_data?).to be_falsey }
     end
   end
 end

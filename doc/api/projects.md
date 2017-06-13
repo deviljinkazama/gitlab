@@ -1,5 +1,4 @@
-# Projects
-
+# Projects API
 
 ### Project visibility level
 
@@ -16,8 +15,6 @@ Constants for project visibility levels are next:
 
 * `public`:
   The project can be cloned without any authentication.
-
-
 
 ## List projects
 
@@ -41,6 +38,8 @@ Parameters:
 | `membership` | boolean | no | Limit by projects that the current user is a member of |
 | `starred` | boolean | no | Limit by projects starred by the current user |
 | `statistics` | boolean | no | Include project statistics |
+| `with_issues_enabled` | boolean | no | Limit by enabled issues feature |
+| `with_merge_requests_enabled` | boolean | no | Limit by enabled merge requests feature |
 
 ```json
 [
@@ -479,6 +478,7 @@ Parameters:
 | `only_allow_merge_if_all_discussions_are_resolved` | boolean | no | Set whether merge requests can only be merged when all the discussions are resolved |
 | `lfs_enabled` | boolean | no | Enable LFS |
 | `request_access_enabled` | boolean | no | Allow users to request member access |
+| `tag_list`    | array   | no       | The list of tags for a project; put array of tags, that should be finally assigned to a project |
 | `repository_storage` | string | no | Which storage shard the repository is on. Available only to admins |
 | `approvals_before_merge` | integer | no | How many approvers should approve merge request by default |
 
@@ -513,6 +513,7 @@ Parameters:
 | `only_allow_merge_if_all_discussions_are_resolved` | boolean | no | Set whether merge requests can only be merged when all the discussions are resolved |
 | `lfs_enabled` | boolean | no | Enable LFS |
 | `request_access_enabled` | boolean | no | Allow users to request member access |
+| `tag_list`    | array   | no       | The list of tags for a project; put array of tags, that should be finally assigned to a project |
 | `repository_storage` | string | no | Which storage shard the repository is on. Available only to admins |
 | `approvals_before_merge` | integer | no | How many approvers should approve merge request by default |
 
@@ -547,6 +548,7 @@ Parameters:
 | `only_allow_merge_if_all_discussions_are_resolved` | boolean | no | Set whether merge requests can only be merged when all the discussions are resolved |
 | `lfs_enabled` | boolean | no | Enable LFS |
 | `request_access_enabled` | boolean | no | Allow users to request member access |
+| `tag_list`    | array   | no       | The list of tags for a project; put array of tags, that should be finally assigned to a project |
 | `repository_storage` | string | no | Which storage shard the repository is on. Available only to admins |
 | `approvals_before_merge` | integer | no | How many approvers should approve merge request by default |
 
@@ -1266,6 +1268,7 @@ Parameters:
   "id": 1,
   "project_id": 3,
   "commit_message_regex": "Fixes \d +\",
+  "branch_name_regex": "",
   "deny_delete_tag": false,
   "created_at": "2012-10-12T17:04:47Z",
   "member_check": false,
@@ -1293,6 +1296,7 @@ Parameters:
 | `member_check` | boolean | no | Restrict commits by author (email) to existing GitLab users |
 | `prevent_secrets` | boolean | no | GitLab will reject any files that are likely to contain secrets |
 | `commit_message_regex` | string | no | All commit messages must match this, e.g. `Fixed \d+\..*` |
+| `branch_name_regex` | string | no | All branch names must match this, e.g. `(feature|hotfix)\/*` |
 | `author_email_regex` | string | no | All commit author emails must match this, e.g. `@my-company.com$` |
 | `file_name_regex` | string | no | All commited filenames must **not** match this, e.g. `(jar|exe)$` |
 | `max_file_size` | integer | no | Maximum file size (MB) |
@@ -1314,6 +1318,7 @@ Parameters:
 | `member_check` | boolean | no | Restrict commits by author (email) to existing GitLab users |
 | `prevent_secrets` | boolean | no | GitLab will reject any files that are likely to contain secrets |
 | `commit_message_regex` | string | no | All commit messages must match this, e.g. `Fixed \d+\..*` |
+| `branch_name_regex` | string | no | All branch names must match this, e.g. `(feature|hotfix)\/*` |
 | `author_email_regex` | string | no | All commit author emails must match this, e.g. `@my-company.com$` |
 | `file_name_regex` | string | no | All commited filenames must **not** match this, e.g. `(jar|exe)$` |
 | `max_file_size` | integer | no | Maximum file size (MB) |

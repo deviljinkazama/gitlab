@@ -7,24 +7,6 @@ describe('ServiceDeskStore', () => {
     store = new ServiceDeskStore();
   });
 
-  describe('setIsActivated', () => {
-    it('defaults to false', () => {
-      expect(store.state.isEnabled).toEqual(false);
-    });
-
-    it('set true', () => {
-      store.setIsActivated(true);
-
-      expect(store.state.isEnabled).toEqual(true);
-    });
-
-    it('set false', () => {
-      store.setIsActivated(false);
-
-      expect(store.state.isEnabled).toEqual(false);
-    });
-  });
-
   describe('setIncomingEmail', () => {
     it('defaults to an empty string', () => {
       expect(store.state.incomingEmail).toEqual('');
@@ -38,16 +20,12 @@ describe('ServiceDeskStore', () => {
     });
   });
 
-  describe('setFetchError', () => {
-    it('defaults to null', () => {
-      expect(store.state.fetchError).toEqual(null);
-    });
+  describe('resetIncomingEmail', () => {
+    it('resets to empty string', () => {
+      store.setIncomingEmail('foo');
+      store.resetIncomingEmail();
 
-    it('set true', () => {
-      const err = new Error('some-fake-failure');
-      store.setFetchError(err);
-
-      expect(store.state.fetchError).toEqual(err);
+      expect(store.state.incomingEmail).toEqual('');
     });
   });
 });

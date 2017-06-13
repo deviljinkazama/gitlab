@@ -69,6 +69,14 @@ module API
       end
     end
 
+    def find_namespace(id)
+      if id =~ /^\d+$/
+        Namespace.find_by(id: id)
+      else
+        Namespace.find_by_full_path(id)
+      end
+    end
+
     def find_group!(id)
       group = find_group(id)
 
@@ -167,7 +175,7 @@ module API
       params_hash = custom_params || params
       attrs = {}
       keys.each do |key|
-        if params_hash[key].present? || (params_hash.has_key?(key) && params_hash[key] == false)
+        if params_hash[key].present? || (params_hash.key?(key) && params_hash[key] == false)
           attrs[key] = params_hash[key]
         end
       end
@@ -265,29 +273,19 @@ module API
 
     # project helpers
 
-    def filter_projects(projects)
-      if params[:membership]
-        projects = projects.merge(current_user.authorized_projects)
-      end
-
-      if params[:owned]
-        projects = projects.merge(current_user.owned_projects)
-      end
-
-      if params[:starred]
-        projects = projects.merge(current_user.starred_projects)
-      end
-
-      if params[:search].present?
-        projects = projects.search(params[:search])
-      end
-
-      if params[:visibility].present?
-        projects = projects.search_by_visibility(params[:visibility])
-      end
-
-      projects = projects.where(archived: params[:archived])
+    def reorder_projects(projects)
       projects.reorder(params[:order_by] => params[:sort])
+    end
+
+    def project_finder_params
+      finder_params = {}
+      finder_params[:owned] = true if params[:owned].present?
+      finder_params[:non_public] = true if params[:membership].present?
+      finder_params[:starred] = true if params[:starred].present?
+      finder_params[:visibility_level] = Gitlab::VisibilityLevel.level_value(params[:visibility]) if params[:visibility]
+      finder_params[:archived] = params[:archived]
+      finder_params[:search] = params[:search] if params[:search]
+      finder_params
     end
 
     # file helpers
@@ -310,7 +308,7 @@ module API
       UploadedFile.new(
         file_path,
         params["#{field}.name"],
-        params["#{field}.type"] || 'application/octet-stream',
+        params["#{field}.type"] || 'application/octet-stream'
       )
     end
 
@@ -327,6 +325,16 @@ module API
         body
       else
         file path
+      end
+    end
+
+    def present_artifacts!(artifacts_file)
+      return not_found! unless artifacts_file.exists?
+  
+      if artifacts_file.file_storage?
+        present_file!(artifacts_file.path, artifacts_file.filename)
+      else
+        redirect_to(artifacts_file.url)
       end
     end
 

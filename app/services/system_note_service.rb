@@ -258,7 +258,7 @@ module SystemNoteService
     create_note(NoteSummary.new(noteable, project, author, body, action: 'title'))
   end
 
-  def self.resolve_all_discussions(merge_request, project, author)
+  def resolve_all_discussions(merge_request, project, author)
     body = "resolved all discussions"
 
     create_note(NoteSummary.new(merge_request, project, author, body, action: 'discussion'))
@@ -270,6 +270,28 @@ module SystemNoteService
 
     note = Note.create(note_attributes.merge(system: true))
     note.system_note_metadata = SystemNoteMetadata.new(action: 'discussion')
+
+    note
+  end
+
+  def diff_discussion_outdated(discussion, project, author, change_position)
+    merge_request = discussion.noteable
+    diff_refs = change_position.diff_refs
+    version_index = merge_request.merge_request_diffs.viewable.count
+
+    body = "changed this line in"
+    if version_params = merge_request.version_params_for(diff_refs)
+      line_code = change_position.line_code(project.repository)
+      url = url_helpers.diffs_namespace_project_merge_request_url(project.namespace, project, merge_request, version_params.merge(anchor: line_code))
+
+      body << " [version #{version_index} of the diff](#{url})"
+    else
+      body << " version #{version_index} of the diff"
+    end
+
+    note_attributes = discussion.reply_attributes.merge(project: project, author: author, note: body)
+    note = Note.create(note_attributes.merge(system: true))
+    note.system_note_metadata = SystemNoteMetadata.new(action: 'outdated')
 
     note
   end
@@ -291,8 +313,8 @@ module SystemNoteService
 
     old_diffs, new_diffs = Gitlab::Diff::InlineDiff.new(old_title, new_title).inline_diffs
 
-    marked_old_title = Gitlab::Diff::InlineDiffMarker.new(old_title).mark(old_diffs, mode: :deletion, markdown: true)
-    marked_new_title = Gitlab::Diff::InlineDiffMarker.new(new_title).mark(new_diffs, mode: :addition, markdown: true)
+    marked_old_title = Gitlab::Diff::InlineDiffMarkdownMarker.new(old_title).mark(old_diffs, mode: :deletion)
+    marked_new_title = Gitlab::Diff::InlineDiffMarkdownMarker.new(new_title).mark(new_diffs, mode: :addition)
 
     body = "changed title from **#{marked_old_title}** to **#{marked_new_title}**"
 
@@ -528,6 +550,38 @@ module SystemNoteService
     body = "moved #{direction} #{cross_reference}"
 
     create_note(NoteSummary.new(noteable, project, author, body, action: 'moved'))
+  end
+
+  #
+  # noteable     - Noteable object
+  # noteable_ref - Referenced noteable object
+  # user         - User performing reference
+  #
+  # Example Note text:
+  #
+  #   "marked this issue as related to gitlab-ce#9001"
+  #
+  # Returns the created Note object
+  def relate_issue(noteable, noteable_ref, user)
+    body = "marked this issue as related to #{noteable_ref.to_reference(noteable.project)}"
+
+    create_note(NoteSummary.new(noteable, noteable.project, user, body, action: 'relate'))
+  end
+
+  #
+  # noteable     - Noteable object
+  # noteable_ref - Referenced noteable object
+  # user         - User performing reference
+  #
+  # Example Note text:
+  #
+  #   "removed the relation with gitlab-ce#9001"
+  #
+  # Returns the created Note object
+  def unrelate_issue(noteable, noteable_ref, user)
+    body = "removed the relation with #{noteable_ref.to_reference(noteable.project)}"
+
+    create_note(NoteSummary.new(noteable, noteable.project, user, body, action: 'unrelate'))
   end
 
   # Called when the merge request is approved by user

@@ -81,6 +81,19 @@ describe SubmoduleHelper do
       end
     end
 
+    context 'in-repository submodule' do
+      let(:group) { create(:group, name: "Master Project", path: "master-project") }
+      let(:project) { create(:empty_project, group: group) }
+      before do
+        self.instance_variable_set(:@project, project)
+      end
+
+      it 'in-repository' do
+        stub_url('./')
+        expect(submodule_links(submodule_item)).to eq(["/master-project/#{project.path}", "/master-project/#{project.path}/tree/hash"])
+      end
+    end
+
     context 'submodule on gitlab.com' do
       it 'detects ssh' do
         stub_url('git@gitlab.com:gitlab-org/gitlab-ce.git')
@@ -99,6 +112,11 @@ describe SubmoduleHelper do
 
       it 'handles urls with no .git on the end' do
         stub_url('http://gitlab.com/gitlab-org/gitlab-ce')
+        expect(submodule_links(submodule_item)).to eq(['https://gitlab.com/gitlab-org/gitlab-ce', 'https://gitlab.com/gitlab-org/gitlab-ce/tree/hash'])
+      end
+
+      it 'handles urls with trailing whitespace' do
+        stub_url('http://gitlab.com/gitlab-org/gitlab-ce.git  ')
         expect(submodule_links(submodule_item)).to eq(['https://gitlab.com/gitlab-org/gitlab-ce', 'https://gitlab.com/gitlab-org/gitlab-ce/tree/hash'])
       end
 
