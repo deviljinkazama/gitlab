@@ -212,12 +212,8 @@ class Projects::IssuesController < Projects::ApplicationController
       title_text: @issue.title,
       description: view_context.markdown_field(@issue, :description),
       description_text: @issue.description,
-<<<<<<< HEAD
       task_status: @issue.task_status,
       updated_at: @issue.updated_at
-=======
-      task_status: @issue.task_status
->>>>>>> ce/9-3-stable
     }
   end
 
