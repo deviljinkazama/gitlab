@@ -1,8 +1,11 @@
 module Gitlab
   module Checks
     class ChangeAccess
+<<<<<<< HEAD
       include PathLocksHelper
 
+=======
+>>>>>>> ce/9-3-stable
       ERROR_MESSAGES = {
         push_code: 'You are not allowed to push code to this project.',
         delete_default_branch: 'The default branch of a project cannot be deleted.',
@@ -17,7 +20,10 @@ module Gitlab
         create_protected_tag: 'You are not allowed to create this tag as it is protected.'
       }.freeze
 
+<<<<<<< HEAD
       # protocol is currently used only in EE
+=======
+>>>>>>> ce/9-3-stable
       attr_reader :user_access, :project, :skip_authorization, :protocol
 
       def initialize(
@@ -39,7 +45,10 @@ module Gitlab
         push_checks
         branch_checks
         tag_checks
+<<<<<<< HEAD
         push_rule_check
+=======
+>>>>>>> ce/9-3-stable
 
         true
       end

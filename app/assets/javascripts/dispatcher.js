@@ -167,9 +167,6 @@ import AuditLogs from './audit_logs';
         case 'admin:projects:index':
           new ProjectsList();
           break;
-        case 'dashboard:groups:index':
-          new GroupsList();
-          break;
         case 'explore:groups:index':
           new GroupsList();
 
@@ -225,6 +222,16 @@ import AuditLogs from './audit_logs';
           new ZenMode();
           new gl.GLForm($('.tag-form'));
           new RefSelectDropdown($('.js-branch-select'), window.gl.availableRefs);
+          break;
+        case 'projects:snippets:new':
+        case 'projects:snippets:edit':
+        case 'projects:snippets:create':
+        case 'projects:snippets:update':
+        case 'snippets:new':
+        case 'snippets:edit':
+        case 'snippets:create':
+        case 'snippets:update':
+          new gl.GLForm($('.snippet-form'));
           break;
         case 'projects:releases:edit':
           new ZenMode();
@@ -375,9 +382,11 @@ import AuditLogs from './audit_logs';
           new ProjectFork();
           break;
         case 'projects:artifacts:browse':
+          new ShortcutsNavigation();
           new BuildArtifacts();
           break;
         case 'projects:artifacts:file':
+          new ShortcutsNavigation();
           new BlobViewer();
           break;
         case 'help:index':
@@ -415,6 +424,9 @@ import AuditLogs from './audit_logs';
           new gl.CILintEditor();
           break;
         case 'users:show':
+          new UserCallout();
+          break;
+        case 'admin:conversational_development_index:show':
           new UserCallout();
           break;
         case 'snippets:show':

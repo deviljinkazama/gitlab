@@ -169,7 +169,7 @@ export default {
     eventHub.$on('refreshPipelines', this.fetchPipelines);
   },
 
-  beforeDestroyed() {
+  beforeDestroy() {
     eventHub.$off('refreshPipelines');
   },
 
@@ -284,9 +284,7 @@ export default {
 
         <table-pagination
           v-if="shouldRenderPagination"
-          :pagenum="pagenum"
           :change="change"
-          :count="state.count.all"
           :pageInfo="state.pageInfo"
           />
       </div>

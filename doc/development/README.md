@@ -52,10 +52,8 @@
 - [Post Deployment Migrations](post_deployment_migrations.md)
 - [Foreign Keys & Associations](foreign_keys.md)
 - [Serializing Data](serializing_data.md)
-
-## i18n
-
-- [Internationalization for GitLab](i18n_guide.md)
+- [Polymorphic Associations](polymorphic_associations.md)
+- [Single Table Inheritance](single_table_inheritance.md)
 
 ## Compliance
 

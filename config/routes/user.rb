@@ -14,10 +14,13 @@ devise_for :users, controllers: { omniauth_callbacks: :omniauth_callbacks,
 devise_scope :user do
   get '/users/auth/:provider/omniauth_error' => 'omniauth_callbacks#omniauth_error', as: :omniauth_error
   get '/users/almost_there' => 'confirmations#almost_there'
+<<<<<<< HEAD
 
   ## EE-specific
   get '/users/auth/kerberos_spnego/negotiate' => 'omniauth_kerberos_spnego#negotiate'
   ## EE-specific
+=======
+>>>>>>> ce/9-3-stable
 end
 
 scope(constraints: { username: Gitlab::PathRegex.root_namespace_route_regex }) do

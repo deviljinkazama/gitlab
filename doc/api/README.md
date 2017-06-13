@@ -15,6 +15,8 @@ following locations:
 - [Commits](commits.md)
 - [Deployments](deployments.md)
 - [Deploy Keys](deploy_keys.md)
+- [Environments](environments.md)
+- [Events](events.md)
 - [Gitignores templates](templates/gitignores.md)
 - [GitLab CI Config templates](templates/gitlab_ci_ymls.md)
 - [Groups](groups.md)
@@ -53,6 +55,15 @@ following locations:
 - [Validate CI configuration](ci/lint.md)
 - [V3 to V4](v3_to_v4.md)
 - [Version](version.md)
+
+## Road to GraphQL
+
+API v4 will be the last REST API that we support. Going forward, we will start
+on moving to GraphQL and deprecate the use of controller-specific
+endpoints. GraphQL has a number of benefits:
+
+1. We avoid having to maintain two different APIs.
+2. Callers of the API can request only what they need.
 
 ### Internal CI API
 
