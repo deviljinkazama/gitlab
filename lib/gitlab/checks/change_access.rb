@@ -1,8 +1,11 @@
 module Gitlab
   module Checks
     class ChangeAccess
+<<<<<<< HEAD
       include PathLocksHelper
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       ERROR_MESSAGES = {
         push_code: 'You are not allowed to push code to this project.',
         delete_default_branch: 'The default branch of a project cannot be deleted.',
@@ -17,7 +20,10 @@ module Gitlab
         create_protected_tag: 'You are not allowed to create this tag as it is protected.'
       }.freeze
 
+<<<<<<< HEAD
       # protocol is currently used only in EE
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       attr_reader :user_access, :project, :skip_authorization, :protocol
 
       def initialize(
@@ -39,7 +45,10 @@ module Gitlab
         push_checks
         branch_checks
         tag_checks
+<<<<<<< HEAD
         push_rule_check
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
         true
       end

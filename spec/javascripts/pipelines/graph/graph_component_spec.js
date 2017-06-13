@@ -95,6 +95,7 @@ describe('graph component', function () {
     });
   });
 
+<<<<<<< HEAD
   describe('when linked pipelines are not present', function () {
     beforeEach(function () {
       const pipeline = Object.assign(graphJSON, { triggered: [], triggeredBy: [] });
@@ -122,6 +123,34 @@ describe('graph component', function () {
       it('it returns left-margin when no triggerer and not the first stage', function () {
         expect(this.component.stageConnectorClass(99, { groups: ['job'] })).toBe('left-margin');
       });
+=======
+  describe('with data', () => {
+    it('should render the graph', () => {
+      const component = new GraphComponent({
+        propsData: {
+          isLoading: false,
+          pipeline: graphJSON,
+        },
+      }).$mount('#js-pipeline-graph-vue');
+
+      expect(component.$el.classList.contains('js-pipeline-graph')).toEqual(true);
+
+      expect(
+        component.$el.querySelector('.stage-column:first-child').classList.contains('no-margin'),
+      ).toEqual(true);
+
+      expect(
+        component.$el.querySelector('.stage-column:nth-child(2)').classList.contains('left-margin'),
+      ).toEqual(true);
+
+      expect(
+        component.$el.querySelector('.stage-column:nth-child(2) .build:nth-child(1)').classList.contains('left-connector'),
+      ).toEqual(true);
+
+      expect(component.$el.querySelector('loading-icon')).toBe(null);
+
+      expect(component.$el.querySelector('.stage-column-list')).toBeDefined();
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     });
   });
 });

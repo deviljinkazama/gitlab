@@ -66,10 +66,13 @@ class Project < ActiveRecord::Base
 
   # update visibility_level of forks
   after_update :update_forks_visibility_level
+<<<<<<< HEAD
   after_update :remove_mirror_repository_reference,
                if: ->(project) { project.mirror? && project.import_url_updated? }
 
   after_validation :check_pending_delete
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
   after_validation :check_pending_delete
 
@@ -344,6 +347,13 @@ class Project < ActiveRecord::Base
 
     event :import_fail do
       transition [:scheduled, :started] => :failed
+<<<<<<< HEAD
+=======
+    end
+
+    event :import_retry do
+      transition failed: :started
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
 
     state :scheduled
@@ -351,14 +361,18 @@ class Project < ActiveRecord::Base
     state :finished
     state :failed
 
+<<<<<<< HEAD
     before_transition [:none, :finished, :failed] => :scheduled do |project, _|
       project.mirror_data&.last_update_scheduled_at = Time.now
     end
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     after_transition [:none, :finished, :failed] => :scheduled do |project, _|
       project.run_after_commit { add_import_job }
     end
 
+<<<<<<< HEAD
     before_transition scheduled: :started do |project, _|
       project.mirror_data&.last_update_started_at = Time.now
     end
@@ -406,6 +420,9 @@ class Project < ActiveRecord::Base
     after_transition [:finished, :failed] => [:scheduled, :started] do |project, _|
       Gitlab::Mirror.increment_capacity(project.id) if project.mirror?
     end
+=======
+    after_transition started: :finished, do: :reset_cache_and_import_attrs
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   end
 
   class << self
@@ -561,8 +578,17 @@ class Project < ActiveRecord::Base
     run_after_commit do
       ProjectCacheWorker.perform_async(self.id)
     end
+<<<<<<< HEAD
 
     self.import_data&.destroy unless mirror?
+=======
+
+    remove_import_data
+  end
+
+  def remove_import_data
+    import_data&.destroy
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   end
 
   def import_url=(value)
@@ -1215,6 +1241,17 @@ class Project < ActiveRecord::Base
     !!repository.exists?
   end
 
+  def update_forks_visibility_level
+    return unless visibility_level < visibility_level_was
+
+    forks.each do |forked_project|
+      if forked_project.visibility_level > visibility_level
+        forked_project.visibility_level = visibility_level
+        forked_project.save!
+      end
+    end
+  end
+
   def create_wiki
     ProjectWiki.new(self, self.owner).wiki
     true
@@ -1227,10 +1264,13 @@ class Project < ActiveRecord::Base
     @wiki ||= ProjectWiki.new(self, self.owner)
   end
 
+<<<<<<< HEAD
   def reference_issue_tracker?
     default_issues_tracker? || jira_tracker_active?
   end
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   def jira_tracker_active?
     jira_tracker? && jira_service.active
   end
@@ -1370,6 +1410,7 @@ class Project < ActiveRecord::Base
     end
   end
 
+<<<<<<< HEAD
   def merge_method
     if self.merge_requests_ff_only_enabled
       :ff
@@ -1428,6 +1469,8 @@ class Project < ActiveRecord::Base
     remote_mirrors.each(&:mark_for_delete_if_blank_url)
   end
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   def running_or_pending_build_count(force: false)
     Rails.cache.fetch(['projects', id, 'running_or_pending_build_count'], force: force) do
       builds.running_or_pending.count(:all)
@@ -1483,6 +1526,7 @@ class Project < ActiveRecord::Base
       { key: 'CI_PROJECT_ID', value: id.to_s, public: true },
       { key: 'CI_PROJECT_NAME', value: path, public: true },
       { key: 'CI_PROJECT_PATH', value: path_with_namespace, public: true },
+      { key: 'CI_PROJECT_PATH_SLUG', value: path_with_namespace.parameterize, public: true },
       { key: 'CI_PROJECT_NAMESPACE', value: namespace.full_path, public: true },
       { key: 'CI_PROJECT_URL', value: web_url, public: true }
     ]

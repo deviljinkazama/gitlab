@@ -3,7 +3,11 @@ require 'spec_helper'
 describe Projects::ForkService, services: true do
   describe 'fork by user' do
     before do
+<<<<<<< HEAD
       @from_user = create(:user )
+=======
+      @from_user = create(:user)
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       @from_namespace = @from_user.namespace
       avatar = fixture_file_upload(Rails.root + "spec/fixtures/dk.png", "image/png")
       @from_project = create(:project,

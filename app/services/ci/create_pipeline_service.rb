@@ -47,8 +47,8 @@ module Ci
         return pipeline
       end
 
-      unless pipeline.config_builds_attributes.present?
-        return error('No builds for this pipeline.')
+      unless pipeline.has_stage_seeds?
+        return error('No stages / jobs for this pipeline.')
       end
 
       _create_pipeline(&block)
@@ -60,14 +60,20 @@ module Ci
       Ci::Pipeline.transaction do
         update_merge_requests_head_pipeline if pipeline.save
 
+<<<<<<< HEAD
         yield(pipeline) if block_given?
 
         Ci::CreatePipelineBuildsService
+=======
+        Ci::CreatePipelineStagesService
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
           .new(project, current_user)
           .execute(pipeline)
       end
 
       cancel_pending_pipelines if project.auto_cancel_pending_pipelines?
+
+      pipeline_created_counter.increment(source: source)
 
       pipeline.tap(&:process!)
     end
@@ -140,6 +146,10 @@ module Ci
       pipeline.errors.add(:base, message)
       pipeline.drop if save
       pipeline
+    end
+
+    def pipeline_created_counter
+      @pipeline_created_counter ||= Gitlab::Metrics.counter(:pipelines_created_count, "Pipelines created count")
     end
   end
 end

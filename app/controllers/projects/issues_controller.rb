@@ -212,8 +212,12 @@ class Projects::IssuesController < Projects::ApplicationController
       title_text: @issue.title,
       description: view_context.markdown_field(@issue, :description),
       description_text: @issue.description,
+<<<<<<< HEAD
       task_status: @issue.task_status,
       updated_at: @issue.updated_at
+=======
+      task_status: @issue.task_status
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     }
   end
 

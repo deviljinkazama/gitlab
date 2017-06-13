@@ -84,6 +84,7 @@ describe 'Git HTTP requests', lib: true do
       end
     end
   end
+<<<<<<< HEAD
 
   shared_examples_for 'pulls are allowed' do
     it do
@@ -109,6 +110,33 @@ describe 'Git HTTP requests', lib: true do
     context "when the project doesn't exist" do
       let(:path) { 'doesnt/exist.git' }
 
+=======
+
+  shared_examples_for 'pulls are allowed' do
+    it do
+      download(path, env) do |response|
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+      end
+    end
+  end
+
+  shared_examples_for 'pushes are allowed' do
+    it do
+      upload(path, env) do |response|
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+      end
+    end
+  end
+
+  describe "User with no identities" do
+    let(:user) { create(:user) }
+
+    context "when the project doesn't exist" do
+      let(:path) { 'doesnt/exist.git' }
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       it_behaves_like 'pulls require Basic HTTP Authentication'
       it_behaves_like 'pushes require Basic HTTP Authentication'
 
@@ -120,6 +148,7 @@ describe 'Git HTTP requests', lib: true do
         end
       end
     end
+<<<<<<< HEAD
 
     context "when requesting the Wiki" do
       let(:wiki) { ProjectWiki.new(project) }
@@ -135,6 +164,23 @@ describe 'Git HTTP requests', lib: true do
 
           it_behaves_like 'pulls are allowed'
 
+=======
+
+    context "when requesting the Wiki" do
+      let(:wiki) { ProjectWiki.new(project) }
+      let(:path) { "/#{wiki.repository.path_with_namespace}.git" }
+
+      context "when the project is public" do
+        let(:project) { create(:project, :repository, :public, :wiki_enabled) }
+
+        it_behaves_like 'pushes require Basic HTTP Authentication'
+
+        context 'when unauthenticated' do
+          let(:env) { {} }
+
+          it_behaves_like 'pulls are allowed'
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
           it "responds to pulls with the wiki's repo" do
             download(path) do |response|
               json_body = ActiveSupport::JSON.decode(response.body)
@@ -473,7 +519,11 @@ describe 'Git HTTP requests', lib: true do
             end
 
             context "when the user doesn't have access to the project" do
+<<<<<<< HEAD
               it "pulls get status 404 Not Found" do
+=======
+              it "pulls get status 404" do
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
                 download(path, user: user.username, password: user.password) do |response|
                   expect(response).to have_http_status(:not_found)
                 end
@@ -583,6 +633,7 @@ describe 'Git HTTP requests', lib: true do
             end
           end
         end
+<<<<<<< HEAD
         
         context "when Kerberos token is provided" do
           let(:env) { { spnego_request_token: 'opaque_request_token' } }
@@ -674,10 +725,43 @@ describe 'Git HTTP requests', lib: true do
                   expect(response.headers['WWW-Authenticate'].split("\n")).to include("Negotiate #{::Base64.strict_encode64('opaque_response_token')}")
                 end
               end
+=======
+      end
+
+      context "when the project path doesn't end in .git" do
+        let(:project) { create(:project, :repository, :public, path: 'project.git-project') }
+
+        context "GET info/refs" do
+          let(:path) { "/#{project.path_with_namespace}/info/refs" }
+
+          context "when no params are added" do
+            before { get path }
+
+            it "redirects to the .git suffix version" do
+              expect(response).to redirect_to("/#{project.path_with_namespace}.git/info/refs")
             end
           end
-        end
 
+          context "when the upload-pack service is requested" do
+            let(:params) { { service: 'git-upload-pack' } }
+            before { get path, params }
+
+            it "redirects to the .git suffix version" do
+              expect(response).to redirect_to("/#{project.path_with_namespace}.git/info/refs?service=#{params[:service]}")
+            end
+          end
+
+          context "when the receive-pack service is requested" do
+            let(:params) { { service: 'git-receive-pack' } }
+            before { get path, params }
+
+            it "redirects to the .git suffix version" do
+              expect(response).to redirect_to("/#{project.path_with_namespace}.git/info/refs?service=#{params[:service]}")
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
+            end
+          end
+
+<<<<<<< HEAD
         context "when repository is above size limit" do
           let(:env) { { user: user.username, password: user.password } }
 
@@ -709,10 +793,32 @@ describe 'Git HTTP requests', lib: true do
               expect(response).to have_http_status(:forbidden)
               expect(response.body).to eq(msg)
             end
+=======
+          context "when the params are anything else" do
+            let(:params) { { service: 'git-implode-pack' } }
+            before { get path, params }
+
+            it "redirects to the sign-in page" do
+              expect(response).to redirect_to(new_user_session_path)
+            end
+          end
+        end
+
+        context "POST git-upload-pack" do
+          it "fails to find a route" do
+            expect { clone_post(project.path_with_namespace) }.to raise_error(ActionController::RoutingError)
+          end
+        end
+
+        context "POST git-receive-pack" do
+          it "failes to find a route" do
+            expect { push_post(project.path_with_namespace) }.to raise_error(ActionController::RoutingError)
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
           end
         end
       end
 
+<<<<<<< HEAD
       context "when the project path doesn't end in .git" do
         let(:project) { create(:project, :repository, :public, path: 'project.git-project') }
 
@@ -790,6 +896,30 @@ describe 'Git HTTP requests', lib: true do
         context "when the file does not exist" do
           before { get "/#{project.path_with_namespace}/blob/master/info/refs" }
 
+=======
+      context "retrieving an info/refs file" do
+        let(:project) { create(:project, :repository, :public) }
+
+        context "when the file exists" do
+          before do
+            # Provide a dummy file in its place
+            allow_any_instance_of(Repository).to receive(:blob_at).and_call_original
+            allow_any_instance_of(Repository).to receive(:blob_at).with('b83d6e391c22777fca1ed3012fce84f633d7fed0', 'info/refs') do
+              Blob.decorate(Gitlab::Git::Blob.find(project.repository, 'master', 'bar/branch-test.txt'), project)
+            end
+
+            get "/#{project.path_with_namespace}/blob/master/info/refs"
+          end
+
+          it "returns the file" do
+            expect(response).to have_http_status(:ok)
+          end
+        end
+
+        context "when the file does not exist" do
+          before { get "/#{project.path_with_namespace}/blob/master/info/refs" }
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
           it "returns not found" do
             expect(response).to have_http_status(:not_found)
           end
