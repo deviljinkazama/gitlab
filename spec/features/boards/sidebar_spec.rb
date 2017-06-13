@@ -134,11 +134,8 @@ describe 'Issue Boards', feature: true, js: true do
           click_link 'Unassigned'
         end
 
-<<<<<<< HEAD
         find('.dropdown-menu-toggle').click
 
-=======
->>>>>>> ce/9-3-stable
         wait_for_requests
 
         expect(page).to have_content('No assignee')
