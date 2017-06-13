@@ -66,13 +66,8 @@ class Project < ActiveRecord::Base
 
   # update visibility_level of forks
   after_update :update_forks_visibility_level
-<<<<<<< HEAD
   after_update :remove_mirror_repository_reference,
                if: ->(project) { project.mirror? && project.import_url_updated? }
-
-  after_validation :check_pending_delete
-=======
->>>>>>> ce/9-3-stable
 
   after_validation :check_pending_delete
 
