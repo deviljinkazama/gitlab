@@ -33,12 +33,8 @@ namespace :gitlab do
         SystemCheck::App::RedisVersionCheck,
         SystemCheck::App::RubyVersionCheck,
         SystemCheck::App::GitVersionCheck,
-<<<<<<< HEAD
         SystemCheck::App::ActiveUsersCheck,
         SystemCheck::App::ElasticsearchCheck
-=======
-        SystemCheck::App::ActiveUsersCheck
->>>>>>> ce/9-3-stable
       ]
 
       SystemCheck.run('GitLab', checks)
