@@ -8,10 +8,7 @@ describe Gitlab::GitAccess, lib: true do
   let(:user) { create(:user) }
   let(:actor) { user }
   let(:protocol) { 'ssh' }
-<<<<<<< HEAD
 
-=======
->>>>>>> ce/9-3-stable
   let(:authentication_abilities) do
     [
       :read_project,
