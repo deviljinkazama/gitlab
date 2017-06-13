@@ -33,7 +33,7 @@ namespace :gitlab do
         SystemCheck::App::RedisVersionCheck,
         SystemCheck::App::RubyVersionCheck,
         SystemCheck::App::GitVersionCheck,
-        SystemCheck::App::ActiveUsersCheck,
+        SystemCheck::App::ActiveUsersCheck
       ]
 
       # EE only
