@@ -46,8 +46,9 @@ class Projects::DeployKeysController < Projects::ApplicationController
   end
 
   def enable
-    load_key
     Projects::EnableDeployKeyService.new(@project, current_user, params).execute
+
+    load_key
     log_audit_event(@key.title, action: :create)
 
     respond_to do |format|
@@ -60,8 +61,9 @@ class Projects::DeployKeysController < Projects::ApplicationController
     deploy_key_project = @project.deploy_keys_projects.find_by(deploy_key_id: params[:id])
     return render_404 unless deploy_key_project
 
-    load_key
     deploy_key_project.destroy!
+
+    load_key
     log_audit_event(@key.title, action: :destroy)
 
     respond_to do |format|
@@ -80,7 +82,14 @@ class Projects::DeployKeysController < Projects::ApplicationController
     params.require(:deploy_key).permit(:key, :title, :can_push)
   end
 
-<<<<<<< HEAD
+  def update_params
+    params.require(:deploy_key).permit(:title, :can_push)
+  end
+
+  def authorize_update_deploy_key!
+    access_denied! unless can?(current_user, :update_deploy_key, deploy_key)
+  end
+
   def log_audit_event(key_title, options = {})
     AuditEventService.new(current_user, @project, options)
       .for_deploy_key(key_title).security_event
@@ -88,13 +97,5 @@ class Projects::DeployKeysController < Projects::ApplicationController
 
   def load_key
     @key ||= current_user.accessible_deploy_keys.find(params[:id])
-=======
-  def update_params
-    params.require(:deploy_key).permit(:title, :can_push)
-  end
-
-  def authorize_update_deploy_key!
-    access_denied! unless can?(current_user, :update_deploy_key, deploy_key)
->>>>>>> ce/9-3-stable
   end
 end
