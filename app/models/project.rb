@@ -342,13 +342,10 @@ class Project < ActiveRecord::Base
 
     event :import_fail do
       transition [:scheduled, :started] => :failed
-<<<<<<< HEAD
-=======
     end
 
     event :import_retry do
       transition failed: :started
->>>>>>> ce/9-3-stable
     end
 
     state :scheduled
@@ -356,18 +353,10 @@ class Project < ActiveRecord::Base
     state :finished
     state :failed
 
-<<<<<<< HEAD
     before_transition [:none, :finished, :failed] => :scheduled do |project, _|
       project.mirror_data&.last_update_scheduled_at = Time.now
     end
 
-=======
->>>>>>> ce/9-3-stable
-    after_transition [:none, :finished, :failed] => :scheduled do |project, _|
-      project.run_after_commit { add_import_job }
-    end
-
-<<<<<<< HEAD
     before_transition scheduled: :started do |project, _|
       project.mirror_data&.last_update_started_at = Time.now
     end
@@ -410,14 +399,15 @@ class Project < ActiveRecord::Base
       end
     end
 
-    after_transition started: :finished, do: :reset_cache_and_import_attrs
-
     after_transition [:finished, :failed] => [:scheduled, :started] do |project, _|
       Gitlab::Mirror.increment_capacity(project.id) if project.mirror?
     end
-=======
+
+    after_transition [:none, :finished, :failed] => :scheduled do |project, _|
+      project.run_after_commit { add_import_job }
+    end
+
     after_transition started: :finished, do: :reset_cache_and_import_attrs
->>>>>>> ce/9-3-stable
   end
 
   class << self
@@ -573,17 +563,12 @@ class Project < ActiveRecord::Base
     run_after_commit do
       ProjectCacheWorker.perform_async(self.id)
     end
-<<<<<<< HEAD
-
-    self.import_data&.destroy unless mirror?
-=======
 
     remove_import_data
   end
 
   def remove_import_data
-    import_data&.destroy
->>>>>>> ce/9-3-stable
+    import_data&.destroy unless mirror?
   end
 
   def import_url=(value)
@@ -1259,13 +1244,6 @@ class Project < ActiveRecord::Base
     @wiki ||= ProjectWiki.new(self, self.owner)
   end
 
-<<<<<<< HEAD
-  def reference_issue_tracker?
-    default_issues_tracker? || jira_tracker_active?
-  end
-
-=======
->>>>>>> ce/9-3-stable
   def jira_tracker_active?
     jira_tracker? && jira_service.active
   end
@@ -1405,7 +1383,6 @@ class Project < ActiveRecord::Base
     end
   end
 
-<<<<<<< HEAD
   def merge_method
     if self.merge_requests_ff_only_enabled
       :ff
@@ -1464,8 +1441,6 @@ class Project < ActiveRecord::Base
     remote_mirrors.each(&:mark_for_delete_if_blank_url)
   end
 
-=======
->>>>>>> ce/9-3-stable
   def running_or_pending_build_count(force: false)
     Rails.cache.fetch(['projects', id, 'running_or_pending_build_count'], force: force) do
       builds.running_or_pending.count(:all)
