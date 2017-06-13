@@ -1519,7 +1519,7 @@ describe MergeRequest, models: true do
           end
 
           it 'does not require approval for the merge request' do
-            expect(merge_request.approvals_left).to eq(1)
+            expect(merge_request.approvals_left).to eq(0)
           end
 
           it 'does not allow the approver to approve the MR' do
