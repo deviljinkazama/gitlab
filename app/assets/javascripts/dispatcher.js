@@ -59,13 +59,10 @@ import RefSelectDropdown from './ref_select_dropdown';
 import GfmAutoComplete from './gfm_auto_complete';
 import ShortcutsBlob from './shortcuts_blob';
 import initSettingsPanels from './settings_panels';
-<<<<<<< HEAD
 
 // EE-only
 import ApproversSelect from './approvers_select';
 import AuditLogs from './audit_logs';
-=======
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
 (function() {
   var Dispatcher;
