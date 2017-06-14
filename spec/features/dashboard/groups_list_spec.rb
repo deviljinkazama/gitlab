@@ -18,16 +18,10 @@ describe 'Dashboard Groups page', js: true, feature: true do
     expect(page).not_to have_content(another_group.full_name)
   end
 
-<<<<<<< HEAD
-  it 'filters groups' do
-    fill_in 'filter_groups', with: group.name
-    wait_for_requests
-=======
   describe 'when filtering groups' do
     before do
       group.add_owner(user)
       nested_group.add_owner(user)
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
       login_as(user)
 
@@ -57,21 +51,12 @@ describe 'Dashboard Groups page', js: true, feature: true do
     end
   end
 
-<<<<<<< HEAD
-  it 'resets search when user cleans the input' do
-    fill_in 'filter_groups', with: group.name
-    wait_for_requests
-
-    fill_in 'filter_groups', with: ""
-    wait_for_requests
-=======
   describe 'group with subgroups' do
     let!(:subgroup) { create(:group, :public, parent: group) }
 
     before do
       group.add_owner(user)
       subgroup.add_owner(user)
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
       login_as(user)
 
