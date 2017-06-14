@@ -56,11 +56,7 @@ class DropdownHint extends gl.FilteredSearchDropdown {
   }
 
   renderContent() {
-<<<<<<< HEAD
     const dropdownData = this.tokenKeys.get()
-=======
-    const dropdownData = gl.FilteredSearchTokenKeys.get()
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       .map(tokenKey => ({
         icon: `fa-${tokenKey.icon}`,
         hint: tokenKey.key,
