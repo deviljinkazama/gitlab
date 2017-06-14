@@ -5,11 +5,7 @@ import './preview_markdown';
 
 window.DropzoneInput = (function() {
   function DropzoneInput(form) {
-<<<<<<< HEAD
-    var updateAttachingMessage, $attachingFileMessage, $mdArea, $attachButton, $cancelButton, $retryLink, $uploadingErrorContainer, $uploadingErrorMessage, $uploadProgress, $uploadingProgressContainer, appendToTextArea, btnAlert, child, closeAlertMessage, closeSpinner, divHover, divSpinner, dropzone, $formDropzone, formTextarea, getFilename, handlePaste, iconPaperclip, iconSpinner, insertToTextArea, isImage, maxFileSize, pasteText, uploadsPath, showError, showSpinner, uploadFile;
-=======
     var updateAttachingMessage, $attachingFileMessage, $mdArea, $attachButton, $cancelButton, $retryLink, $uploadingErrorContainer, $uploadingErrorMessage, $uploadProgress, $uploadingProgressContainer, appendToTextArea, btnAlert, child, closeAlertMessage, closeSpinner, divHover, divSpinner, dropzone, $formDropzone, formTextarea, getFilename, handlePaste, iconPaperclip, iconSpinner, insertToTextArea, isImage, maxFileSize, pasteText, uploadsPath, showError, showSpinner, uploadFile, addFileToForm;
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     Dropzone.autoDiscover = false;
     divHover = '<div class="div-dropzone-hover"></div>';
     iconPaperclip = '<i class="fa fa-paperclip div-dropzone-icon"></i>';
@@ -75,10 +71,7 @@ window.DropzoneInput = (function() {
         pasteText(response.link.markdown, shouldPad);
         // Show 'Attach a file' link only when all files have been uploaded.
         if (!processingFileCount) $attachButton.removeClass('hide');
-<<<<<<< HEAD
-=======
         addFileToForm(response.link.url);
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       },
       error: function(file, errorMessage = 'Attaching the file failed.', xhr) {
         // If 'error' event is fired by dropzone, the second parameter is error message.
@@ -206,13 +199,10 @@ window.DropzoneInput = (function() {
       return formTextarea.trigger('input');
     };
 
-<<<<<<< HEAD
-=======
     addFileToForm = function(path) {
       $(form).append('<input type="hidden" name="files[]" value="' + _.escape(path) + '">');
     };
 
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     getFilename = function(e) {
       var value;
       if (window.clipboardData && window.clipboardData.getData) {
