@@ -144,16 +144,6 @@
   }
 }
 
-<<<<<<< HEAD
-  .selected {
-    .name {
-      background-color: $filter-name-selected-color;
-    }
-
-    .value-container {
-      background-color: $filter-value-selected-color;
-    }
-=======
 .filtered-search-token:hover,
 .filtered-search-token .selected,
 .filtered-search-term .selected {
@@ -163,7 +153,6 @@
 
   .value-container {
     background-color: $filter-value-selected-color;
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   }
 }
 
