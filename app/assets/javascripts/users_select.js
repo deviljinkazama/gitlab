@@ -567,10 +567,6 @@ function UsersSelect(currentUser, els) {
                   }
                 }
               }
-<<<<<<< HEAD
-
-=======
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
               if (showNullUser) {
                 nullUser = {
                   name: 'Unassigned',
