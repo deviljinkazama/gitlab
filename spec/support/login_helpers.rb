@@ -41,7 +41,8 @@ module LoginHelpers
   def login_via(provider, user, uid)
     mock_auth_hash(provider, uid, user.email)
     visit new_user_session_path
-    click_link provider
+    expect(page).to have_content('Sign in with')
+    click_link "oauth-login-#{provider}"
   end
 
   def mock_auth_hash(provider, uid, email)
