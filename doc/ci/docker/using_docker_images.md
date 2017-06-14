@@ -40,7 +40,7 @@ accessible during the build process.
 ## What is an image
 
 The `image` keyword is the name of the docker image the docker executor
-will run to perform the CI tasks.  
+will run to perform the CI tasks.
 
 By default the executor will only pull images from [Docker Hub][hub],
 but this can be configured in the `gitlab-runner/config.toml` by setting
@@ -192,13 +192,10 @@ To configure access for `registry.example.com`, follow these steps:
 
 You can add configuration for as many registries as you want, adding more
 registries to the `"auths"` hash as described above.
-<<<<<<< HEAD
 
 If the repository is private you need to authenticate your GitLab Runner in the
 registry. Learn how to do that on
 [GitLab Runner's documentation][runner-priv-reg].
-=======
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
 ## Accessing the services
 

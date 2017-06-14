@@ -27,11 +27,7 @@ download and analyze the report artifact in JSON format.
 
 For GitLab [Enterprise Edition Starter][ee] users, this information can be automatically
 extracted and shown right in the merge request widget. [Learn more on code quality
-<<<<<<< HEAD
 diffs in merge requests](../../user/project/merge_requests/code_quality_diff.md).
-=======
-diffs in merge requests](http://docs.gitlab.com/ee/user/project/merge_requests/code_quality_diff.md).
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
 [cli]: https://github.com/codeclimate/codeclimate
 [dind]: ../docker/using_docker_build.md#use-docker-in-docker-executor
