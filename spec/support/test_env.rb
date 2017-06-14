@@ -42,12 +42,8 @@ module TestEnv
     'csv'                                => '3dd0896',
     'v1.1.0'                             => 'b83d6e3',
     'add-ipython-files'                  => '93ee732',
-<<<<<<< HEAD
     'add-pdf-file'                       => 'e774ebd',
     'squash-large-files'                 => '54cec52'
-=======
-    'add-pdf-file'                       => 'e774ebd'
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   }.freeze
 
   # gitlab-test-fork is a fork of gitlab-fork, but we don't necessarily
@@ -263,11 +259,7 @@ module TestEnv
 
       # Before we used Git clone's --mirror option, bare repos could end up
       # with missing refs, clearing them and retrying should fix the issue.
-<<<<<<< HEAD
-      cleanup && init unless reset.call
-=======
       cleanup && clean_gitlab_test_path && init unless reset.call
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
   end
 
