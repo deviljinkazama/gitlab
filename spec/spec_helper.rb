@@ -56,11 +56,8 @@ RSpec.configure do |config|
   config.include StubGitlabCalls
   config.include StubGitlabData
   config.include ApiHelpers, :api
-<<<<<<< HEAD
   config.include Rails.application.routes.url_helpers, type: :routing
-=======
   config.include MigrationsHelpers, :migration
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
   config.infer_spec_type_from_file_location!
 
