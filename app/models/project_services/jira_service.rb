@@ -86,11 +86,19 @@ class JiraService < IssueTrackerService
 
   def fields
     [
+<<<<<<< HEAD
       { type: 'text', name: 'url', title: 'Web URL', placeholder: 'https://jira.example.com' },
       { type: 'text', name: 'api_url', title: 'JIRA API URL', placeholder: 'If different from Web URL' },
       { type: 'text', name: 'project_key', placeholder: 'Project Key' },
       { type: 'text', name: 'username', placeholder: '' },
       { type: 'password', name: 'password', placeholder: '' },
+=======
+      { type: 'text', name: 'url', title: 'Web URL', placeholder: 'https://jira.example.com', required: true },
+      { type: 'text', name: 'api_url', title: 'JIRA API URL', placeholder: 'If different from Web URL' },
+      { type: 'text', name: 'project_key', placeholder: 'Project Key', required: true },
+      { type: 'text', name: 'username', placeholder: '', required: true },
+      { type: 'password', name: 'password', placeholder: '', required: true },
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       { type: 'text', name: 'jira_issue_transition_id', placeholder: '' }
     ]
   end
@@ -173,10 +181,6 @@ class JiraService < IssueTrackerService
   def test(_)
     result = test_settings
     { success: result.present?, result: result }
-  end
-
-  def can_test?
-    username.present? && password.present?
   end
 
   # JIRA does not need test data.

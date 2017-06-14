@@ -29,6 +29,7 @@ module Gitlab
         'No'
       end
     end
+<<<<<<< HEAD
 
     # EE below
     def try_megabytes_to_bytes(size)
@@ -53,5 +54,7 @@ module Gitlab
 
       nil
     end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   end
 end

@@ -116,7 +116,10 @@ class ProjectPolicy < BasePolicy
   end
 
   def master_access!
+<<<<<<< HEAD
     can! :push_code_to_protected_branches
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     can! :delete_protected_branch
     can! :update_project_snippet
     can! :update_environment
@@ -195,7 +198,10 @@ class ProjectPolicy < BasePolicy
   def archived_access!
     cannot! :create_merge_request
     cannot! :push_code
+<<<<<<< HEAD
     cannot! :push_code_to_protected_branches
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     cannot! :delete_protected_branch
     cannot! :update_merge_request
     cannot! :admin_merge_request
@@ -244,7 +250,10 @@ class ProjectPolicy < BasePolicy
 
     unless repository_enabled
       cannot! :push_code
+<<<<<<< HEAD
       cannot! :push_code_to_protected_branches
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       cannot! :delete_protected_branch
       cannot! :download_code
       cannot! :fork_project

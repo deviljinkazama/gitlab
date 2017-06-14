@@ -146,19 +146,31 @@ describe GitPushService, services: true do
   end
 
   describe "Pipelines" do
+<<<<<<< HEAD
     subject { execute_service(project, user, oldrev, newrev, ref) }
+=======
+    subject { execute_service(project, user, @oldrev, @newrev, @ref) }
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
     before do
       stub_ci_pipeline_to_return_yaml_file
     end
 
     it "creates a new pipeline" do
+<<<<<<< HEAD
       expect{ subject }.to change { Ci::Pipeline.count }
+=======
+      expect{ subject }.to change{ Ci::Pipeline.count }
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       expect(Ci::Pipeline.last).to be_push
     end
   end
 
+<<<<<<< HEAD
   describe "ES indexing" do
+=======
+  describe "Push Event" do
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     before do
       stub_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
     end

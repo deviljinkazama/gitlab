@@ -8,7 +8,10 @@ describe Gitlab::GitAccess, lib: true do
   let(:user) { create(:user) }
   let(:actor) { user }
   let(:protocol) { 'ssh' }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   let(:authentication_abilities) do
     [
       :read_project,
@@ -82,6 +85,7 @@ describe Gitlab::GitAccess, lib: true do
             end
           end
         end
+<<<<<<< HEAD
 
         context 'when actor is a User' do
           context 'when the User can read the project' do
@@ -184,6 +188,110 @@ describe Gitlab::GitAccess, lib: true do
           allow(Gitlab.config.gitlab_shell).to receive(:receive_pack).and_return(false)
         end
 
+=======
+
+        context 'when actor is a User' do
+          context 'when the User can read the project' do
+            before { project.team << [user, :master] }
+
+            it 'allows pull access' do
+              expect { pull_access_check }.not_to raise_error
+            end
+
+            it 'allows push access' do
+              expect { push_access_check }.not_to raise_error
+            end
+          end
+
+          context 'when the User cannot read the project' do
+            it 'blocks pulls with "not found"' do
+              expect { pull_access_check }.to raise_not_found('The project you were looking for could not be found.')
+            end
+
+            it 'blocks pushes with "not found"' do
+              expect { push_access_check }.to raise_not_found('The project you were looking for could not be found.')
+            end
+          end
+        end
+
+        # For backwards compatibility
+        context 'when actor is :ci' do
+          let(:actor) { :ci }
+          let(:authentication_abilities) { build_authentication_abilities }
+
+          it 'allows pull access' do
+            expect { pull_access_check }.not_to raise_error
+          end
+
+          it 'does not block pushes with "not found"' do
+            expect { push_access_check }.to raise_unauthorized('You are not allowed to upload code for this project.')
+          end
+        end
+      end
+
+      context 'when actor is nil' do
+        let(:actor) { nil }
+
+        context 'when guests can read the project' do
+          let(:project) { create(:project, :repository, :public) }
+
+          it 'allows pull access' do
+            expect { pull_access_check }.not_to raise_error
+          end
+
+          it 'does not block pushes with "not found"' do
+            expect { push_access_check }.to raise_unauthorized('You are not allowed to upload code for this project.')
+          end
+        end
+
+        context 'when guests cannot read the project' do
+          it 'blocks pulls with "not found"' do
+            expect { pull_access_check }.to raise_not_found('The project you were looking for could not be found.')
+          end
+
+          it 'blocks pushes with "not found"' do
+            expect { push_access_check }.to raise_not_found('The project you were looking for could not be found.')
+          end
+        end
+      end
+    end
+
+    context 'when the project is nil' do
+      let(:project) { nil }
+
+      it 'blocks any command with "not found"' do
+        expect { pull_access_check }.to raise_not_found('The project you were looking for could not be found.')
+        expect { push_access_check }.to raise_not_found('The project you were looking for could not be found.')
+      end
+    end
+  end
+
+  describe '#check_command_disabled!' do
+    before { project.team << [user, :master] }
+
+    context 'over http' do
+      let(:protocol) { 'http' }
+
+      context 'when the git-upload-pack command is disabled in config' do
+        before do
+          allow(Gitlab.config.gitlab_shell).to receive(:upload_pack).and_return(false)
+        end
+
+        context 'when calling git-upload-pack' do
+          it { expect { pull_access_check }.to raise_unauthorized('Pulling over HTTP is not allowed.') }
+        end
+
+        context 'when calling git-receive-pack' do
+          it { expect { push_access_check }.not_to raise_error }
+        end
+      end
+
+      context 'when the git-receive-pack command is disabled in config' do
+        before do
+          allow(Gitlab.config.gitlab_shell).to receive(:receive_pack).and_return(false)
+        end
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         context 'when calling git-receive-pack' do
           it { expect { push_access_check }.to raise_unauthorized('Pushing over HTTP is not allowed.') }
         end
@@ -853,6 +961,7 @@ describe Gitlab::GitAccess, lib: true do
 
         it { expect { push_access_check }.to raise_not_found('The project you were looking for could not be found.') }
       end
+<<<<<<< HEAD
     end
   end
 
@@ -863,6 +972,8 @@ describe Gitlab::GitAccess, lib: true do
       project.team << [user, :master]
 
       expect { push_access_check }.to raise_unauthorized('The repository is temporarily read-only. Please try again later.')
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
   end
 

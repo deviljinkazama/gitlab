@@ -9,8 +9,11 @@ describe Projects::EnvironmentsController do
   end
 
   before do
+<<<<<<< HEAD
     allow_any_instance_of(License).to receive(:feature_available?).and_return(false)
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     project.add_master(user)
 
     sign_in(user)

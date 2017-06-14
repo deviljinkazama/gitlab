@@ -146,6 +146,15 @@ export default {
 
       notify.notifyMe(title, message, this.mr.gitlabLogo);
     },
+    handleNotification(data) {
+      if (data.ci_status === this.mr.ciStatus) return;
+
+      const label = data.pipeline.details.status.label;
+      const title = `Pipeline ${label}`;
+      const message = `Pipeline ${label} for "${data.title}"`;
+
+      notify.notifyMe(title, message, this.mr.gitlabLogo);
+    },
     resumePolling() {
       this.pollingInterval.resume();
     },

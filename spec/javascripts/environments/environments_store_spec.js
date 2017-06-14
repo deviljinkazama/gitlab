@@ -157,6 +157,7 @@ describe('Store', () => {
     });
   });
 
+<<<<<<< HEAD
   describe('deploy boards', () => {
     beforeEach(() => {
       const environment = {
@@ -179,6 +180,8 @@ describe('Store', () => {
     });
   });
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   describe('getOpenFolders', () => {
     it('should return open folder', () => {
       store.storeEnvironments(serverData);

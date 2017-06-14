@@ -10,7 +10,11 @@
           = link_to 'Normal view', namespace_project_blob_path(@project.namespace, @project, @id),
               class: 'btn'
         - else
+<<<<<<< HEAD
           = link_to 'Blame', namespace_project_blame_path(@project.namespace, @project, @id),
+=======
+          = link_to 'Annotate', namespace_project_blame_path(@project.namespace, @project, @id),
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
               class: 'btn js-blob-blame-link' unless blob.empty?
 
       = link_to 'History', namespace_project_commits_path(@project.namespace, @project, @id),

@@ -6,6 +6,15 @@ describe 'Branches', feature: true do
   let(:project) { create(:project, :public) }
   let(:repository) { project.repository }
 
+<<<<<<< HEAD
+=======
+  def set_protected_branch_name(branch_name)
+    find(".js-protected-branch-select").click
+    find(".dropdown-input-field").set(branch_name)
+    click_on("Create wildcard #{branch_name}")
+  end
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   context 'logged in as developer' do
     before do
       login_as :user
@@ -63,8 +72,11 @@ describe 'Branches', feature: true do
         project.add_user(@user, :master)
         visit namespace_project_protected_branches_path(project.namespace, project)
         set_protected_branch_name('fix')
+<<<<<<< HEAD
         set_allowed_to('merge')
         set_allowed_to('push')
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         click_on "Protect"
 
         within(".protected-branches-list") { expect(page).to have_content('fix') }
@@ -93,8 +105,11 @@ describe 'Branches', feature: true do
       before do
         visit namespace_project_protected_branches_path(project.namespace, project)
         set_protected_branch_name('fix')
+<<<<<<< HEAD
         set_allowed_to('merge')
         set_allowed_to('push')
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         click_on "Protect"
 
         within(".protected-branches-list") { expect(page).to have_content('fix') }

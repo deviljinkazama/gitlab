@@ -64,6 +64,7 @@ module API
       expose :project_id, :issues_events, :merge_requests_events
       expose :note_events, :pipeline_events, :wiki_page_events
       expose :job_events
+<<<<<<< HEAD
     end
 
     class ProjectPushRule < Grape::Entity
@@ -71,6 +72,8 @@ module API
       expose :commit_message_regex, :branch_name_regex, :deny_delete_tag
       expose :member_check, :prevent_secrets, :author_email_regex
       expose :file_name_regex, :max_file_size
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
 
     class BasicProjectDetails < Grape::Entity
@@ -110,6 +113,11 @@ module API
       expose :creator_id
       expose :namespace, using: 'API::Entities::Namespace'
       expose :forked_from_project, using: Entities::BasicProjectDetails, if: lambda{ |project, options| project.forked? }
+<<<<<<< HEAD
+=======
+      expose :import_status
+      expose :import_error, if: lambda { |_project, options| options[:user_can_admin_project] }
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       expose :avatar_url do |user, options|
         user.avatar_url(only_path: false)
       end
@@ -251,7 +259,7 @@ module API
     end
 
     class ProjectSnippet < Grape::Entity
-      expose :id, :title, :file_name
+      expose :id, :title, :file_name, :description
       expose :author, using: Entities::UserBasic
       expose :updated_at, :created_at
 
@@ -261,7 +269,7 @@ module API
     end
 
     class PersonalSnippet < Grape::Entity
-      expose :id, :title, :file_name
+      expose :id, :title, :file_name, :description
       expose :author, using: Entities::UserBasic
       expose :updated_at, :created_at
 
@@ -362,6 +370,7 @@ module API
     class MergeRequestChanges < MergeRequest
       expose :diffs, as: :changes, using: Entities::RepoDiff do |compare, _|
         compare.raw_diffs(limits: false).to_a
+<<<<<<< HEAD
       end
     end
 
@@ -382,6 +391,8 @@ module API
 
       expose :user_can_approve do |merge_request, options|
         merge_request.can_approve?(options[:current_user])
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       end
     end
 

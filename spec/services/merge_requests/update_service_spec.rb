@@ -59,7 +59,11 @@ describe MergeRequests::UpdateService, services: true do
         end
       end
 
+<<<<<<< HEAD
       it 'matches base expectations' do
+=======
+      it 'mathces base expectations' do
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         expect(@merge_request).to be_valid
         expect(@merge_request.title).to eq('New title')
         expect(@merge_request.assignee).to eq(user2)

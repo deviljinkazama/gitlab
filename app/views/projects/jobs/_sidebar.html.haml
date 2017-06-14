@@ -68,6 +68,7 @@
         - elsif @build.runner
           \##{@build.runner.id}
       .btn-group.btn-group-justified{ role: :group }
+<<<<<<< HEAD:app/views/projects/jobs/_sidebar.html.haml
         - if @build.has_trace?
           = link_to 'Raw', raw_namespace_project_job_path(@project.namespace, @project, @build), class: 'btn btn-sm btn-default'
         - if @build.active?
@@ -77,6 +78,10 @@
                     class: "btn btn-sm btn-default", method: :post,
                     data: { confirm: "Are you sure you want to erase this build?" } do
             Erase
+=======
+        - if @build.active?
+          = link_to "Cancel", cancel_namespace_project_job_path(@project.namespace, @project, @build), class: 'btn btn-sm btn-default', method: :post
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81:app/views/projects/jobs/_sidebar.html.haml
 
     - if @build.trigger_request
       .build-widget
@@ -118,7 +123,7 @@
           %span.stage-selection More
           = icon('chevron-down')
         %ul.dropdown-menu
-          - @build.pipeline.stages.each do |stage|
+          - @build.pipeline.legacy_stages.each do |stage|
             %li
               %a.stage-item= stage.name
 
@@ -137,6 +142,3 @@
                 = build.id
             - if build.retried?
               %i.fa.fa-refresh.has-tooltip{ data: { container: 'body', placement: 'bottom' }, title: 'Job was retried' }
-
-:javascript
-  new Sidebar();

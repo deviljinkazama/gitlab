@@ -9,9 +9,13 @@ module BlobViewer
     end
 
     def prepare!
+<<<<<<< HEAD
       if blob.project
         blob.load_all_data!(blob.project.repository)
       end
+=======
+      blob.load_all_data!
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
 
     def render_error

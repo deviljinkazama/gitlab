@@ -55,6 +55,7 @@ is calculated as; closed and merged merge requests plus all closed issues divide
 total merge requests and issues.
 
 ![Milestone statistics](img/progress.png)
+<<<<<<< HEAD
 
 ## Burndown charts
 
@@ -92,3 +93,5 @@ cumulative value.
 [ee-1540]: https://gitlab.com/gitlab-org/gitlab-ee/merge_requests/1540
 [ee]: https://about.gitlab.com/gitlab-ee
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @mixin flat-connector-before($length: 44px) {
   &::before {
     content: '';
@@ -25,6 +26,8 @@
   }
 }
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 .pipelines {
   .stage {
     max-width: 90px;
@@ -998,6 +1001,7 @@
   }
 }
 
+<<<<<<< HEAD
 /**
  * Cross-project pipelines (applied conditionally to pipeline graph)
  */
@@ -1109,3 +1113,12 @@
   font-size: 10px;
   vertical-align: top;
 }
+=======
+.pipeline-header-container {
+  min-height: 55px;
+
+  .text-center {
+    padding-top: 12px;
+  }
+}
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81

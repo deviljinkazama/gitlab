@@ -1,8 +1,15 @@
 <script>
 import ciIconBadge from './ci_badge_link.vue';
+<<<<<<< HEAD
 import timeagoTooltip from './time_ago_tooltip.vue';
 import tooltipMixin from '../mixins/tooltip';
 import userAvatarLink from './user_avatar/user_avatar_link.vue';
+=======
+import loadingIcon from './loading_icon.vue';
+import timeagoTooltip from './time_ago_tooltip.vue';
+import tooltipMixin from '../mixins/tooltip';
+import userAvatarImage from './user_avatar/user_avatar_image.vue';
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
 /**
  * Renders header component for job and pipeline page based on UI mockups
@@ -31,7 +38,12 @@ export default {
     },
     user: {
       type: Object,
+<<<<<<< HEAD
       required: true,
+=======
+      required: false,
+      default: () => ({}),
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     },
     actions: {
       type: Array,
@@ -46,8 +58,14 @@ export default {
 
   components: {
     ciIconBadge,
+<<<<<<< HEAD
     timeagoTooltip,
     userAvatarLink,
+=======
+    loadingIcon,
+    timeagoTooltip,
+    userAvatarImage,
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   },
 
   computed: {
@@ -58,13 +76,21 @@ export default {
 
   methods: {
     onClickAction(action) {
+<<<<<<< HEAD
       this.$emit('postAction', action);
+=======
+      this.$emit('actionClicked', action);
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     },
   },
 };
 </script>
 <template>
+<<<<<<< HEAD
   <header class="page-content-header top-area">
+=======
+  <header class="page-content-header">
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     <section class="header-main-content">
 
       <ci-icon-badge :status="status" />
@@ -79,6 +105,7 @@ export default {
 
       by
 
+<<<<<<< HEAD
       <user-avatar-link
         :link-href="user.web_url"
         :img-src="user.avatar_url"
@@ -94,6 +121,25 @@ export default {
         ref="tooltip">
         {{user.name}}
       </a>
+=======
+      <template v-if="user">
+        <a
+          :href="user.path"
+          :title="user.email"
+          class="js-user-link commit-committer-link"
+          ref="tooltip">
+
+          <user-avatar-image
+            :img-src="user.avatar_url"
+            :img-alt="userAvatarAltText"
+            :tooltip-text="user.name"
+            :img-size="24"
+            />
+
+          {{user.name}}
+        </a>
+      </template>
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     </section>
 
     <section
@@ -111,11 +157,25 @@ export default {
         <button
           v-else="action.type === 'button'"
           @click="onClickAction(action)"
+<<<<<<< HEAD
           :class="action.cssClass"
           type="button">
           {{action.label}}
         </button>
 
+=======
+          :disabled="action.isLoading"
+          :class="action.cssClass"
+          type="button">
+          {{action.label}}
+
+          <i
+            v-show="action.isLoading"
+            class="fa fa-spin fa-spinner"
+            aria-hidden="true">
+          </i>
+        </button>
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       </template>
     </section>
   </header>

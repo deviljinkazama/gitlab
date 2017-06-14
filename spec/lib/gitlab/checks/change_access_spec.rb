@@ -99,6 +99,7 @@ describe Gitlab::Checks::ChangeAccess, lib: true do
         it 'raises an error' do
           expect { subject }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'The default branch of a project cannot be deleted.')
         end
+<<<<<<< HEAD
       end
 
       context 'protected branches check' do
@@ -225,6 +226,65 @@ describe Gitlab::Checks::ChangeAccess, lib: true do
         before do
           allow(User).to receive(:existing_member?).and_return(false)
           allow_any_instance_of(Commit).to receive(:author_email).and_return('some@mail.com')
+=======
+      end
+
+      context 'protected branches check' do
+        before do
+          allow(ProtectedBranch).to receive(:protected?).with(project, 'master').and_return(true)
+          allow(ProtectedBranch).to receive(:protected?).with(project, 'feature').and_return(true)
+        end
+
+        it 'raises an error if the user is not allowed to do forced pushes to protected branches' do
+          expect(Gitlab::Checks::ForcePush).to receive(:force_push?).and_return(true)
+
+          expect { subject }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You are not allowed to force push code to a protected branch on this project.')
+        end
+
+        it 'raises an error if the user is not allowed to merge to protected branches' do
+          expect_any_instance_of(Gitlab::Checks::MatchingMergeRequest).to receive(:match?).and_return(true)
+          expect(user_access).to receive(:can_merge_to_branch?).and_return(false)
+          expect(user_access).to receive(:can_push_to_branch?).and_return(false)
+
+          expect { subject }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You are not allowed to merge code into protected branches on this project.')
+        end
+
+        it 'raises an error if the user is not allowed to push to protected branches' do
+          expect(user_access).to receive(:can_push_to_branch?).and_return(false)
+
+          expect { subject }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You are not allowed to push code to protected branches on this project.')
+        end
+
+        context 'branch deletion' do
+          let(:newrev) { '0000000000000000000000000000000000000000' }
+          let(:ref) { 'refs/heads/feature' }
+
+          context 'if the user is not allowed to delete protected branches' do
+            it 'raises an error' do
+              expect { subject }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You are not allowed to delete protected branches from this project. Only a project master or owner can delete a protected branch.')
+            end
+          end
+
+          context 'if the user is allowed to delete protected branches' do
+            before do
+              project.add_master(user)
+            end
+
+            context 'through the web interface' do
+              let(:protocol) { 'web' }
+
+              it 'allows branch deletion' do
+                expect { subject }.not_to raise_error
+              end
+            end
+
+            context 'over SSH or HTTP' do
+              it 'raises an error' do
+                expect { subject }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You can only delete protected branches using the web interface.')
+              end
+            end
+          end
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         end
 
         it 'returns an error if the commit author is not a GitLab member' do

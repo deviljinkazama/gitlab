@@ -22,10 +22,13 @@ import './components/board_sidebar';
 import './components/new_list_dropdown';
 import './components/modal/index';
 import '../vue_shared/vue_resource_interceptor';
+<<<<<<< HEAD
 
 import './components/boards_selector';
 import collapseIcon from './icons/fullscreen_collapse.svg';
 import expandIcon from './icons/fullscreen_expand.svg';
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
 Vue.use(VueResource);
 
@@ -86,7 +89,11 @@ $(() => {
       gl.boardService = new BoardService(this.endpoint, this.bulkUpdatePath, this.boardId);
       Store.rootPath = this.endpoint;
 
+<<<<<<< HEAD
       this.filterManager = new FilteredSearchBoards(Store.filter, true, [(this.milestoneTitle ? 'milestone' : null)]);
+=======
+      this.filterManager = new FilteredSearchBoards(Store.filter, true);
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       this.filterManager.setup();
 
       // Listen for updateTokens event
@@ -105,6 +112,8 @@ $(() => {
             if (list.type === 'closed') {
               list.position = Infinity;
               list.label = { description: 'Shows all closed issues. Moving an issue to this list closes it' };
+            } else if (list.type === 'backlog') {
+              list.position = -1;
             }
           });
 
@@ -147,7 +156,7 @@ $(() => {
     },
     computed: {
       disabled() {
-        return !this.store.lists.filter(list => list.type !== 'blank' && list.type !== 'done').length;
+        return !this.store.lists.filter(list => !list.preset).length;
       },
       tooltipTitle() {
         if (this.disabled) {

@@ -11,6 +11,10 @@ export default class FilteredSearchBoards extends gl.FilteredSearchManager {
     // Issue boards is slightly different, we handle all the requests async
     // instead or reloading the page, we just re-fire the list ajax requests
     this.isHandledAsync = true;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     this.cantEdit = cantEdit;
   }
 

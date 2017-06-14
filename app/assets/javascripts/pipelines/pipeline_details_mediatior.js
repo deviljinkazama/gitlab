@@ -26,6 +26,11 @@ export default class pipelinesMediator {
     if (!Visibility.hidden()) {
       this.state.isLoading = true;
       this.poll.makeRequest();
+<<<<<<< HEAD
+=======
+    } else {
+      this.refreshPipeline();
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     }
 
     Visibility.change(() => {
@@ -48,4 +53,13 @@ export default class pipelinesMediator {
     this.state.isLoading = false;
     return new Flash('An error occurred while fetching the pipeline.');
   }
+<<<<<<< HEAD
+=======
+
+  refreshPipeline() {
+    this.service.getPipeline()
+      .then(response => this.successCallback(response))
+      .catch(() => this.errorCallback());
+  }
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 }

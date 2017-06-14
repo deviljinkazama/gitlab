@@ -1,7 +1,13 @@
 <script>
+<<<<<<< HEAD
   import linkedPipelinesColumn from './linked_pipelines_column.vue';
   import stageColumnComponent from './stage_column_component.vue';
   import loadingIcon from '../../../vue_shared/components/loading_icon.vue';
+=======
+  import stageColumnComponent from './stage_column_component.vue';
+  import loadingIcon from '../../../vue_shared/components/loading_icon.vue';
+  import '../../../flash';
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
   export default {
     props: {
@@ -13,6 +19,7 @@
         type: Object,
         required: true,
       },
+<<<<<<< HEAD
     },
 
     components: {
@@ -39,6 +46,21 @@
       },
     },
 
+=======
+    },
+
+    components: {
+      stageColumnComponent,
+      loadingIcon,
+    },
+
+    computed: {
+      graph() {
+        return this.pipeline.details && this.pipeline.details.stages;
+      },
+    },
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     methods: {
       capitalizeStageName(name) {
         return name.charAt(0).toUpperCase() + name.slice(1);
@@ -90,11 +112,14 @@
         >
         <stage-column-component
           v-for="(stage, index) in graph"
+<<<<<<< HEAD
           :class="{
             'has-upstream': index === 0 && hasTriggeredBy,
             'has-downstream': index === graph.length - 1 && hasTriggered,
             'has-only-one-job': stage.groups.length === 1
           }"
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
           :title="capitalizeStageName(stage.name)"
           :jobs="stage.groups"
           :key="stage.name"

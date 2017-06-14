@@ -2,7 +2,11 @@ module Ci
   class CreatePipelineService < BaseService
     attr_reader :pipeline
 
+<<<<<<< HEAD
     def execute(source, ignore_skip_ci: false, save_on_errors: true, trigger_request: nil, schedule: nil, mirror_update: false, &block)
+=======
+    def execute(source, ignore_skip_ci: false, save_on_errors: true, trigger_request: nil, schedule: nil)
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       @pipeline = Ci::Pipeline.new(
         source: source,
         project: project,
@@ -47,8 +51,8 @@ module Ci
         return pipeline
       end
 
-      unless pipeline.config_builds_attributes.present?
-        return error('No builds for this pipeline.')
+      unless pipeline.has_stage_seeds?
+        return error('No stages / jobs for this pipeline.')
       end
 
       _create_pipeline(&block)
@@ -59,17 +63,29 @@ module Ci
     def _create_pipeline
       Ci::Pipeline.transaction do
         update_merge_requests_head_pipeline if pipeline.save
+<<<<<<< HEAD
 
         yield(pipeline) if block_given?
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
-        Ci::CreatePipelineBuildsService
+        Ci::CreatePipelineStagesService
           .new(project, current_user)
           .execute(pipeline)
       end
 
       cancel_pending_pipelines if project.auto_cancel_pending_pipelines?
 
+      pipeline_created_counter.increment(source: source)
+
       pipeline.tap(&:process!)
+    end
+
+    def update_merge_requests_head_pipeline
+      return unless pipeline.latest?
+
+      MergeRequest.where(source_project: @pipeline.project, source_branch: @pipeline.ref).
+        update_all(head_pipeline_id: @pipeline.id)
     end
 
     def update_merge_requests_head_pipeline
@@ -140,6 +156,10 @@ module Ci
       pipeline.errors.add(:base, message)
       pipeline.drop if save
       pipeline
+    end
+
+    def pipeline_created_counter
+      @pipeline_created_counter ||= Gitlab::Metrics.counter(:pipelines_created_count, "Pipelines created count")
     end
   end
 end

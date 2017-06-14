@@ -22,6 +22,46 @@ describe JiraService, models: true do
 
       it { is_expected.not_to validate_presence_of(:url) }
     end
+<<<<<<< HEAD
+
+    context 'validating urls' do
+      let(:service) do
+        described_class.new(
+          project: create(:empty_project),
+          active: true,
+          username: 'username',
+          password: 'test',
+          project_key: 'TEST',
+          jira_issue_transition_id: 24,
+          url: 'http://jira.test.com'
+        )
+      end
+
+      it 'is valid when all fields have required values' do
+        expect(service).to be_valid
+      end
+
+      it 'is not valid when url is not a valid url' do
+        service.url = 'not valid'
+
+        expect(service).not_to be_valid
+      end
+
+      it 'is not valid when api url is not a valid url' do
+        service.api_url = 'not valid'
+
+        expect(service).not_to be_valid
+      end
+
+      it 'is valid when api url is a valid url' do
+        service.api_url = 'http://jira.test.com/api'
+
+        expect(service).to be_valid
+      end
+    end
+  end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
     context 'validating urls' do
       let(:service) do
@@ -66,41 +106,6 @@ describe JiraService, models: true do
     it 'does not allow # on the code' do
       expect(subject.reference_pattern.match('#123')).to be_nil
       expect(subject.reference_pattern.match('1#23#12')).to be_nil
-    end
-  end
-
-  describe '#can_test?' do
-    let(:jira_service) { described_class.new }
-
-    it 'returns false if username is blank' do
-      allow(jira_service).to receive_messages(
-        url: 'http://jira.example.com',
-        username: '',
-        password: '12345678'
-      )
-
-      expect(jira_service.can_test?).to be_falsy
-    end
-
-    it 'returns false if password is blank' do
-      allow(jira_service).to receive_messages(
-        url: 'http://jira.example.com',
-        username: 'tester',
-        password: ''
-      )
-
-      expect(jira_service.can_test?).to be_falsy
-    end
-
-    it 'returns true if password and username are present' do
-      jira_service = described_class.new
-      allow(jira_service).to receive_messages(
-        url: 'http://jira.example.com',
-        username: 'tester',
-        password: '12345678'
-      )
-
-      expect(jira_service.can_test?).to be_truthy
     end
   end
 
@@ -239,11 +244,19 @@ describe JiraService, models: true do
 
       jira_service.test_settings
     end
+<<<<<<< HEAD
 
     it 'tries to get JIRA project with URL when API URL not set' do
       test_settings('jira.example.com')
     end
 
+=======
+
+    it 'tries to get JIRA project with URL when API URL not set' do
+      test_settings('jira.example.com')
+    end
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     it 'tries to get JIRA project with API URL if set' do
       jira_service.update(api_url: 'http://jira.api.com')
       test_settings('jira.api.com')

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Ci::CreatePipelineService, services: true do
+describe Ci::CreatePipelineService, :services do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:admin) }
 
@@ -30,6 +30,10 @@ describe Ci::CreatePipelineService, services: true do
       it 'creates a pipeline' do
         expect(pipeline).to be_kind_of(Ci::Pipeline)
         expect(pipeline).to be_valid
+<<<<<<< HEAD
+=======
+        expect(pipeline).to be_persisted
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         expect(pipeline).to be_push
         expect(pipeline).to eq(project.pipelines.last)
         expect(pipeline).to have_attributes(user: user)
@@ -37,6 +41,17 @@ describe Ci::CreatePipelineService, services: true do
         expect(pipeline.builds.first).to be_kind_of(Ci::Build)
       end
 
+<<<<<<< HEAD
+=======
+      it 'increments the prometheus counter' do
+        expect(Gitlab::Metrics).to receive(:counter)
+          .with(:pipelines_created_count, "Pipelines created count")
+          .and_call_original
+
+        pipeline
+      end
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       context 'when merge requests already exist for this source branch' do
         it 'updates head pipeline of each merge request' do
           merge_request_1 = create(:merge_request, source_branch: 'master', target_branch: "branch_1", source_project: project)
@@ -294,6 +309,21 @@ describe Ci::CreatePipelineService, services: true do
 
         expect(result).to be_persisted
         expect(Environment.find_by(name: "review/master")).not_to be_nil
+      end
+    end
+
+    context 'when environment with invalid name' do
+      before do
+        config = YAML.dump(deploy: { environment: { name: 'name,with,commas' }, script: 'ls' })
+        stub_ci_pipeline_yaml_file(config)
+      end
+
+      it 'does not create an environment' do
+        expect do
+          result = execute_service
+
+          expect(result).to be_persisted
+        end.not_to change { Environment.count }
       end
     end
   end

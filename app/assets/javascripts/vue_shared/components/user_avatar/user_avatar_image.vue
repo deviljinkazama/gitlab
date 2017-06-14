@@ -60,6 +60,15 @@ export default {
     avatarSizeClass() {
       return `s${this.size}`;
     },
+<<<<<<< HEAD
+=======
+    // API response sends null when gravatar is disabled and
+    // we provide an empty string when we use it inside user avatar link.
+    // In both cases we should render the defaultAvatarUrl
+    imageSource() {
+      return this.imgSrc === '' || this.imgSrc === null ? defaultAvatarUrl : this.imgSrc;
+    },
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   },
 };
 </script>
@@ -68,7 +77,11 @@ export default {
   <img
     class="avatar"
     :class="[avatarSizeClass, cssClasses]"
+<<<<<<< HEAD
     :src="imgSrc"
+=======
+    :src="imageSource"
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     :width="size"
     :height="size"
     :alt="imgAlt"

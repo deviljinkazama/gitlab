@@ -985,9 +985,12 @@ RSpec/EmptyExampleGroup:
   Enabled: true
   CustomIncludeMethods:
     - run_permission_checks
+<<<<<<< HEAD
     - run_group_permission_checks
     - it_should_email!
     - it_should_not_email!
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
 # Checks for long example.
 RSpec/ExampleLength:

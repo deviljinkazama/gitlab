@@ -33,12 +33,20 @@ describe('Header CI Component', () => {
           path: 'path',
           type: 'button',
           cssClass: 'btn',
+<<<<<<< HEAD
+=======
+          isLoading: false,
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         },
         {
           label: 'Go',
           path: 'path',
           type: 'link',
           cssClass: 'link',
+<<<<<<< HEAD
+=======
+          isLoading: false,
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         },
       ],
     };
@@ -79,4 +87,16 @@ describe('Header CI Component', () => {
     expect(vm.$el.querySelector('.link').textContent.trim()).toEqual(props.actions[1].label);
     expect(vm.$el.querySelector('.link').getAttribute('href')).toEqual(props.actions[0].path);
   });
+<<<<<<< HEAD
+=======
+
+  it('should show loading icon', (done) => {
+    vm.actions[0].isLoading = true;
+
+    Vue.nextTick(() => {
+      expect(vm.$el.querySelector('.btn .fa-spinner').getAttribute('style')).toEqual('');
+      done();
+    });
+  });
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 });

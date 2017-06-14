@@ -2,7 +2,10 @@ class Spinach::Features::Project < Spinach::FeatureSteps
   include SharedAuthentication
   include SharedProject
   include SharedPaths
+<<<<<<< HEAD
   include Select2Helper
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   include WaitForRequests
 
   step 'change project settings' do

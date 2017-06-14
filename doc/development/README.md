@@ -52,6 +52,11 @@
 - [Post Deployment Migrations](post_deployment_migrations.md)
 - [Foreign Keys & Associations](foreign_keys.md)
 - [Serializing Data](serializing_data.md)
+<<<<<<< HEAD
+=======
+- [Polymorphic Associations](polymorphic_associations.md)
+- [Single Table Inheritance](single_table_inheritance.md)
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
 ## i18n
 

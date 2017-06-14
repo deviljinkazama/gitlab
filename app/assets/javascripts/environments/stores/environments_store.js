@@ -229,4 +229,8 @@ export default class EnvironmentsStore {
 
     return environments.filter(env => env.isFolder && env.isOpen);
   }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 }

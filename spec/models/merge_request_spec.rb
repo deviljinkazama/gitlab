@@ -1498,6 +1498,7 @@ describe MergeRequest, models: true do
       expect_any_instance_of(DiffNote).to receive(:save).once
 
       subject.reload_diff(subject.author)
+<<<<<<< HEAD
     end
   end
 
@@ -1704,6 +1705,8 @@ describe MergeRequest, models: true do
           end
         end
       end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
   end
 
@@ -2063,6 +2066,7 @@ describe MergeRequest, models: true do
       end
     end
   end
+<<<<<<< HEAD
 
   describe '#base_pipeline' do
     let!(:pipeline) { create(:ci_empty_pipeline, project: subject.project, sha: subject.diff_base_sha) }
@@ -2107,4 +2111,6 @@ describe MergeRequest, models: true do
       it { expect(subject.has_codeclimate_data?).to be_falsey }
     end
   end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 end

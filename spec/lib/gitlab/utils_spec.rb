@@ -2,9 +2,12 @@ require 'spec_helper'
 
 describe Gitlab::Utils, lib: true do
   delegate :to_boolean, :boolean_to_yes_no, to: :described_class
+<<<<<<< HEAD
 
   # EE
   delegate :which, to: :described_class
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
   describe '.to_boolean' do
     it 'accepts booleans' do
@@ -42,6 +45,7 @@ describe Gitlab::Utils, lib: true do
       expect(boolean_to_yes_no(false)).to eq('No')
     end
   end
+<<<<<<< HEAD
 
   # EE
   describe '.which' do
@@ -51,4 +55,6 @@ describe Gitlab::Utils, lib: true do
       expect(which('sh', 'PATH' => '/bin')).to eq('/bin/sh')
     end
   end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 end

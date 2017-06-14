@@ -212,8 +212,12 @@ class Projects::IssuesController < Projects::ApplicationController
       title_text: @issue.title,
       description: view_context.markdown_field(@issue, :description),
       description_text: @issue.description,
+<<<<<<< HEAD
       task_status: @issue.task_status,
       updated_at: @issue.updated_at
+=======
+      task_status: @issue.task_status
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     }
 
     if @issue.is_edited?
@@ -280,7 +284,11 @@ class Projects::IssuesController < Projects::ApplicationController
 
   def issue_params
     params.require(:issue).permit(
+<<<<<<< HEAD
       :title, :assignee_id, :position, :description, :confidential, :weight,
+=======
+      :title, :assignee_id, :position, :description, :confidential,
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       :milestone_id, :due_date, :state_event, :task_num, :lock_version, label_ids: [], assignee_ids: []
     )
   end

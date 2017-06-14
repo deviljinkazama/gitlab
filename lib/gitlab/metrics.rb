@@ -1,25 +1,10 @@
 module Gitlab
   module Metrics
-    extend Gitlab::CurrentSettings
-
-    RAILS_ROOT   = Rails.root.to_s
-    METRICS_ROOT = Rails.root.join('lib', 'gitlab', 'metrics').to_s
-    PATH_REGEX   = /^#{RAILS_ROOT}\/?/
-
-    def self.settings
-      @settings ||= {
-        enabled:               current_application_settings[:metrics_enabled],
-        pool_size:             current_application_settings[:metrics_pool_size],
-        timeout:               current_application_settings[:metrics_timeout],
-        method_call_threshold: current_application_settings[:metrics_method_call_threshold],
-        host:                  current_application_settings[:metrics_host],
-        port:                  current_application_settings[:metrics_port],
-        sample_interval:       current_application_settings[:metrics_sample_interval] || 15,
-        packet_size:           current_application_settings[:metrics_packet_size] || 1
-      }
-    end
+    extend Gitlab::Metrics::InfluxDb
+    extend Gitlab::Metrics::Prometheus
 
     def self.enabled?
+<<<<<<< HEAD
       settings[:enabled] || false
     end
 
@@ -156,6 +141,9 @@ module Gitlab
         InfluxDB::Client.
           new(udp: { host: host, port: port })
       end
+=======
+      influx_metrics_enabled? || prometheus_metrics_enabled?
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
   end
 end

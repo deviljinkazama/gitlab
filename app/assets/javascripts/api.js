@@ -10,10 +10,17 @@ const Api = {
   licensePath: '/api/:version/templates/licenses/:key',
   gitignorePath: '/api/:version/templates/gitignores/:key',
   gitlabCiYmlPath: '/api/:version/templates/gitlab_ci_ymls/:key',
+<<<<<<< HEAD
   ldapGroupsPath: '/api/:version/ldap/:provider/groups.json',
   dockerfilePath: '/api/:version/templates/dockerfiles/:key',
   issuableTemplatePath: '/:namespace_path/:project_path/templates/:type/:key',
   usersPath: '/api/:version/users.json',
+=======
+  dockerfilePath: '/api/:version/templates/dockerfiles/:key',
+  issuableTemplatePath: '/:namespace_path/:project_path/templates/:type/:key',
+  usersPath: '/api/:version/users.json',
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   group(groupId, callback) {
     const url = Api.buildUrl(Api.groupPath)
       .replace(':id', groupId);
@@ -25,7 +32,11 @@ const Api = {
   },
 
   // Return groups list. Filtered by query
+<<<<<<< HEAD
   groups(query, options, callback = $.noop) {
+=======
+  groups(query, options, callback) {
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     const url = Api.buildUrl(Api.groupsPath);
     return $.ajax({
       url,
@@ -135,6 +146,7 @@ const Api = {
     })
       .done(file => callback(null, file))
       .error(callback);
+<<<<<<< HEAD
   },
 
   users(query, options) {
@@ -174,6 +186,20 @@ const Api = {
       dataType: 'json',
     })
       .done(groups => callback(groups));
+=======
+  },
+
+  users(query, options) {
+    const url = Api.buildUrl(this.usersPath);
+    return Api.wrapAjaxCall({
+      url,
+      data: Object.assign({
+        search: query,
+        per_page: 20,
+      }, options),
+      dataType: 'json',
+    });
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   },
 
   buildUrl(url) {

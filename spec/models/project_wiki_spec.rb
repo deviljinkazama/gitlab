@@ -42,6 +42,7 @@ describe ProjectWiki, models: true do
 
       expect(project_wiki.http_url_to_repo).to eq(expected_url)
       expect(project_wiki.http_url_to_repo).not_to include('@')
+<<<<<<< HEAD
     end
   end
 
@@ -50,6 +51,8 @@ describe ProjectWiki, models: true do
       gitlab_kerberos_url = Gitlab.config.build_gitlab_kerberos_url
       repo_kerberos_url = "#{gitlab_kerberos_url}/#{subject.path_with_namespace}.git"
       expect(subject.kerberos_url_to_repo).to eq(repo_kerberos_url)
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
   end
 

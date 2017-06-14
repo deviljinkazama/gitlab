@@ -119,7 +119,11 @@ class GitPushService < BaseService
     EventCreateService.new.push(@project, current_user, build_push_data)
     @project.execute_hooks(build_push_data.dup, :push_hooks)
     @project.execute_services(build_push_data.dup, :push_hooks)
+<<<<<<< HEAD
     Ci::CreatePipelineService.new(@project, current_user, build_push_data).execute(:push, mirror_update: mirror_update)
+=======
+    Ci::CreatePipelineService.new(@project, current_user, build_push_data).execute(:push)
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
     if push_remove_branch?
       AfterBranchDeleteService

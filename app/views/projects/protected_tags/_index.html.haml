@@ -2,7 +2,11 @@
 - content_for :page_specific_javascripts do
   = page_specific_javascript_bundle_tag('protected_tags')
 
+<<<<<<< HEAD
 %section.settings.js-protected-tags-container{ data: { "groups-autocomplete" => "#{autocomplete_project_groups_path(format: :json)}", "users-autocomplete" => "#{autocomplete_users_path(format: :json)}" } }
+=======
+%section.settings
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   .settings-header
     %h4
       Protected Tags

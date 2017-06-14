@@ -51,7 +51,10 @@ describe Project, models: true do
     it { is_expected.to have_one(:project_feature).dependent(:destroy) }
     it { is_expected.to have_one(:statistics).class_name('ProjectStatistics').dependent(:delete) }
     it { is_expected.to have_one(:import_data).class_name('ProjectImportData').dependent(:delete) }
+<<<<<<< HEAD
     it { is_expected.to have_one(:mirror_data).class_name('ProjectMirrorData').dependent(:delete) }
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     it { is_expected.to have_one(:last_event).class_name('Event') }
     it { is_expected.to have_one(:forked_from_project).through(:forked_project_link) }
     it { is_expected.to have_many(:commit_statuses) }
@@ -997,6 +1000,7 @@ describe Project, models: true do
 
         expect(project.avatar_url).to eq([gitlab_host, avatar_path].join)
       end
+<<<<<<< HEAD
 
       context 'When in a geo secondary node' do
         let(:geo_url) { 'http://geo.example.com' }
@@ -1008,6 +1012,8 @@ describe Project, models: true do
 
         it { should eq "#{geo_url}#{avatar_path}" }
       end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
 
     context 'When avatar file in git' do
@@ -1728,6 +1734,7 @@ describe Project, models: true do
 
       expect(project.reload.import_status).to eq('finished')
     end
+<<<<<<< HEAD
 
     context 'with a mirrored project' do
       let(:project) { create(:empty_project, :mirror) }
@@ -1740,6 +1747,8 @@ describe Project, models: true do
         project.import_schedule
       end
     end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   end
 
   describe '#latest_successful_builds_for' do
@@ -1887,6 +1896,7 @@ describe Project, models: true do
         project.add_import_job
       end
 
+<<<<<<< HEAD
       context 'without mirror' do
         it 'returns nil' do
           project = create(:project)
@@ -1898,6 +1908,13 @@ describe Project, models: true do
       context 'without repository' do
         it 'schedules RepositoryImportWorker' do
           project = create(:empty_project, import_url: generate(:url))
+=======
+    context 'not forked' do
+      it 'schedules a RepositoryImportWorker job' do
+        project = create(:empty_project, import_url: generate(:url))
+
+        expect(RepositoryImportWorker).to receive(:perform_async).with(project.id)
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
           expect(RepositoryImportWorker).to receive(:perform_async).with(project.id)
 

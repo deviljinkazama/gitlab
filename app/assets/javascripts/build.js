@@ -64,7 +64,11 @@ window.Build = (function () {
 
     $(window)
       .off('resize.build')
+<<<<<<< HEAD
       .on('resize.build', this.sidebarOnResize.bind(this));
+=======
+      .on('resize.build', _.throttle(this.sidebarOnResize.bind(this), 100));
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
     this.updateArtifactRemoveDate();
 
@@ -80,7 +84,11 @@ window.Build = (function () {
     this.$scrollContainer.niceScroll({
       cursorcolor: '#fff',
       cursoropacitymin: 1,
+<<<<<<< HEAD
       cursorwidth: '3px',
+=======
+      cursorwidth: '7px',
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       railpadding: { top: 5, bottom: 5, right: 5 },
     });
 
@@ -250,6 +258,10 @@ window.Build = (function () {
 
   Build.prototype.sidebarOnResize = function () {
     this.toggleSidebar(this.shouldHideSidebarForViewport());
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     this.verifyTopPosition();
 
     if (this.$scrollContainer.getNiceScroll(0)) {

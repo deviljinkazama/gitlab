@@ -183,6 +183,7 @@ describe Group, models: true do
 
     context 'when avatar file is uploaded' do
       before { group.add_master(user) }
+<<<<<<< HEAD
 
       it 'shows correct avatar url' do
         expect(group.avatar_url).to eq(avatar_path)
@@ -210,6 +211,16 @@ describe Group, models: true do
 
           expect(group.avatar_url).to eq(geo_avatar_url)
         end
+=======
+
+      it 'shows correct avatar url' do
+        expect(group.avatar_url).to eq(avatar_path)
+        expect(group.avatar_url(only_path: false)).to eq([gitlab_host, avatar_path].join)
+
+        allow(ActionController::Base).to receive(:asset_host).and_return(gitlab_host)
+
+        expect(group.avatar_url).to eq([gitlab_host, avatar_path].join)
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       end
     end
   end

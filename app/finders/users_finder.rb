@@ -12,7 +12,10 @@
 #     active: boolean
 #     blocked: boolean
 #     external: boolean
+<<<<<<< HEAD
 #     skip_ldap: boolean
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 #
 class UsersFinder
   attr_accessor :current_user, :params
@@ -30,7 +33,10 @@ class UsersFinder
     users = by_active(users)
     users = by_external_identity(users)
     users = by_external(users)
+<<<<<<< HEAD
     users = by_non_ldap(users)
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
     users
   end
@@ -73,10 +79,13 @@ class UsersFinder
 
     users.external
   end
+<<<<<<< HEAD
 
   def by_non_ldap(users)
     return users unless params[:skip_ldap]
 
     users.non_ldap
   end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 end

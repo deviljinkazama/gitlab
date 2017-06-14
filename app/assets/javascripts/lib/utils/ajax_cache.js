@@ -6,8 +6,13 @@ class AjaxCache extends Cache {
     this.pendingRequests = { };
   }
 
+<<<<<<< HEAD
   retrieve(endpoint) {
     if (this.hasData(endpoint)) {
+=======
+  retrieve(endpoint, forceRetrieve) {
+    if (this.hasData(endpoint) && !forceRetrieve) {
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       return Promise.resolve(this.get(endpoint));
     }
 

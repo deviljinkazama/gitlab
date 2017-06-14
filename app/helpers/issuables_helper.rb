@@ -211,7 +211,11 @@ module IssuablesHelper
   end
 
   def issuable_initial_data(issuable)
+<<<<<<< HEAD
     {
+=======
+    data = {
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       endpoint: namespace_project_issue_path(@project.namespace, @project, issuable),
       canUpdate: can?(current_user, :update_issue, issuable),
       canDestroy: can?(current_user, :destroy_issue, issuable),
@@ -228,7 +232,27 @@ module IssuablesHelper
       initialTitleText: issuable.title,
       initialDescriptionHtml: markdown_field(issuable, :description),
       initialDescriptionText: issuable.description
+<<<<<<< HEAD
     }.to_json
+=======
+    }
+
+    data.merge!(updated_at_by(issuable))
+
+    data.to_json
+  end
+
+  def updated_at_by(issuable)
+    return {} unless issuable.is_edited?
+
+    {
+      updatedAt: issuable.updated_at.to_time.iso8601,
+      updatedBy: {
+        name: issuable.last_edited_by.name,
+        path: user_path(issuable.last_edited_by)
+      }
+    }
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   end
 
   private

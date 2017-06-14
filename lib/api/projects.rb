@@ -22,11 +22,14 @@ module API
         optional :only_allow_merge_if_pipeline_succeeds, type: Boolean, desc: 'Only allow to merge if builds succeed'
         optional :only_allow_merge_if_all_discussions_are_resolved, type: Boolean, desc: 'Only allow to merge if all discussions are resolved'
         optional :tag_list, type: Array[String], desc: 'The list of tags for a project'
+<<<<<<< HEAD
       end
 
       params :optional_params_ee do
         optional :repository_storage, type: String, desc: 'Which storage shard the repository is on. Available only to admins'
         optional :approvals_before_merge, type: Integer, desc: 'How many approvers should approve merge request by default'
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       end
 
       params :optional_params do
@@ -135,6 +138,7 @@ module API
       params do
         requires :name, type: String, desc: 'The name of the project'
         requires :user_id, type: Integer, desc: 'The ID of a user'
+        optional :path, type: String, desc: 'The path of the repository'
         optional :default_branch, type: String, desc: 'The default branch of the project'
         use :optional_params
         use :create_params
@@ -170,16 +174,6 @@ module API
         entity = current_user ? Entities::ProjectWithAccess : Entities::BasicProjectDetails
         present user_project, with: entity, current_user: current_user,
                               user_can_admin_project: can?(current_user, :admin_project, user_project), statistics: params[:statistics]
-      end
-
-      desc 'Get events for a single project' do
-        success Entities::Event
-      end
-      params do
-        use :pagination
-      end
-      get ":id/events" do
-        present paginate(user_project.events.recent), with: Entities::Event
       end
 
       desc 'Fork new project for the current user or provided namespace.' do

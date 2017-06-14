@@ -9,7 +9,7 @@ class Member < ActiveRecord::Base
 
   belongs_to :created_by, class_name: "User"
   belongs_to :user
-  belongs_to :source, polymorphic: true
+  belongs_to :source, polymorphic: true # rubocop:disable Cop/PolymorphicAssociations
 
   delegate :name, :username, :email, to: :user, prefix: true
 
@@ -201,6 +201,10 @@ class Member < ActiveRecord::Base
 
   def real_source_type
     source_type
+  end
+
+  def access_field
+    access_level
   end
 
   def invite?

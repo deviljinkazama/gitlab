@@ -21,15 +21,40 @@ class PostReceive
       process_wiki_changes(post_received)
     else
       process_project_changes(post_received)
+      process_repository_update(post_received)
     end
   end
 
+<<<<<<< HEAD
   private
 
   def process_project_changes(post_received)
     changes = []
     refs = Set.new
 
+=======
+  def process_repository_update(post_received)
+    changes = []
+    refs = Set.new
+
+    post_received.changes_refs do |oldrev, newrev, ref|
+      @user ||= post_received.identify(newrev)
+
+      unless @user
+        log("Triggered hook for non-existing user \"#{post_received.identifier}\"")
+        return false
+      end
+
+      changes << Gitlab::DataBuilder::Repository.single_change(oldrev, newrev, ref)
+      refs << ref
+    end
+
+    hook_data = Gitlab::DataBuilder::Repository.update(post_received.project, @user, changes, refs.to_a)
+    SystemHooksService.new.execute_hooks(hook_data, :repository_update_hooks)
+  end
+
+  def process_project_changes(post_received)
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     post_received.changes_refs do |oldrev, newrev, ref|
       @user ||= post_received.identify(newrev)
 

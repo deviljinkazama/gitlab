@@ -58,6 +58,7 @@ module Gitlab
         diff_refs&.head_sha
       end
 
+<<<<<<< HEAD
       def content_sha
         return old_content_sha if deleted_file?
         return @content_sha if defined?(@content_sha)
@@ -78,11 +79,34 @@ module Gitlab
         return @old_content_sha if defined?(@old_content_sha)
 
         refs = diff_refs || fallback_diff_refs
+=======
+      def new_content_sha
+        return if deleted_file?
+        return @new_content_sha if defined?(@new_content_sha)
+
+        refs = diff_refs || fallback_diff_refs
+        @new_content_sha = refs&.head_sha
+      end
+
+      def new_content_commit
+        return @new_content_commit if defined?(@new_content_commit)
+
+        sha = new_content_commit
+        @new_content_commit = repository.commit(sha) if sha
+      end
+
+      def old_content_sha
+        return if new_file?
+        return @old_content_sha if defined?(@old_content_sha)
+
+        refs = diff_refs || fallback_diff_refs
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         @old_content_sha = refs&.base_sha
       end
 
       def old_content_commit
         return @old_content_commit if defined?(@old_content_commit)
+<<<<<<< HEAD
 
         sha = old_content_sha
         @old_content_commit = repository.commit(sha) if sha
@@ -104,6 +128,41 @@ module Gitlab
         return @old_blob = nil unless sha
 
         @old_blob = repository.blob_at(sha, old_path)
+=======
+
+        sha = old_content_sha
+        @old_content_commit = repository.commit(sha) if sha
+      end
+
+      def new_blob
+        return @new_blob if defined?(@new_blob)
+
+        sha = new_content_sha
+        return @new_blob = nil unless sha
+
+        @new_blob = repository.blob_at(sha, file_path)
+      end
+
+      def old_blob
+        return @old_blob if defined?(@old_blob)
+
+        sha = old_content_sha
+        return @old_blob = nil unless sha
+
+        @old_blob = repository.blob_at(sha, old_path)
+      end
+
+      def content_sha
+        new_content_sha || old_content_sha
+      end
+
+      def content_commit
+        new_content_commit || old_content_commit
+      end
+
+      def blob
+        new_blob || old_blob
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       end
 
       attr_writer :highlighted_diff_lines
@@ -152,6 +211,21 @@ module Gitlab
 
       def file_identifier
         "#{file_path}-#{new_file?}-#{deleted_file?}-#{renamed_file?}"
+<<<<<<< HEAD
+=======
+      end
+
+      def diffable?
+        repository.attributes(file_path).fetch('diff') { true }
+      end
+
+      def binary?
+        old_blob&.binary? || new_blob&.binary?
+      end
+
+      def text?
+        !binary?
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       end
     end
   end

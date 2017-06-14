@@ -4,6 +4,12 @@ export default class Store {
     titleText,
     descriptionHtml,
     descriptionText,
+<<<<<<< HEAD
+=======
+    updatedAt,
+    updatedByName,
+    updatedByPath,
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   }) {
     this.state = {
       titleHtml,
@@ -11,7 +17,13 @@ export default class Store {
       descriptionHtml,
       descriptionText,
       taskStatus: '',
+<<<<<<< HEAD
       updatedAt: '',
+=======
+      updatedAt,
+      updatedByName,
+      updatedByPath,
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     };
     this.formState = {
       title: '',
@@ -30,6 +42,11 @@ export default class Store {
     this.state.descriptionText = data.description_text;
     this.state.taskStatus = data.task_status;
     this.state.updatedAt = data.updated_at;
+<<<<<<< HEAD
+=======
+    this.state.updatedByName = data.updated_by_name;
+    this.state.updatedByPath = data.updated_by_path;
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   }
 
   stateShouldUpdate(data) {

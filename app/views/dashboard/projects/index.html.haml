@@ -9,7 +9,11 @@
 = render "projects/last_push"
 
 %div{ class: container_class }
+<<<<<<< HEAD
   - if show_user_callout?
+=======
+  - if show_callout?('user_callout_dismissed')
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     = render 'shared/user_callout'
 
   - if @projects.any? || params[:name]

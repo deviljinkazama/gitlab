@@ -16,6 +16,10 @@
 /* global Flash */
 import { borderlessStatusIconEntityMap } from '../../vue_shared/ci_status_icons';
 import loadingIcon from '../../vue_shared/components/loading_icon.vue';
+<<<<<<< HEAD
+=======
+import tooltipMixin from '../../vue_shared/mixins/tooltip';
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
 export default {
   props: {
@@ -30,6 +34,10 @@ export default {
       default: false,
     },
   },
+
+  mixins: [
+    tooltipMixin,
+  ],
 
   data() {
     return {
@@ -127,9 +135,10 @@ export default {
 <template>
   <div class="dropdown">
     <button
+      ref="tooltip"
       :class="triggerButtonClass"
       @click="onClickStage"
-      class="mini-pipeline-graph-dropdown-toggle has-tooltip js-builds-dropdown-button"
+      class="mini-pipeline-graph-dropdown-toggle js-builds-dropdown-button"
       :title="stage.title"
       data-placement="top"
       data-toggle="dropdown"

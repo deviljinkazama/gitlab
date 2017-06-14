@@ -120,7 +120,11 @@ export default {
     eventHub.$on('postAction', this.postAction);
   },
 
+<<<<<<< HEAD
   beforeDestroyed() {
+=======
+  beforeDestroy() {
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     eventHub.$off('toggleFolder');
     eventHub.$off('postAction');
   },
@@ -252,7 +256,11 @@ export default {
       </div>
     </div>
 
+<<<<<<< HEAD
     <div class="content-list environments-container">
+=======
+    <div class="environments-container">
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       <loading-icon
         label="Loading environments"
         size="3"
@@ -277,7 +285,7 @@ export default {
           v-if="canCreateEnvironmentParsed"
           :href="newEnvironmentPath"
           class="btn btn-create js-new-environment-button">
-          New Environment
+          New environment
         </a>
       </div>
 

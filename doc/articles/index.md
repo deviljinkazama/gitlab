@@ -17,6 +17,10 @@ They are written by members of the GitLab Team and by
 
 - [How to install Git](how_to_install_git/index.md)
 
+## Git
+
+- [How to install Git](how_to_install_git/index.md)
+
 ## GitLab Pages
 
 - **GitLab Pages from A to Z**

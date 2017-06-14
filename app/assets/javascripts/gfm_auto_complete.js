@@ -2,6 +2,10 @@ import emojiMap from 'emojis/digests.json';
 import emojiAliases from 'emojis/aliases.json';
 import { glEmojiTag } from '~/behaviors/gl_emoji';
 import glRegexp from '~/lib/utils/regexp';
+<<<<<<< HEAD
+=======
+import AjaxCache from '~/lib/utils/ajax_cache';
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
 function sanitize(str) {
   return str.replace(/<(?:.|\n)*?>/gm, '');
@@ -35,6 +39,7 @@ class GfmAutoComplete {
       // This triggers at.js again
       // Needed for slash commands with suffixes (ex: /label ~)
       $input.on('inserted-commands.atwho', $input.trigger.bind($input, 'keyup'));
+      $input.on('clear-commands-cache.atwho', () => this.clearCache());
     });
   }
 
@@ -313,6 +318,7 @@ class GfmAutoComplete {
       },
     });
   }
+<<<<<<< HEAD
 
   getDefaultCallbacks() {
     const fetchData = this.fetchData.bind(this);
@@ -352,6 +358,47 @@ class GfmAutoComplete {
         const targetSubtext = subtext.split(/\s+/g).pop();
         const resultantFlag = flag.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
 
+=======
+
+  getDefaultCallbacks() {
+    const fetchData = this.fetchData.bind(this);
+
+    return {
+      sorter(query, items, searchKey) {
+        this.setting.highlightFirst = this.setting.alwaysHighlightFirst || query.length > 0;
+        if (GfmAutoComplete.isLoading(items)) {
+          this.setting.highlightFirst = false;
+          return items;
+        }
+        return $.fn.atwho.default.callbacks.sorter(query, items, searchKey);
+      },
+      filter(query, data, searchKey) {
+        if (GfmAutoComplete.isLoading(data)) {
+          fetchData(this.$inputor, this.at);
+          return data;
+        }
+        return $.fn.atwho.default.callbacks.filter(query, data, searchKey);
+      },
+      beforeInsert(value) {
+        let resultantValue = value;
+        if (value && !this.setting.skipSpecialCharacterTest) {
+          const withoutAt = value.substring(1);
+          if (withoutAt && /[^\w\d]/.test(withoutAt)) {
+            resultantValue = `${value.charAt()}"${withoutAt}"`;
+          }
+        }
+        return resultantValue;
+      },
+      matcher(flag, subtext) {
+        // The below is taken from At.js source
+        // Tweaked to commands to start without a space only if char before is a non-word character
+        // https://github.com/ichord/At.js
+        const atSymbolsWithBar = Object.keys(this.app.controllers).join('|');
+        const atSymbolsWithoutBar = Object.keys(this.app.controllers).join('');
+        const targetSubtext = subtext.split(/\s+/g).pop();
+        const resultantFlag = flag.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         const accentAChar = decodeURI('%C3%80');
         const accentYChar = decodeURI('%C3%BF');
 
@@ -375,11 +422,22 @@ class GfmAutoComplete {
     } else if (GfmAutoComplete.atTypeMap[at] === 'emojis') {
       this.loadData($input, at, Object.keys(emojiMap).concat(Object.keys(emojiAliases)));
     } else {
+<<<<<<< HEAD
       $.getJSON(this.dataSources[GfmAutoComplete.atTypeMap[at]], (data) => {
         this.loadData($input, at, data);
       }).fail(() => { this.isLoadingData[at] = false; });
     }
   }
+=======
+      AjaxCache.retrieve(this.dataSources[GfmAutoComplete.atTypeMap[at]], true)
+        .then((data) => {
+          this.loadData($input, at, data);
+        })
+        .catch(() => { this.isLoadingData[at] = false; });
+    }
+  }
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   loadData($input, at, data) {
     this.isLoadingData[at] = false;
     this.cachedData[at] = data;
@@ -389,6 +447,13 @@ class GfmAutoComplete {
     return $input.trigger('keyup');
   }
 
+<<<<<<< HEAD
+=======
+  clearCache() {
+    this.cachedData = {};
+  }
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   static isLoading(data) {
     let dataToInspect = data;
     if (data && data.length > 0) {
@@ -421,6 +486,7 @@ GfmAutoComplete.Emoji = {
     </li>
     `;
   },
+<<<<<<< HEAD
 };
 // Team Members
 GfmAutoComplete.Members = {
@@ -436,6 +502,23 @@ GfmAutoComplete.Issues = {
   // eslint-disable-next-line no-template-curly-in-string
   template: '<li><small>${id}</small> ${title}</li>',
 };
+=======
+};
+// Team Members
+GfmAutoComplete.Members = {
+  // eslint-disable-next-line no-template-curly-in-string
+  template: '<li>${avatarTag} ${username} <small>${title}</small></li>',
+};
+GfmAutoComplete.Labels = {
+  // eslint-disable-next-line no-template-curly-in-string
+  template: '<li><span class="dropdown-label-box" style="background: ${color}"></span> ${title}</li>',
+};
+// Issues and MergeRequests
+GfmAutoComplete.Issues = {
+  // eslint-disable-next-line no-template-curly-in-string
+  template: '<li><small>${id}</small> ${title}</li>',
+};
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 // Milestones
 GfmAutoComplete.Milestones = {
   // eslint-disable-next-line no-template-curly-in-string

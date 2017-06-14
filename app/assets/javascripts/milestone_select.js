@@ -166,9 +166,13 @@
           clicked: function(options) {
             const { $el, e } = options;
             let selected = options.selectedObj;
+<<<<<<< HEAD
 
             var data, isIssueIndex, isMRIndex, isSelecting, page, boardsStore;
             if (!selected) return;
+=======
+            var data, isIssueIndex, isMRIndex, isSelecting, page, boardsStore;
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
             page = $('body').data('page');
             isIssueIndex = page === 'projects:issues:index';
             isMRIndex = (page === page && page === 'projects:merge_requests:index');

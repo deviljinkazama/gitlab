@@ -22,6 +22,7 @@ describe Gitlab::GitAccessWiki, lib: true do
 
       subject { access.check('git-receive-pack', changes) }
 
+<<<<<<< HEAD
       it { expect { subject }.not_to raise_error }
 
       context 'when in a secondary gitlab geo node' do
@@ -30,6 +31,10 @@ describe Gitlab::GitAccessWiki, lib: true do
           allow(Gitlab::Geo).to receive(:secondary?) { true }
           allow(Gitlab::Geo).to receive(:license_allows?) { true }
         end
+=======
+    it { expect { subject }.not_to raise_error }
+  end
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
         it 'does not give access to upload wiki code' do
           expect { subject }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "You can't push code to a secondary GitLab Geo node.")

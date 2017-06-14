@@ -24,7 +24,10 @@ describe 'New/edit issue', :feature, :js do
       visit new_namespace_project_issue_path(project.namespace, project)
     end
 
+<<<<<<< HEAD
     xdescribe 'shorten users API pagination limit (CE)' do
+=======
+    describe 'shorten users API pagination limit (CE)' do
       before do
         # Using `allow_any_instance_of`/`and_wrap_original`, `original` would
         # somehow refer to the very block we defined to _wrap_ that method, instead of
@@ -64,11 +67,55 @@ describe 'New/edit issue', :feature, :js do
       end
     end
 
+    describe 'single assignee (CE)' do
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
+      before do
+        # Using `allow_any_instance_of`/`and_wrap_original`, `original` would
+        # somehow refer to the very block we defined to _wrap_ that method, instead of
+        # the original method, resulting in infinite recurison when called.
+        # This is likely a bug with helper modules included into dynamically generated view classes.
+        # To work around this, we have to hold on to and call to the original implementation manually.
+        original_issue_dropdown_options = FormHelper.instance_method(:issue_dropdown_options)
+        allow_any_instance_of(FormHelper).to receive(:issue_dropdown_options).and_wrap_original do |original, *args|
+          options = original_issue_dropdown_options.bind(original.receiver).call(*args)
+          options[:data][:per_page] = 2
+
+          options
+        end
+
+        visit new_namespace_project_issue_path(project.namespace, project)
+
+        click_button 'Unassigned'
+
+        wait_for_requests
+<<<<<<< HEAD
+      end
+
+      it 'should display selected users even if they are not part of the original API call' do
+        find('.dropdown-input-field').native.send_keys user2.name
+
+        page.within '.dropdown-menu-user' do
+          expect(page).to have_content user2.name
+          click_link user2.name
+        end
+
+        find('.js-assignee-search').click
+        find('.js-dropdown-input-clear').click
+
+        page.within '.dropdown-menu-user' do
+          expect(page).to have_content user.name
+          expect(find('.dropdown-menu-user a.is-active').first(:xpath, '..')['data-user-id']).to eq(user2.id.to_s)
+        end
+      end
+    end
+
     xdescribe 'single assignee (CE)' do
       before do
         click_button 'Unassigned'
 
         wait_for_requests
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       end
 
       it 'unselects other assignees when unassigned is selected' do

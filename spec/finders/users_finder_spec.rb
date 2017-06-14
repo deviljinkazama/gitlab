@@ -45,6 +45,7 @@ describe UsersFinder do
 
         expect(users).to contain_exactly(user, user1, user2, omniauth_user)
       end
+<<<<<<< HEAD
 
       context 'with LDAP users' do
         let!(:ldap_user) { create(:omniauth_user, provider: 'ldap') }
@@ -61,6 +62,8 @@ describe UsersFinder do
           expect(users).to contain_exactly(user, user1, user2, omniauth_user)
         end
       end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
 
     context 'with an admin user' do

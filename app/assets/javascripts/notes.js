@@ -16,6 +16,10 @@ import autosize from 'vendor/autosize';
 import Dropzone from 'dropzone';
 import 'vendor/jquery.caret'; // required by jquery.atwho
 import 'vendor/jquery.atwho';
+<<<<<<< HEAD
+=======
+import AjaxCache from '~/lib/utils/ajax_cache';
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 import CommentTypeToggle from './comment_type_toggle';
 import './autosave';
 import './dropzone_input';
@@ -325,6 +329,9 @@ const normalizeNewlines = function(str) {
       if (Notes.isNewNote(noteEntity, this.note_ids)) {
         this.note_ids.push(noteEntity.id);
 
+        if ($notesList.length) {
+          $notesList.find('.system-note.being-posted').remove();
+        }
         const $newNote = Notes.animateAppendNote(noteEntity.html, $notesList);
 
         this.setupNewNote($newNote);
@@ -1118,12 +1125,23 @@ const normalizeNewlines = function(str) {
     };
 
     Notes.prototype.addFlash = function(...flashParams) {
+<<<<<<< HEAD
       this.flashErrors.push(new Flash(...flashParams));
     };
 
     Notes.prototype.clearFlash = function() {
       this.flashErrors.forEach(flash => flash.flashContainer.remove());
       this.flashErrors = [];
+=======
+      this.flashInstance = new Flash(...flashParams);
+    };
+
+    Notes.prototype.clearFlash = function() {
+      if (this.flashInstance && this.flashInstance.flashContainer) {
+        this.flashInstance.flashContainer.hide();
+        this.flashInstance = null;
+      }
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     };
 
     Notes.prototype.cleanForm = function($form) {
@@ -1187,7 +1205,7 @@ const normalizeNewlines = function(str) {
     Notes.prototype.getFormData = function($form) {
       return {
         formData: $form.serialize(),
-        formContent: $form.find('.js-note-text').val(),
+        formContent: _.escape($form.find('.js-note-text').val()),
         formAction: $form.attr('action'),
       };
     };
@@ -1207,19 +1225,51 @@ const normalizeNewlines = function(str) {
     };
 
     /**
+     * Gets appropriate description from slash commands found in provided `formContent`
+     */
+    Notes.prototype.getSlashCommandDescription = function (formContent, availableSlashCommands = []) {
+      let tempFormContent;
+
+      // Identify executed slash commands from `formContent`
+      const executedCommands = availableSlashCommands.filter((command, index) => {
+        const commandRegex = new RegExp(`/${command.name}`);
+        return commandRegex.test(formContent);
+      });
+
+      if (executedCommands && executedCommands.length) {
+        if (executedCommands.length > 1) {
+          tempFormContent = 'Applying multiple commands';
+        } else {
+          const commandDescription = executedCommands[0].description.toLowerCase();
+          tempFormContent = `Applying command to ${commandDescription}`;
+        }
+      } else {
+        tempFormContent = 'Applying command';
+      }
+
+      return tempFormContent;
+    };
+
+    /**
      * Create placeholder note DOM element populated with comment body
      * that we will show while comment is being posted.
      * Once comment is _actually_ posted on server, we will have final element
      * in response that we will show in place of this temporary element.
      */
-    Notes.prototype.createPlaceholderNote = function({ formContent, uniqueId, isDiscussionNote, currentUsername, currentUserFullname }) {
+    Notes.prototype.createPlaceholderNote = function ({ formContent, uniqueId, isDiscussionNote, currentUsername, currentUserFullname, currentUserAvatar }) {
       const discussionClass = isDiscussionNote ? 'discussion' : '';
       const escapedFormContent = _.escape(formContent);
       const $tempNote = $(
         `<li id="${uniqueId}" class="note being-posted fade-in-half timeline-entry">
            <div class="timeline-entry-inner">
               <div class="timeline-icon">
+<<<<<<< HEAD
                  <a href="/${currentUsername}"><span class="avatar dummy-avatar"></span></a>
+=======
+                 <a href="/${currentUsername}">
+                   <img class="avatar s40" src="${currentUserAvatar}">
+                 </a>
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
               </div>
               <div class="timeline-content ${discussionClass}">
                  <div class="note-header">
@@ -1238,6 +1288,23 @@ const normalizeNewlines = function(str) {
               </div>
            </div>
         </li>`
+      );
+
+      return $tempNote;
+    };
+
+    /**
+     * Create Placeholder System Note DOM element populated with slash command description
+     */
+    Notes.prototype.createPlaceholderSystemNote = function ({ formContent, uniqueId }) {
+      const $tempNote = $(
+        `<li id="${uniqueId}" class="note system-note timeline-entry being-posted fade-in-half">
+           <div class="timeline-entry-inner">
+             <div class="timeline-content">
+               <i>${formContent}</i>
+             </div>
+           </div>
+         </li>`
       );
 
       return $tempNote;
@@ -1274,7 +1341,9 @@ const normalizeNewlines = function(str) {
       const isDiscussionForm = $form.hasClass('js-discussion-note-form');
       const isDiscussionResolve = $submitBtn.hasClass('js-comment-resolve-button');
       const { formData, formContent, formAction } = this.getFormData($form);
-      const uniqueId = _.uniqueId('tempNote_');
+      let noteUniqueId;
+      let systemNoteUniqueId;
+      let hasSlashCommands = false;
       let $notesContainer;
       let tempFormContent;
 
@@ -1295,16 +1364,28 @@ const normalizeNewlines = function(str) {
       tempFormContent = formContent;
       if (this.hasSlashCommands(formContent)) {
         tempFormContent = this.stripSlashCommands(formContent);
+        hasSlashCommands = true;
       }
 
+      // Show placeholder note
       if (tempFormContent) {
-        // Show placeholder note
+        noteUniqueId = _.uniqueId('tempNote_');
         $notesContainer.append(this.createPlaceholderNote({
           formContent: tempFormContent,
-          uniqueId,
+          uniqueId: noteUniqueId,
           isDiscussionNote,
           currentUsername: gon.current_username,
           currentUserFullname: gon.current_user_fullname,
+          currentUserAvatar: gon.current_user_avatar_url,
+        }));
+      }
+
+      // Show placeholder system note
+      if (hasSlashCommands) {
+        systemNoteUniqueId = _.uniqueId('tempSystemNote_');
+        $notesContainer.append(this.createPlaceholderSystemNote({
+          formContent: this.getSlashCommandDescription(formContent, AjaxCache.get(gl.GfmAutoComplete.dataSources.commands)),
+          uniqueId: systemNoteUniqueId,
         }));
       }
 
@@ -1322,7 +1403,17 @@ const normalizeNewlines = function(str) {
       gl.utils.ajaxPost(formAction, formData)
         .then((note) => {
           // Submission successful! remove placeholder
+<<<<<<< HEAD
           $notesContainer.find(`#${uniqueId}`).remove();
+=======
+          $notesContainer.find(`#${noteUniqueId}`).remove();
+
+          // Reset cached commands list when command is applied
+          if (hasSlashCommands) {
+            $form.find('textarea.js-note-text').trigger('clear-commands-cache.atwho');
+          }
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
           // Clear previous form errors
           this.clearFlashWrapper();
 
@@ -1359,7 +1450,11 @@ const normalizeNewlines = function(str) {
           $form.trigger('ajax:success', [note]);
         }).fail(() => {
           // Submission failed, remove placeholder note and show Flash error message
-          $notesContainer.find(`#${uniqueId}`).remove();
+          $notesContainer.find(`#${noteUniqueId}`).remove();
+
+          if (hasSlashCommands) {
+            $notesContainer.find(`#${systemNoteUniqueId}`).remove();
+          }
 
           // Show form again on UI on failure
           if (isDiscussionForm && $notesContainer.length) {

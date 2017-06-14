@@ -72,8 +72,13 @@
       Pipeline
       = link_to "##{last_pipeline.id}", namespace_project_pipeline_path(@project.namespace, @project, last_pipeline.id)
       = ci_label_for_status(last_pipeline.status)
+<<<<<<< HEAD
       - if last_pipeline.stages.any?
         with #{"stage".pluralize(last_pipeline.stages.count)}
+=======
+      - if last_pipeline.stages_count.nonzero?
+        with #{"stage".pluralize(last_pipeline.stages_count)}
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
         .mr-widget-pipeline-graph
           = render 'shared/mini_pipeline_graph', pipeline: last_pipeline, klass: 'js-commit-pipeline-graph'
       in

@@ -9,7 +9,11 @@ class AutocompleteController < ApplicationController
     @users = @users.where.not(id: params[:skip_users]) if params[:skip_users].present?
     @users = @users.active
     @users = @users.reorder(:name)
+<<<<<<< HEAD
     @users = load_users_by_ability || @users.page(params[:page]).per(params[:per_page])
+=======
+    @users = @users.page(params[:page]).per(params[:per_page])
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
     if params[:todo_filter].present? && current_user
       @users = @users.todo_authors(current_user.id, params[:todo_state_filter])

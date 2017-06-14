@@ -31,9 +31,14 @@ class DeploymentService < Service
     raise NotImplementedError
   end
 
+<<<<<<< HEAD
   # Environments have a rollout status. This represents the current state of
   # deployments to that environment.
   def rollout_status(environment)
     raise NotImplementedError
+=======
+  def can_test?
+    false
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   end
 end

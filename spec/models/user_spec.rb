@@ -15,10 +15,13 @@ describe User, models: true do
 
   describe 'delegations' do
     it { is_expected.to delegate_method(:path).to(:namespace).with_prefix }
+<<<<<<< HEAD
 
     # EE
     it { is_expected.to delegate_method(:shared_runners_minutes_limit).to(:namespace) }
     it { is_expected.to delegate_method(:shared_runners_minutes_limit=).to(:namespace).with_arguments(133) }
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   end
 
   describe 'associations' do
@@ -30,7 +33,7 @@ describe User, models: true do
     it { is_expected.to have_many(:deploy_keys).dependent(:destroy) }
     it { is_expected.to have_many(:events).dependent(:destroy) }
     it { is_expected.to have_many(:recent_events).class_name('Event') }
-    it { is_expected.to have_many(:issues).dependent(:restrict_with_exception) }
+    it { is_expected.to have_many(:issues).dependent(:destroy) }
     it { is_expected.to have_many(:notes).dependent(:destroy) }
     it { is_expected.to have_many(:merge_requests).dependent(:destroy) }
     it { is_expected.to have_many(:identities).dependent(:destroy) }
@@ -1025,6 +1028,7 @@ describe User, models: true do
 
         expect(user.avatar_url).to eq([gitlab_host, avatar_path].join)
       end
+<<<<<<< HEAD
 
       context 'when in a geo secondary node' do
         let(:geo_host) { 'http://geo.example.com' }
@@ -1044,6 +1048,8 @@ describe User, models: true do
           expect(user.avatar_url).to eq(geo_avatar_url)
         end
       end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     end
   end
 
@@ -2066,6 +2072,7 @@ describe User, models: true do
       user.invalidate_merge_request_cache_counts
     end
   end
+<<<<<<< HEAD
 
   describe '#forget_me!' do
     subject { create(:user, remember_created_at: Time.now) }
@@ -2098,4 +2105,6 @@ describe User, models: true do
       expect { subject.remember_me! }.not_to change(subject, :remember_created_at)
     end
   end
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 end

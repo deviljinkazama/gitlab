@@ -91,7 +91,7 @@ export default {
     hasAuthor() {
       return this.author &&
         this.author.avatar_url &&
-        this.author.web_url &&
+        this.author.path &&
         this.author.username;
     },
 
@@ -135,12 +135,21 @@ export default {
         {{shortSha}}
       </a>
 
+<<<<<<< HEAD
       <p class="commit-title">
         <span v-if="title">
           <user-avatar-link
             v-if="hasAuthor"
             class="avatar-image-container"
             :link-href="author.web_url"
+=======
+      <div class="commit-title flex-truncate-parent">
+        <span v-if="title" class="flex-truncate-child">
+          <user-avatar-link
+            v-if="hasAuthor"
+            class="avatar-image-container"
+            :link-href="author.path"
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
             :img-src="author.avatar_url"
             :img-alt="userImageAltDescription"
             :tooltip-text="author.username"
@@ -153,7 +162,7 @@ export default {
         <span v-else>
           Cant find HEAD commit for this branch
         </span>
-      </p>
+      </div>
     </div>
   `,
 };

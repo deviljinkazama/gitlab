@@ -11,8 +11,11 @@
       = view_on_environment_button(@commit.sha, @path, @environment) if @environment
 
     .btn-group{ role: "group" }<
+<<<<<<< HEAD
       = lock_file_link(html_options: { class: 'btn btn-sm path-lock' })
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       = edit_blob_link
       - if current_user
         = replace_blob_link

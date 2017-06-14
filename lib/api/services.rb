@@ -611,9 +611,13 @@ module API
       SlackService,
       MattermostService,
       MicrosoftTeamsService,
+<<<<<<< HEAD
       TeamcityService,
       JenkinsService,
       JenkinsDeprecatedService
+=======
+      TeamcityService
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
     ]
 
     if Rails.env.development?

@@ -962,11 +962,6 @@ module Gitlab
         end
       end
 
-      # Checks if the blob should be diffable according to its attributes
-      def diffable?(blob)
-        attributes(blob.path).fetch('diff') { blob.text? }
-      end
-
       # Returns the Git attributes for the given file path.
       #
       # See `Gitlab::Git::Attributes` for more information.
@@ -1019,9 +1014,15 @@ module Gitlab
             value = $~[:value].chomp
 
             next unless name && modules[name]
+<<<<<<< HEAD
 
             modules[name][key] = value
 
+=======
+
+            modules[name][key] = value
+
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
             if key == 'path'
               begin
                 modules[name]['id'] = blob_content(commit, value)

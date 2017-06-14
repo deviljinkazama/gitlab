@@ -16,11 +16,14 @@
         type: String,
         required: true,
       },
+<<<<<<< HEAD
       updatedAt: {
         type: String,
         required: false,
         default: '',
       },
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       taskStatus: {
         type: String,
         required: false,
@@ -31,7 +34,10 @@
       return {
         preAnimation: false,
         pulseAnimation: false,
+<<<<<<< HEAD
         timeAgoEl: $('.js-issue-edited-ago'),
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       };
     },
     watch: {
@@ -39,12 +45,15 @@
         this.animateChange();
 
         this.$nextTick(() => {
+<<<<<<< HEAD
           const toolTipTime = gl.utils.formatDate(this.updatedAt);
 
           this.timeAgoEl.attr('datetime', this.updatedAt)
             .attr('title', toolTipTime)
             .tooltip('fixTitle');
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
           this.renderGFM();
         });
       },

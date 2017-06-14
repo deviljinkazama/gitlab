@@ -1,8 +1,11 @@
 module Gitlab
   module Checks
     class ChangeAccess
+<<<<<<< HEAD
       include PathLocksHelper
 
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       ERROR_MESSAGES = {
         push_code: 'You are not allowed to push code to this project.',
         delete_default_branch: 'The default branch of a project cannot be deleted.',
@@ -17,7 +20,10 @@ module Gitlab
         create_protected_tag: 'You are not allowed to create this tag as it is protected.'
       }.freeze
 
+<<<<<<< HEAD
       # protocol is currently used only in EE
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       attr_reader :user_access, :project, :skip_authorization, :protocol
 
       def initialize(
@@ -39,7 +45,10 @@ module Gitlab
         push_checks
         branch_checks
         tag_checks
+<<<<<<< HEAD
         push_rule_check
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
         true
       end
@@ -67,8 +76,30 @@ module Gitlab
 
         if forced_push?
           raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:force_push_protected_branch]
+<<<<<<< HEAD
         end
 
+        if deletion?
+          protected_branch_deletion_checks
+        else
+          protected_branch_push_checks
+        end
+      end
+
+      def protected_branch_deletion_checks
+        unless user_access.can_delete_branch?(@branch_name)
+          raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:non_master_delete_protected_branch]
+        end
+
+        unless protocol == 'web'
+          raise GitAccess::UnauthorizedError, ERROR_MESSAGES[:non_web_delete_protected_branch]
+=======
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
+        end
+      end
+
+<<<<<<< HEAD
+=======
         if deletion?
           protected_branch_deletion_checks
         else
@@ -86,6 +117,7 @@ module Gitlab
         end
       end
 
+>>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
       def protected_branch_push_checks
         if matching_merge_request?
           unless user_access.can_merge_to_branch?(@branch_name) || user_access.can_push_to_branch?(@branch_name)
