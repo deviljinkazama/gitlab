@@ -55,6 +55,7 @@ import RefSelectDropdown from './ref_select_dropdown';
 import GfmAutoComplete from './gfm_auto_complete';
 import ShortcutsBlob from './shortcuts_blob';
 import initSettingsPanels from './settings_panels';
+import OAuthRememberMe from './oauth_remember_me';
 
 (function() {
   var Dispatcher;
@@ -112,6 +113,7 @@ import initSettingsPanels from './settings_panels';
         case 'sessions:new':
           new UsernameValidator();
           new ActiveTabMemoizer();
+          new OAuthRememberMe({ container: $("#remember_me") }).bindEvents();
           break;
         case 'projects:boards:show':
         case 'projects:boards:index':
