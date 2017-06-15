@@ -136,7 +136,7 @@ ActiveRecord::Schema.define(version: 20170606202615) do
     t.integer "cached_markdown_version"
     t.boolean "clientside_sentry_enabled", default: false, null: false
     t.string "clientside_sentry_dsn"
-<<<<<<< HEAD
+    t.boolean "prometheus_metrics_enabled", default: false, null: false
     t.boolean "check_namespace_plan", default: false, null: false
     t.integer "mirror_max_delay", default: 5, null: false
     t.integer "mirror_max_capacity", default: 100, null: false
@@ -159,9 +159,6 @@ ActiveRecord::Schema.define(version: 20170606202615) do
     t.integer "group_id", null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-=======
-    t.boolean "prometheus_metrics_enabled", default: false, null: false
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
   end
 
   add_index "approver_groups", ["group_id"], name: "index_approver_groups_on_group_id", using: :btree
@@ -384,7 +381,6 @@ ActiveRecord::Schema.define(version: 20170606202615) do
   add_index "ci_runners", ["locked"], name: "index_ci_runners_on_locked", using: :btree
   add_index "ci_runners", ["token"], name: "index_ci_runners_on_token", using: :btree
 
-<<<<<<< HEAD
   create_table "ci_sources_pipelines", force: :cascade do |t|
     t.integer "project_id"
     t.integer "pipeline_id"
@@ -398,7 +394,7 @@ ActiveRecord::Schema.define(version: 20170606202615) do
   add_index "ci_sources_pipelines", ["source_job_id"], name: "index_ci_pipeline_source_pipelines_on_source_job_id", using: :btree
   add_index "ci_sources_pipelines", ["source_pipeline_id"], name: "index_ci_pipeline_source_pipelines_on_source_pipeline_id", using: :btree
   add_index "ci_sources_pipelines", ["source_project_id"], name: "index_ci_pipeline_source_pipelines_on_source_project_id", using: :btree
-=======
+
   create_table "ci_stages", force: :cascade do |t|
     t.integer "project_id"
     t.integer "pipeline_id"
@@ -410,7 +406,6 @@ ActiveRecord::Schema.define(version: 20170606202615) do
   add_index "ci_stages", ["pipeline_id", "name"], name: "index_ci_stages_on_pipeline_id_and_name", using: :btree
   add_index "ci_stages", ["pipeline_id"], name: "index_ci_stages_on_pipeline_id", using: :btree
   add_index "ci_stages", ["project_id"], name: "index_ci_stages_on_project_id", using: :btree
->>>>>>> 0d9311624754fbc3e0b8f4a28be576e48783bf81
 
   create_table "ci_trigger_requests", force: :cascade do |t|
     t.integer "trigger_id", null: false
