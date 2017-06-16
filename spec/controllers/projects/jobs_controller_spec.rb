@@ -73,7 +73,11 @@ describe Projects::JobsController do
 
       it 'verifies number of queries', :request_store do
         recorded = ActiveRecord::QueryRecorder.new { get_index }
+<<<<<<< HEAD
         expect(recorded.count).to be_within(6).of(8)
+=======
+        expect(recorded.count).to be_within(5).of(7)
+>>>>>>> upstream/master
       end
 
       def create_job(name, status)

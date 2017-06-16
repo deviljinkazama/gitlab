@@ -11,7 +11,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170606202615) do
+ActiveRecord::Schema.define(version: 20170607121233) do
+
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "pg_trgm"
@@ -136,11 +137,16 @@ ActiveRecord::Schema.define(version: 20170606202615) do
     t.boolean "clientside_sentry_enabled", default: false, null: false
     t.string "clientside_sentry_dsn"
     t.boolean "prometheus_metrics_enabled", default: false, null: false
+<<<<<<< HEAD
     t.boolean "check_namespace_plan", default: false, null: false
     t.integer "mirror_max_delay", default: 5, null: false
     t.integer "mirror_max_capacity", default: 100, null: false
     t.integer "mirror_capacity_threshold", default: 50, null: false
     t.boolean "authorized_keys_enabled"
+=======
+    t.boolean "help_page_hide_commercial_content", default: false
+    t.string "help_page_support_url"
+>>>>>>> upstream/master
   end
 
   create_table "approvals", force: :cascade do |t|
@@ -1055,6 +1061,18 @@ ActiveRecord::Schema.define(version: 20170606202615) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "events"
+    t.boolean "new_note"
+    t.boolean "new_issue"
+    t.boolean "reopen_issue"
+    t.boolean "close_issue"
+    t.boolean "reassign_issue"
+    t.boolean "new_merge_request"
+    t.boolean "reopen_merge_request"
+    t.boolean "close_merge_request"
+    t.boolean "reassign_merge_request"
+    t.boolean "merge_merge_request"
+    t.boolean "failed_pipeline"
+    t.boolean "success_pipeline"
   end
 
   add_index "notification_settings", ["source_id", "source_type"], name: "index_notification_settings_on_source_id_and_source_type", using: :btree

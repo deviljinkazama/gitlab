@@ -9,7 +9,7 @@ import StopComponent from './environment_stop.vue';
 import RollbackComponent from './environment_rollback.vue';
 import TerminalButtonComponent from './environment_terminal_button.vue';
 import MonitoringButtonComponent from './environment_monitoring.vue';
-import CommitComponent from '../../vue_shared/components/commit';
+import CommitComponent from '../../vue_shared/components/commit.vue';
 import eventHub from '../event_hub';
 
 const timeagoInstance = new Timeago();
@@ -551,10 +551,10 @@ export default {
       </span>
     </div>
 
-    <div class="table-section section-30 environments-actions table-button-footer" role="gridcell">
+    <div class="table-section section-30 table-button-footer" role="gridcell">
       <div
         v-if="!model.isFolder"
-        class="btn-group environment-action-buttons"
+        class="btn-group table-action-buttons"
         role="group">
 
         <actions-component
