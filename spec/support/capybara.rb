@@ -18,7 +18,8 @@ Capybara.register_driver :poltergeist do |app|
     url_blacklist: %w[.mp4 .png .gif .avi .bmp .jpg .jpeg],
     phantomjs_options: [
       '--load-images=yes'
-    ]
+    ],
+    debug: true
   )
 end
 
