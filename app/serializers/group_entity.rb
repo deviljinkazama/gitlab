@@ -10,11 +10,7 @@ class GroupEntity < Grape::Entity
   expose :parent_id
   expose :created_at, :updated_at
 
-<<<<<<< HEAD
-  expose :web_url do |group|
-=======
   expose :group_path do |group|
->>>>>>> upstream/master
     group_path(group)
   end
 
