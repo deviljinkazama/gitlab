@@ -44,9 +44,14 @@ export default {
         :is="componentName"
         :mr="mr"
         :service="service" />
-      <mr-widget-related-links
+      <section
         v-if="shouldRenderRelatedLinks"
-        :related-links="mr.relatedLinks" />
+        class="mr-info-list mr-links">
+        <div class="legend"></div>
+        <mr-widget-related-links
+          :is-merged="mr.isMerged"
+          :related-links="mr.relatedLinks" />
+      </section>
       <mr-widget-merge-help v-if="shouldRenderMergeHelp" />
     </div>
   `,
