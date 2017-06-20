@@ -13,9 +13,11 @@ class FilteredSearchManager {
     this.clearSearchButton = this.container.querySelector('.clear-search');
     this.tokensContainer = this.container.querySelector('.tokens-container');
     this.filteredSearchTokenKeys = gl.FilteredSearchTokenKeys;
+    
+    const multipleAssignees = this.filteredSearchInput.dataset.multipleAssignees;
 
     gl.FilteredSearchTokenKeysIssuesEE.init({
-      multipleAssignees: this.filteredSearchInput.dataset.multipleAssignees,
+      multipleAssignees: gl.utils.convertPermissionToBoolean(multipleAssignees),
     });
 
     if (this.page === 'issues' || this.page === 'boards') {
