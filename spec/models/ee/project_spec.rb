@@ -30,7 +30,7 @@ describe Project, models: true do
         let(:feature) { feature_sym }
         let(:feature_code) { feature_code }
 
-        context "checking #{feature} availabily both on Global and Namespace license" do
+        context "checking #{feature_code} availabily both on Global and Namespace license" do
           let(:check_namespace_plan) { true }
 
           context 'allowed by Plan License AND Global License' do
@@ -44,7 +44,7 @@ describe Project, models: true do
 
           context 'not allowed by Plan License but project and namespace are public' do
             let(:allowed_on_global_license) { true }
-            let(:plan_license) { Namespace::BRONZE_PLAN }
+            let(:plan_license) { nil }
 
             it 'returns true' do
               allow(namespace).to receive(:public?) { true }
@@ -56,7 +56,7 @@ describe Project, models: true do
 
           context 'not allowed by Plan License' do
             let(:allowed_on_global_license) { true }
-            let(:plan_license) { Namespace::BRONZE_PLAN }
+            let(:plan_license) { nil }
 
             it 'returns false' do
               is_expected.to eq(false)
