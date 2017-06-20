@@ -4,7 +4,7 @@ class RepositoryImportWorker
   include Sidekiq::Worker
   include DedicatedSidekiqQueue
 
-  sidekiq_options status_expiration: StuckImportJobsWorker::IMPORT_EXPIRATION
+  sidekiq_options queue: :project_import, status_expiration: StuckImportJobsWorker::IMPORT_EXPIRATION
 
   attr_accessor :project, :current_user
 

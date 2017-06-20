@@ -5,6 +5,8 @@ class RepositoryForkWorker
   include Gitlab::ShellAdapter
   include DedicatedSidekiqQueue
 
+  sidekiq_options queue: :project_fork
+
   def perform(project_id, forked_from_repository_storage_path, source_path, target_path)
     Gitlab::Metrics.add_event(:fork_repository,
                               source_path: source_path,
