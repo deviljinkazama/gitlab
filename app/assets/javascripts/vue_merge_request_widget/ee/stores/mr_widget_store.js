@@ -1,5 +1,9 @@
 import CEMergeRequestStore from '../../stores/mr_widget_store';
 
+const unmergedStatesEE = [
+  'rebase',
+];
+
 export default class MergeRequestStore extends CEMergeRequestStore {
   constructor(data) {
     super(data);
@@ -13,6 +17,8 @@ export default class MergeRequestStore extends CEMergeRequestStore {
     this.initApprovals(data);
 
     super.setData(data);
+
+    this.isMerged = this.isMerged && unmergedStatesEE.indexOf(data.state) === -1;
   }
 
   initSquashBeforeMerge(data) {
