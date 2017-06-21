@@ -1,4 +1,4 @@
-class RemovePushEventsFromGeoPrimarySystemHook < ActiveRecord::Migration
+class RemoveGeoPrimarySystemHook < ActiveRecord::Migration
   include Gitlab::Database::MigrationHelpers
 
   DOWNTIME = false
@@ -10,16 +10,14 @@ class RemovePushEventsFromGeoPrimarySystemHook < ActiveRecord::Migration
     return unless geo_enabled?
 
     execute <<-SQL
-      UPDATE web_hooks
-      SET push_events = false, tag_push_events = false WHERE
+      DELETE FROM web_hooks WHERE
       type = 'SystemHook' AND
-      id = (
+      id IN (
       SELECT system_hook_id FROM geo_nodes WHERE
-        host = #{quote(Gitlab.config.gitlab.host)} AND
-        port = #{quote(Gitlab.config.gitlab.port)} AND
-        relative_url_root = #{quote(Gitlab.config.gitlab.relative_url_root)});
+        "primary" = #{true_value}
+      );
     SQL
-  end
+ end
 
   def geo_enabled?
     select_all("SELECT 1 FROM geo_nodes").present?

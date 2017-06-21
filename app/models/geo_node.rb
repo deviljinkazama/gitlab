@@ -20,9 +20,9 @@ class GeoNode < ActiveRecord::Base
   validates :access_key, presence: true
   validates :encrypted_secret_access_key, presence: true
 
-  after_initialize :build_dependents
   after_save :expire_cache!
   after_destroy :expire_cache!
+  before_save :build_dependents
   before_validation :update_dependents_attributes
 
   before_validation :ensure_access_keys!
@@ -141,8 +141,6 @@ class GeoNode < ActiveRecord::Base
     if self.primary?
       self.oauth_application = nil
       update_clone_url
-      self.system_hook.push_events = false
-      self.system_hook.tag_push_events = false
     else
       update_oauth_application!
       update_system_hook!
@@ -169,6 +167,8 @@ class GeoNode < ActiveRecord::Base
   end
 
   def update_system_hook!
+    return if self.primary?
+
     self.build_system_hook if system_hook.nil?
     self.system_hook.token = SecureRandom.hex(20) unless self.system_hook.token.present?
     self.system_hook.url = geo_events_url if uri.present?

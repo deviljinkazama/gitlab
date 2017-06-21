@@ -47,10 +47,8 @@ describe GeoNode, type: :model do
   end
 
   context 'system hooks' do
-    it 'primary creates a system hook with no push events' do
-      hook = primary_node.system_hook
-      expect(hook.push_events).to be_falsey
-      expect(hook.tag_push_events).to be_falsey
+    it 'primary does not create a system hook' do
+      expect(primary_node.system_hook).to be_nil
     end
 
     it 'secondary creates a system hook with push events' do
